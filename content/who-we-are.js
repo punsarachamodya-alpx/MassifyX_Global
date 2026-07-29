@@ -30,6 +30,21 @@ module.exports = {
     ]
   },
 
+  team: {
+    eyebrow: 'The team',
+    headline: 'Who’s behind the work.',
+    members: [
+      {
+        name: 'Viraj Bulugahapitiya',
+        role: 'AI Engineer and Data Scientist, At MassifyX Global',
+        // TODO(founder): upload a headshot; initials render until then.
+        photo: '',
+        quote: '',
+        linkedin: 'https://www.linkedin.com/in/viraj97'
+      }
+    ]
+  },
+
   mission: {
     statement:
       'To give mid-market companies senior-led procurement and supply chain operations, without the overhead of building that team in-house.'

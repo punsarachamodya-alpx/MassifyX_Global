@@ -330,11 +330,11 @@ button {
   display: flex;
   align-items: center;
   gap: 2rem;
-  min-height: 78px;
+  min-height: 88px;
 }
 
 .header__logo img {
-  height: 34px;
+  height: 46px;
   width: auto;
 }
 
@@ -1582,7 +1582,7 @@ button {
 }
 
 .footer__logo img {
-  height: 32px;
+  height: 42px;
   width: auto;
   margin-bottom: 1.3rem;
 }
