@@ -26,6 +26,22 @@
   <link rel="preload" href="/fonts/manrope-var-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/montserrat-var-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/css/styles.css">
+  <%
+    // Admin-editable sizing (Appearance section). Parsed with a fallback to the
+    // shipped defaults, so a blank or corrupted value can never break layout.
+    const logoH = parseInt(appearance.logoHeaderHeight, 10) || 68;
+    const logoHMobile = Math.round(logoH * 0.765);
+    const footerLogoH = parseInt(appearance.logoFooterHeight, 10) || 64;
+    const iconSize = parseInt(appearance.industryIconSize, 10) || 44;
+  %>
+  <style>
+    :root { --logo-h: <%= logoH %>px; --header-h: calc(var(--logo-h) + 44px); }
+    .footer__logo img { height: <%= footerLogoH %>px; }
+    .card__icon { width: <%= iconSize %>px; height: <%= iconSize %>px; }
+    @media (max-width: 980px) {
+      :root { --logo-h: <%= logoHMobile %>px; --header-h: calc(var(--logo-h) + 36px); }
+    }
+  </style>
   <%# Sets the .js flag before first paint so scroll-reveal can hide content only
       when JavaScript is actually available. External, never inline: script-src is 'self'. %>
   <script src="/js/js-on.js"></script>

@@ -80,10 +80,11 @@ app.use(
   })
 );
 
-// Every view gets site + nav without each route having to pass them.
+// Every view gets site + nav + appearance without each route having to pass them.
 app.use((req, res, next) => {
   res.locals.site = store.getSection('site');
   res.locals.nav = store.getSection('nav');
+  res.locals.appearance = store.getSection('appearance');
   res.locals.currentPath = req.path;
   res.locals.canonical = store.getSection('site').baseUrl + req.originalUrl.split('?')[0];
   next();

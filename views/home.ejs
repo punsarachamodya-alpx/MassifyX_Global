@@ -12,7 +12,11 @@
       </div>
     </div>
     <div class="hero__figure">
-      <%- include('partials/hero-figure') %>
+      <% if (page.hero.figureImage) { %>
+        <img src="<%= page.hero.figureImage %>" alt="" width="660" height="520">
+      <% } else { %>
+        <%- include('partials/hero-figure') %>
+      <% } %>
     </div>
   </div>
 </section>
@@ -62,7 +66,7 @@
 
 <%# Full-bleed motion band: the supply-chain thesis in one moving image. %>
 <section class="motion-band" aria-hidden="true">
-  <img src="/img/motion/supply-flow.svg" alt="" width="1600" height="420" loading="lazy">
+  <img src="<%= page.motionBand.image %>" alt="" width="1600" height="420" loading="lazy">
 </section>
 
 <section class="section">
@@ -95,7 +99,13 @@
     <div class="grid grid--4">
       <% industries.items.forEach(function (ind) { %>
         <a class="card card--link reveal" href="/industries#<%= ind.slug %>">
-          <span class="card__icon"><%- include('partials/industry-icon', { slug: ind.slug }) %></span>
+          <span class="card__icon">
+            <% if (ind.icon) { %>
+              <img src="<%= ind.icon %>" alt="">
+            <% } else { %>
+              <%- include('partials/industry-icon', { slug: ind.slug }) %>
+            <% } %>
+          </span>
           <h3 class="card__title" style="font-size:1.06rem;"><%= ind.name %></h3>
         </a>
       <% }); %>
