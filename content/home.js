@@ -23,14 +23,6 @@ module.exports = {
     image: '/img/motion/supply-flow.svg'
   },
 
-  // Full-bleed cinematic showcase beneath the hero: a single still with a slow
-  // zoom, not a video, so it stays lightweight and works with no JS.
-  showcase: {
-    eyebrow: 'Real-time visibility',
-    headline: 'Every container, every vessel, tracked to the metre.',
-    image: '/img/home/ai-port-terminal.jpg'
-  },
-
   valueProps: [
     {
       title: 'Cost structure that works',
@@ -52,10 +44,6 @@ module.exports = {
   process: {
     eyebrow: 'How we work',
     headline: 'Three steps from scope to a running operation.',
-    // Supports the steps with a photo of the kind of operations-centre setup
-    // the delivery team works inside. Leave empty to drop the image and let
-    // the steps run full width.
-    image: '/img/home/supply-chain-operations-center.jpg',
     steps: [
       {
         number: '01',

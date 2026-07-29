@@ -843,39 +843,6 @@ button {
   }
 }
 
-.process-layout--with-image {
-  display: grid;
-  gap: clamp(2rem, 4vw, 3rem);
-  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-  align-items: start;
-}
-
-.process-media {
-  position: sticky;
-  top: 6rem;
-  aspect-ratio: 4 / 5;
-  overflow: hidden;
-  border-radius: 3px;
-}
-
-.process-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-@media (max-width: 960px) {
-  .process-layout--with-image {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .process-media {
-    position: static;
-    aspect-ratio: 16 / 10;
-    order: -1;
-  }
-}
-
 /* ---------------------------------------------------- 13. Division blocks */
 
 .division {
@@ -1815,65 +1782,6 @@ button {
   object-position: center;
 }
 
-/* Full-bleed cinematic still: a slow, continuous zoom on the image itself
-   reads as motion without shipping a video. The section clips the overflow
-   the zoom creates; the caption sits on a gradient so it stays legible over
-   whatever part of the image is under it. */
-.showcase {
-  position: relative;
-  overflow: hidden;
-  background: var(--navy);
-  line-height: 0;
-}
-
-.showcase__media {
-  position: relative;
-  height: clamp(360px, 46vw, 640px);
-  overflow: hidden;
-}
-
-.showcase__media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  animation: mx-kenburns 24s ease-in-out infinite alternate;
-}
-
-.showcase__media::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(10, 27, 60, 0.05) 0%, rgba(10, 27, 60, 0.68) 100%);
-}
-
-.showcase__caption {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: clamp(1.5rem, 4vw, 3rem);
-  line-height: normal;
-  color: #fff;
-}
-
-.showcase__caption .eyebrow {
-  color: #8fb4ea;
-}
-
-.showcase__caption h2 {
-  max-width: 34ch;
-  margin-top: 0.6rem;
-}
-
-@keyframes mx-kenburns {
-  from {
-    transform: scale(1);
-  }
-  to {
-    transform: scale(1.08);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -1886,8 +1794,7 @@ button {
   }
 
   .hero-figure__pulse,
-  .hero-figure__dash,
-  .showcase__media img {
+  .hero-figure__dash {
     animation: none;
   }
 
