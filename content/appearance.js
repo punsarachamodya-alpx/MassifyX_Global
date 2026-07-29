@@ -6,7 +6,7 @@
 // the visible wordmark itself. (They previously sat on a canvas that was ~68%
 // transparent padding, so a "68px" logo rendered as a ~22px wordmark.)
 module.exports = {
-  logoHeaderHeight: '56',
-  logoFooterHeight: '52',
+  logoHeaderHeight: '112',
+  logoFooterHeight: '104',
   industryIconSize: '44'
 };

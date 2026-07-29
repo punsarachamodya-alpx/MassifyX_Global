@@ -30,22 +30,78 @@
     // Admin-editable sizing (Appearance section). Parsed with a fallback to the
     // shipped defaults, so a blank or corrupted value can never break layout.
     const logoH = parseInt(appearance.logoHeaderHeight, 10) || 56;
-    // 0.714 was picked so the default (56px) lands mobile at 40px — the same
-    // height as the footer logo, which measured well on a phone. Not derived
-    // from the footer value directly, so an admin changing one doesn't silently
-    // resize the other.
-    const logoHMobile = Math.round(logoH * 0.714);
     const footerLogoH = parseInt(appearance.logoFooterHeight, 10) || 52;
     const iconSize = parseInt(appearance.industryIconSize, 10) || 44;
+
+    // Mobile screen width doesn't grow with a bigger desktop logo choice, so
+    // phone sizing is capped at a fixed, separately-verified-safe height rather
+    // than scaled as a fraction of the desktop value. 40px measured well next to
+    // the hamburger button down to a 320px-wide phone; a straight percentage of
+    // a large desktop value (e.g. 112px) would overflow narrow screens instead
+    // of just rendering smaller. min() also means a deliberately tiny desktop
+    // logo is never blown back up on mobile.
+    const MOBILE_LOGO_CAP = 40;
+    const logoHMobile = Math.min(MOBILE_LOGO_CAP, logoH);
+    const footerLogoHMobile = Math.min(MOBILE_LOGO_CAP, footerLogoH);
+
+    // The wordmark PNG is cropped to its ink (708x122 — see public/brand/), so
+    // this is its true aspect ratio, not the old padded-canvas one.
+    const LOGO_ASPECT = 708 / 122;
+    const desktopLogoWidth = logoH * LOGO_ASPECT;
+
+    // How much room the 5 nav links + CTA button + gutters need beside the logo
+    // to fit on one line, measured in a real browser at two logo sizes (56px and
+    // 112px) and solved for the constant: breakpoint = logoWidth + ~915px, with
+    // a small safety margin added here. A fixed pixel breakpoint (the previous
+    // approach) only holds for the logo size it was measured at — this one
+    // holds for whatever the admin sets, including much larger custom values.
+    const NAV_ROOM = 930;
+    const navBreakpoint = Math.ceil(desktopLogoWidth + NAV_ROOM);
   %>
   <style>
     :root { --logo-h: <%= logoH %>px; --header-h: calc(var(--logo-h) + 44px); }
     .footer__logo img { height: <%= footerLogoH %>px; }
     .card__icon { width: <%= iconSize %>px; height: <%= iconSize %>px; }
-    <%# Kept in sync with the hamburger breakpoint in styles.css — see the comment
-        there for why it's 1240px and not a phone/tablet-sized value. %>
-    @media (max-width: 1240px) {
+    <%# See the comment above navBreakpoint: this is not a fixed value because a
+        wider admin-set logo needs a wider viewport before the nav fits on one
+        line. Also carries the full hamburger-mode ruleset — CSS media queries
+        can't reference a custom property, so this can't just override a
+        breakpoint declared in styles.css; the whole thing has to live here. %>
+    @media (max-width: <%= navBreakpoint %>px) {
       :root { --logo-h: <%= logoHMobile %>px; --header-h: calc(var(--logo-h) + 36px); }
+
+      .header__toggle { display: flex; }
+
+      .header__nav {
+        position: fixed;
+        inset: var(--header-h) 0 auto 0;
+        background: #fff;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        padding: 1rem var(--gutter) 2rem;
+        border-bottom: 1px solid var(--rule);
+        box-shadow: 0 24px 40px -28px rgba(10, 27, 60, 0.4);
+        display: none;
+      }
+
+      .header__nav.is-open { display: flex; }
+
+      .header__link {
+        padding-block: 0.95rem;
+        border-bottom: 1px solid var(--rule);
+        font-size: 1.05rem;
+      }
+
+      .header__link::after { display: none; }
+
+      .header__cta { margin: 1.25rem 0 0; text-align: center; }
+    }
+    <%# The footer has its own, narrower breakpoint (see .footer__grid in
+        styles.css) where it drops to a single column — that's when a large
+        footer logo would otherwise overflow, so the cap applies from there. %>
+    @media (max-width: 820px) {
+      .footer__logo img { height: <%= footerLogoHMobile %>px; }
     }
   </style>
   <%# Sets the .js flag before first paint so scroll-reveal can hide content only
