@@ -126,29 +126,6 @@ module.exports = {
     ]
   },
 
-  team: {
-    eyebrow: 'Who runs this',
-    headline: 'Senior attention, named and accountable.',
-    members: [
-      {
-        name: 'Punsara Wimalasena',
-        role: 'Founder, MassifyX Global',
-        // TODO(founder): upload a headshot; initials render until then.
-        photo: '',
-        quote:
-          'International supply chain and procurement experience across telecom, garments, seafood, and logistics - built around a simple observation: mid-market companies need dedicated intelligent procurement talents for smooth operation .',
-        linkedin: 'https://www.linkedin.com/in/punsara-wimalasena'
-      },
-      {
-        name: 'Viraj Bulugahapitiya',
-        role: 'AI Engineer and Data Scientist, At MassifyX Global',
-        photo: '',
-        quote: '',
-        linkedin: 'https://www.linkedin.com/in/viraj97'
-      }
-    ]
-  },
-
   closing: {
     headline: 'Ready to see how this works for your operation?',
     body:

@@ -20,12 +20,9 @@ module.exports = {
   // While false, submissions are logged to stdout rather than silently dropped.
   deliveryConfigured: false,
 
-  // TODO(founder): add a Calendly (or equivalent) embed URL. While empty, the booking
-  // panel shows a "coming soon" note rather than a broken iframe.
+  // TODO(founder): add a Calendly (or equivalent) embed URL. While empty, the
+  // booking panel is omitted entirely rather than showing a placeholder.
   bookingEmbedUrl: '',
-  bookingFallbackTitle: 'Direct booking coming soon',
-  bookingFallbackBody:
-    'We’re wiring up instant scheduling. In the meantime, send the form and we’ll come back with times that suit you.',
 
   fields: [
     { name: 'name', label: 'Name', type: 'text', required: true, autocomplete: 'name' },
