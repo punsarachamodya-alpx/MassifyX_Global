@@ -13,7 +13,17 @@ cp .env.example .env    # then set ADMIN_PASSWORD and SESSION_SECRET
 npm run dev             # node --watch, restarts on save
 ```
 
-Production: `npm start`. Any host that runs `npm start` works — see **Hosting** below.
+Generate the two secrets with:
+
+```bash
+node -e "console.log('ADMIN_PASSWORD=' + require('crypto').randomBytes(12).toString('base64url'))"
+node -e "console.log('SESSION_SECRET=' + require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Both scripts read `.env` automatically, and start fine without it (with a warning —
+the public site works, `/admin` stays locked). Production: `npm start`.
+
+**Full deployment guide, including Hostinger: [`deploy/README.md`](deploy/README.md).**
 
 | Variable | Required? | Effect |
 | --- | --- | --- |

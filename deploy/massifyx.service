@@ -1,0 +1,39 @@
+# systemd unit — keeps the site running and restarts it on crash or reboot.
+#
+#   sudo cp deploy/massifyx.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now massifyx
+#   sudo systemctl status massifyx
+#
+# Adjust User, WorkingDirectory, and the ExecStart node path to match your server.
+
+[Unit]
+Description=MassifyX Global website
+After=network.target
+
+[Service]
+Type=simple
+User=massifyx
+WorkingDirectory=/var/www/massifyx
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=5
+
+# Secrets are read from this file, not baked into the unit.
+# Create it with: sudo install -o massifyx -g massifyx -m 600 /dev/null /etc/massifyx.env
+EnvironmentFile=/etc/massifyx.env
+
+# Logs go to the journal: journalctl -u massifyx -f
+StandardOutput=journal
+StandardError=journal
+
+# Basic hardening. data/ and public/img/uploads/ must stay writable, so the
+# whole filesystem is read-only except those paths.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/var/www/massifyx/data /var/www/massifyx/public/img/uploads
+
+[Install]
+WantedBy=multi-user.target
