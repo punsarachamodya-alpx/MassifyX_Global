@@ -1,0 +1,109 @@
+<%# Renders one schema field of any type.
+    Locals: field, value, name (the "f:<dotted>" input name), paths %>
+
+<% if (field.type === 'repeater') { %>
+  <% var rows = Array.isArray(value) ? value : []; %>
+  <fieldset class="arep" data-repeater="<%= name %>" data-next="<%= rows.length %>">
+    <legend class="afield__label"><%= field.label %></legend>
+
+    <div class="arep__rows">
+      <% rows.forEach(function (row, i) { %>
+        <div class="arep__row">
+          <div class="arep__head">
+            <span class="arep__idx"><%= field.itemLabel || 'Item' %> <%= i + 1 %></span>
+            <button type="button" class="abtn abtn--danger arep__del"
+                    data-target="<%= name %>.<%= i %>.__deleted">Remove</button>
+          </div>
+          <input type="hidden" name="<%= name %>.<%= i %>.__deleted" value="0">
+          <% field.fields.forEach(function (sub) { %>
+            <%- include('_field', {
+                  field: sub,
+                  value: paths.getPath(row, sub.path),
+                  name: name + '.' + i + '.' + sub.path,
+                  paths: paths
+                }) %>
+          <% }); %>
+        </div>
+      <% }); %>
+    </div>
+
+    <%# Blank row template — admin.js clones it and swaps __INDEX__ for the next index. %>
+    <template class="arep__tpl">
+      <div class="arep__row">
+        <div class="arep__head">
+          <span class="arep__idx"><%= field.itemLabel || 'Item' %> (new)</span>
+          <button type="button" class="abtn abtn--danger arep__del"
+                  data-target="<%= name %>.__INDEX__.__deleted">Remove</button>
+        </div>
+        <input type="hidden" name="<%= name %>.__INDEX__.__deleted" value="0">
+        <% field.fields.forEach(function (sub) { %>
+          <%- include('_field', {
+                field: sub,
+                value: sub.type === 'repeater' ? [] : '',
+                name: name + '.__INDEX__.' + sub.path,
+                paths: paths
+              }) %>
+        <% }); %>
+      </div>
+    </template>
+
+    <button type="button" class="abtn abtn--quiet arep__add">
+      Add <%= (field.itemLabel || 'item').toLowerCase() %>
+    </button>
+  </fieldset>
+
+<% } else if (field.type === 'boolean') { %>
+  <label class="acheckbox">
+    <input type="checkbox" name="<%= name %>" <%= value ? 'checked' : '' %>>
+    <span><%= field.label %></span>
+  </label>
+
+<% } else if (field.type === 'select') { %>
+  <label class="afield">
+    <span class="afield__label"><%= field.label %></span>
+    <select name="<%= name %>">
+      <% field.options.forEach(function (o) { %>
+        <option value="<%= o.value %>" <%= value === o.value ? 'selected' : '' %>><%= o.label %></option>
+      <% }); %>
+    </select>
+  </label>
+
+<% } else if (field.type === 'list') { %>
+  <label class="afield">
+    <span class="afield__label"><%= field.label %></span>
+    <textarea name="<%= name %>" rows="5"><%= paths.arrayToLines(value) %></textarea>
+    <span class="afield__hint">One per line. Blank lines are ignored.</span>
+  </label>
+
+<% } else if (field.type === 'paras') { %>
+  <label class="afield">
+    <span class="afield__label"><%= field.label %></span>
+    <textarea name="<%= name %>" rows="8"><%= paths.parasToText(value) %></textarea>
+    <span class="afield__hint">Leave a blank line between paragraphs.</span>
+  </label>
+
+<% } else if (field.type === 'textarea') { %>
+  <label class="afield">
+    <span class="afield__label"><%= field.label %></span>
+    <textarea name="<%= name %>" rows="4"><%= value || '' %></textarea>
+  </label>
+
+<% } else if (field.type === 'image') { %>
+  <div class="afield">
+    <span class="afield__label"><%= field.label %></span>
+    <% if (value) { %>
+      <img class="athumb" src="<%= value %>" alt="">
+    <% } %>
+    <input type="text" name="<%= name %>" value="<%= value || '' %>"
+           placeholder="/img/uploads/… or leave empty">
+    <span class="afield__hint">
+      Upload images from the <a href="/admin/edit/site">upload panel</a>, then paste the path here.
+    </span>
+  </div>
+
+<% } else { %>
+  <label class="afield">
+    <span class="afield__label"><%= field.label %></span>
+    <input type="text" name="<%= name %>" value="<%= value || '' %>">
+  </label>
+<% } %>

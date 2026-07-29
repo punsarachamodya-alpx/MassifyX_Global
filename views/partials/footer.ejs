@@ -1,0 +1,43 @@
+<footer class="footer">
+  <div class="shell">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <a class="footer__logo" href="/" aria-label="<%= site.publicName %> — home">
+          <img src="/brand/massifyx-lockup-dark.png" alt="<%= site.publicName %>" width="360" height="110">
+        </a>
+        <p class="footer__tagline"><%= site.tagline %></p>
+        <p><%= site.engagementPoint %> engagement point &middot; <%= site.deliveryHub %> delivery hub</p>
+      </div>
+
+      <div>
+        <h2 class="footer__heading">Explore</h2>
+        <ul class="footer__list">
+          <% nav.primary.forEach(function (item) { %>
+            <li><a href="<%= item.href %>"><%= item.label %></a></li>
+          <% }); %>
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="footer__heading">Legal &amp; contact</h2>
+        <ul class="footer__list">
+          <% nav.legal.forEach(function (item) { %>
+            <li><a href="<%= item.href %>"><%= item.label %></a></li>
+          <% }); %>
+          <li><a href="mailto:<%= site.contactEmail %>"><%= site.contactEmail %></a></li>
+          <% if (site.linkedinUrl) { %>
+            <li><a href="<%= site.linkedinUrl %>" rel="noopener noreferrer" target="_blank">LinkedIn</a></li>
+          <% } %>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <p><%= site.registrationLine %></p>
+      <p>
+        &copy; <%= new Date().getFullYear() %> <%= site.publicName %>.
+        <button type="button" class="footer__cookie-btn" id="cookieReopen">Cookie preferences</button>
+      </p>
+    </div>
+  </div>
+</footer>

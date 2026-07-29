@@ -1,0 +1,13 @@
+node_modules/
+
+# Admin overrides and backups live on the server's disk, not in the repo.
+# See §17: hosts with an ephemeral filesystem discard these on redeploy.
+data/
+
+# Admin-uploaded images
+public/img/uploads/*
+!public/img/uploads/.gitkeep
+
+npm-debug.log*
+.env
+.DS_Store

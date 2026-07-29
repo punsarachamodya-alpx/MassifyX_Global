@@ -1,0 +1,91 @@
+<section class="hero hero--inner">
+  <div class="shell">
+    <div class="hero__copy">
+      <span class="eyebrow"><%= page.hero.eyebrow %></span>
+      <h1 class="display-1"><%= page.hero.headline %></h1>
+    </div>
+    <p class="lede"><%= page.hero.body %></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <% page.divisions.forEach(function (d) { %>
+      <div class="division reveal">
+        <div>
+          <span class="division__index"><%= d.index %></span>
+          <h2 class="division__name">
+            <%= d.name %>
+            <%- include('partials/badge', { status: d.status }) %>
+          </h2>
+          <p class="division__summary"><%= d.summary %></p>
+        </div>
+        <ul class="capability-list">
+          <% d.capabilities.forEach(function (c) { %>
+            <li><%= c %></li>
+          <% }); %>
+        </ul>
+      </div>
+    <% }); %>
+  </div>
+</section>
+
+<section class="section section--alt">
+  <div class="shell">
+    <div class="section-head reveal">
+      <span class="eyebrow"><%= page.products.eyebrow %></span>
+      <h2 class="display-2"><%= page.products.headline %></h2>
+      <p class="lede"><%= page.products.body %></p>
+    </div>
+
+    <div class="table-scroll reveal">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th scope="col">Product</th>
+            <th scope="col">Status</th>
+            <th scope="col">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% page.products.items.forEach(function (p) { %>
+            <tr>
+              <td><%= p.name %></td>
+              <td><%- include('partials/badge', { status: p.status }) %></td>
+              <td><%= p.description %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="section-head reveal">
+      <span class="eyebrow"><%= page.tiers.eyebrow %></span>
+      <h2 class="display-2"><%= page.tiers.headline %></h2>
+      <p class="lede"><%= page.tiers.body %></p>
+    </div>
+
+    <div class="grid grid--3">
+      <% page.tiers.items.forEach(function (t) { %>
+        <div class="tier reveal">
+          <h3 class="tier__name"><%= t.name %></h3>
+          <p class="tier__summary"><%= t.summary %></p>
+          <ul class="tier__includes">
+            <% t.includes.forEach(function (i) { %>
+              <li><%= i %></li>
+            <% }); %>
+          </ul>
+          <div class="tier__cta">
+            <a class="btn btn--ghost" href="/contact"><%= page.tiers.ctaLabel %></a>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/cta-band', { closing: page.closing }) %>

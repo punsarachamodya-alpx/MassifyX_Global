@@ -1,0 +1,578 @@
+/* MassifyX Global — admin panel. Deliberately plain: this is a tool, not a showcase. */
+
+:root {
+  --navy: #0a1b3c;
+  --navy-deep: #060f26;
+  --cobalt: #2e7bff;
+  --cobalt-dark: #1c5fd6;
+  --ice: #f1f6ff;
+  --ink: #0a1b3c;
+  --ink-muted: #4a5c7e;
+  --rule: rgba(10, 27, 60, 0.14);
+  --danger: #c0392b;
+  --ok: #10804a;
+  --font-body: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url('/fonts/manrope-var-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url('/fonts/jetbrains-mono-var-latin.woff2') format('woff2');
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f6f8fc;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+h1 {
+  font-size: 1.75rem;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.5rem;
+}
+
+.ah2 {
+  font-size: 1.1rem;
+  letter-spacing: -0.01em;
+  margin: 2.5rem 0 0.5rem;
+}
+
+p {
+  margin: 0 0 0.5rem;
+}
+
+a {
+  color: var(--cobalt);
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--ice);
+  padding: 0.15em 0.4em;
+  border-radius: 2px;
+}
+
+.amuted {
+  color: var(--ink-muted);
+}
+
+:focus-visible {
+  outline: 3px solid var(--cobalt);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------- bar */
+
+.abar {
+  background: var(--navy-deep);
+  color: #fff;
+}
+
+.abar__inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.abar__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.abar__nav {
+  display: flex;
+  gap: 1.4rem;
+  margin-left: auto;
+}
+
+.abar__nav a {
+  color: rgba(255, 255, 255, 0.78);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.abar__nav a:hover {
+  color: #fff;
+}
+
+.abar__out {
+  margin: 0;
+}
+
+/* ---------------------------------------------------------------- shell */
+
+.ashell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 5rem;
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.aside__label {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 0.8rem;
+}
+
+.aside__nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.aside__nav a {
+  padding: 0.55rem 0.7rem;
+  border-radius: 3px;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 0.92rem;
+}
+
+.aside__nav a:hover {
+  background: #fff;
+  color: var(--cobalt);
+}
+
+@media (max-width: 860px) {
+  .ashell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .aside__nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .aside__nav a {
+    background: #fff;
+    border: 1px solid var(--rule);
+  }
+}
+
+/* ----------------------------------------------------------------- cards */
+
+.acard {
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 1.35rem;
+}
+
+.acard h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.02rem;
+}
+
+.acard--link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.18s, transform 0.18s;
+}
+
+.acard--link:hover {
+  border-color: var(--cobalt);
+  transform: translateY(-2px);
+}
+
+.agrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.apill {
+  display: inline-block;
+  margin-top: 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.5rem;
+  border-radius: 2px;
+  background: rgba(46, 123, 255, 0.12);
+  color: var(--cobalt-dark);
+}
+
+.apill--quiet {
+  background: rgba(10, 27, 60, 0.07);
+  color: var(--ink-muted);
+}
+
+/* ------------------------------------------------------------- checklist */
+
+.acheck {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+}
+
+.acheck__item {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.8rem 1.1rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.acheck__item:last-child {
+  border-bottom: 0;
+}
+
+.acheck__mark {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--rule);
+  display: grid;
+  place-items: center;
+  font-size: 0.72rem;
+  color: #fff;
+  flex: none;
+}
+
+.acheck__item.is-done .acheck__mark {
+  background: var(--ok);
+  border-color: var(--ok);
+}
+
+.acheck__label {
+  flex: 1;
+}
+
+.acheck__item.is-done .acheck__label {
+  color: var(--ink-muted);
+}
+
+.acheck__go {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* ---------------------------------------------------------------- fields */
+
+.aform {
+  margin-top: 1.5rem;
+}
+
+.afield {
+  display: block;
+  margin-bottom: 1.25rem;
+}
+
+.afield__label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+.afield input[type='text'],
+.afield input[type='password'],
+.afield textarea,
+.afield select {
+  width: 100%;
+  font: inherit;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0.6rem 0.75rem;
+}
+
+.afield textarea {
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.afield input:focus,
+.afield textarea:focus,
+.afield select:focus {
+  outline: none;
+  border-color: var(--cobalt);
+  box-shadow: 0 0 0 3px rgba(46, 123, 255, 0.15);
+}
+
+.afield__hint {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+}
+
+.acheckbox {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+  font-weight: 600;
+}
+
+.athumb {
+  display: block;
+  max-width: 160px;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  margin-bottom: 0.6rem;
+  background: var(--ice);
+}
+
+/* -------------------------------------------------------------- repeater */
+
+.arep {
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: #fff;
+  padding: 1.1rem;
+  margin: 0 0 1.5rem;
+}
+
+.arep legend {
+  padding: 0 0.4rem;
+  margin-bottom: 0;
+}
+
+.arep__row {
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--cobalt);
+  border-radius: 3px;
+  padding: 1rem 1rem 0.25rem;
+  margin-bottom: 1rem;
+  background: #fcfdff;
+}
+
+.arep__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.arep__idx {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+/* Nested repeaters step in visually so the hierarchy stays readable */
+.arep .arep {
+  background: #f8fafd;
+  border-left: 3px solid rgba(46, 123, 255, 0.35);
+}
+
+/* -------------------------------------------------------------- buttons */
+
+.abtn {
+  display: inline-block;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 0.55rem 1.05rem;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  background: none;
+}
+
+.abtn--primary {
+  background: var(--cobalt);
+  border-color: var(--cobalt);
+  color: #fff;
+}
+
+.abtn--primary:hover {
+  background: var(--cobalt-dark);
+}
+
+.abtn--quiet {
+  background: #fff;
+  border-color: var(--rule);
+  color: var(--ink);
+}
+
+.abtn--quiet:hover {
+  border-color: var(--cobalt);
+  color: var(--cobalt);
+}
+
+.abar .abtn--quiet {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+.abtn--danger {
+  background: #fff;
+  border-color: rgba(192, 57, 43, 0.4);
+  color: var(--danger);
+}
+
+.abtn--danger:hover {
+  background: var(--danger);
+  color: #fff;
+}
+
+.abtn--full {
+  width: 100%;
+  text-align: center;
+}
+
+.aform__actions {
+  display: flex;
+  gap: 0.7rem;
+  align-items: center;
+  padding-top: 0.5rem;
+}
+
+.areset {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+}
+
+/* -------------------------------------------------------------- notices */
+
+.anotice {
+  border-radius: 3px;
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+  border-left: 3px solid;
+  font-size: 0.92rem;
+}
+
+.anotice--ok {
+  background: #e9f7f0;
+  border-color: var(--ok);
+  color: #0b5c36;
+}
+
+.anotice--error {
+  background: #fdecea;
+  border-color: var(--danger);
+  color: #86261a;
+}
+
+.anotice--warn {
+  background: #fff8e6;
+  border-color: #d99b13;
+  color: #6b4c07;
+}
+
+/* --------------------------------------------------------------- tables */
+
+.atable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.atable th {
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.atable td {
+  padding: 0.7rem 0.6rem;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: middle;
+}
+
+.atable form {
+  margin: 0;
+}
+
+.afiles {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ---------------------------------------------------------------- login */
+
+.alogin-wrap {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem 1.5rem;
+}
+
+.alogin {
+  width: 100%;
+  max-width: 380px;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+  padding: 2.2rem;
+}
+
+.alogin__logo {
+  margin-bottom: 1.6rem;
+}
+
+.alogin h1 {
+  font-size: 1.35rem;
+}
+
+.alogin form {
+  margin-top: 1.5rem;
+}

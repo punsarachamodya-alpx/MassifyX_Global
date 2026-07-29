@@ -1,0 +1,12 @@
+<div class="acard">
+  <h1><%= heading %></h1>
+  <p class="amuted"><%= body %></p>
+  <% if (typeof files !== 'undefined' && files && files.length) { %>
+    <ul class="afiles">
+      <% files.forEach(function (f) { %>
+        <li><code><%= f %></code></li>
+      <% }); %>
+    </ul>
+  <% } %>
+  <p style="margin-top:1.5rem;"><a class="abtn abtn--quiet" href="/admin">Back to dashboard</a></p>
+</div>

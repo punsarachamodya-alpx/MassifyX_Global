@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= meta && meta.title ? meta.title : site.publicName %></title>
+  <meta name="description" content="<%= meta && meta.description ? meta.description : site.description %>">
+  <link rel="canonical" href="<%= canonical %>">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="<%= site.publicName %>">
+  <meta property="og:title" content="<%= meta && meta.title ? meta.title : site.publicName %>">
+  <meta property="og:description" content="<%= meta && meta.description ? meta.description : site.description %>">
+  <meta property="og:url" content="<%= canonical %>">
+  <meta property="og:image" content="<%= site.baseUrl %>/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="<%= meta && meta.title ? meta.title : site.publicName %>">
+  <meta name="twitter:description" content="<%= meta && meta.description ? meta.description : site.description %>">
+  <meta name="twitter:image" content="<%= site.baseUrl %>/og-image.png">
+
+  <meta name="theme-color" content="#0a1b3c">
+  <link rel="icon" href="/brand/favicon-32.png" sizes="32x32">
+  <link rel="icon" href="/brand/favicon-256.png" sizes="256x256">
+  <link rel="apple-touch-icon" href="/brand/apple-icon-180.png">
+
+  <link rel="preload" href="/fonts/manrope-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/montserrat-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/css/styles.css">
+  <%# Sets the .js flag before first paint so scroll-reveal can hide content only
+      when JavaScript is actually available. External, never inline: script-src is 'self'. %>
+  <script src="/js/js-on.js"></script>
+
+  <script type="application/ld+json">
+    <%- JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: site.publicName,
+      legalName: site.legalEntity,
+      description: site.description,
+      email: site.contactEmail,
+      url: site.baseUrl,
+      logo: site.baseUrl + '/brand/massifyx-lockup-light.png',
+      sameAs: [site.linkedinUrl].filter(Boolean)
+    }) %>
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <%- include('partials/header') %>
+  <main id="main">
+    <%- body %>
+  </main>
+  <%- include('partials/footer') %>
+  <%- include('partials/cookie-banner') %>
+  <script src="/js/main.js" defer></script>
+</body>
+</html>
