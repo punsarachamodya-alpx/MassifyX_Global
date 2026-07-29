@@ -251,7 +251,7 @@ router.post('/backups/restore', auth.verifyCsrf, (req, res) => {
     res.status(400).render('admin/message', {
       title: 'Restore failed',
       heading: 'Restore failed',
-      body: err.message
+      message: err.message
     });
   }
 });
@@ -263,24 +263,30 @@ router.get('/export', (req, res) => {
 
 // ------------------------------------------------------------------ upload
 
-router.post('/upload', auth.verifyCsrf, (req, res) => {
+// multer must run before the CSRF check: it's the only thing that parses a
+// multipart body, and the "_csrf" field lives inside that body. Checking CSRF
+// first (as a normal route-level middleware would) always sees an empty
+// req.body and rejects every upload.
+router.post('/upload', (req, res, next) => {
   upload.array('images', 4)(req, res, (err) => {
     if (err) {
       return res.status(400).render('admin/message', {
         title: 'Upload failed',
         heading: 'Upload failed',
-        body: err.message
+        message: err.message
       });
     }
-    const files = (req.files || []).map((f) => `/img/uploads/${f.filename}`);
-    res.render('admin/message', {
-      title: 'Uploaded',
-      heading: files.length ? 'Upload complete' : 'Nothing uploaded',
-      body: files.length
-        ? 'Copy a path below into the matching image field.'
-        : 'Only JPG, PNG, and WebP files under 4 MB are accepted.',
-      files
-    });
+    next();
+  });
+}, auth.verifyCsrf, (req, res) => {
+  const files = (req.files || []).map((f) => `/img/uploads/${f.filename}`);
+  res.render('admin/message', {
+    title: 'Uploaded',
+    heading: files.length ? 'Upload complete' : 'Nothing uploaded',
+    message: files.length
+      ? 'Copy a path below into the matching image field.'
+      : 'Only JPG, PNG, and WebP files under 4 MB are accepted.',
+    files
   });
 });
 

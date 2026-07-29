@@ -1,6 +1,9 @@
+<%# "message", not "body": express-ejs-layouts reserves the "body" local for the
+    rendered page content it injects into the layout. A same-named local here would
+    silently overwrite that HTML with this plain string. %>
 <div class="acard">
   <h1><%= heading %></h1>
-  <p class="amuted"><%= body %></p>
+  <p class="amuted"><%= message %></p>
   <% if (typeof files !== 'undefined' && files && files.length) { %>
     <ul class="afiles">
       <% files.forEach(function (f) { %>
