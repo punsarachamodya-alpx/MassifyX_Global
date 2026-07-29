@@ -1,0 +1,89 @@
+<section class="hero hero--inner">
+  <div class="shell">
+    <div class="hero__copy">
+      <span class="eyebrow"><%= page.hero.eyebrow %></span>
+      <h1 class="display-1"><%= page.hero.headline %></h1>
+    </div>
+    <p class="lede"><%= page.hero.body %></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="section-head reveal">
+      <span class="eyebrow"><%= page.founder.eyebrow %></span>
+      <h2 class="display-2"><%= page.founder.headline %></h2>
+    </div>
+
+    <div class="founder">
+      <div class="founder__portrait reveal">
+        <% if (page.founder.photo) { %>
+          <img src="<%= page.founder.photo %>" alt="<%= page.founder.name %>" width="480" height="600">
+        <% } else { %>
+          <%= page.founder.name.split(' ').map(function (w) { return w[0]; }).slice(0, 2).join('') %>
+        <% } %>
+      </div>
+
+      <div class="founder__story reveal">
+        <% page.founder.story.forEach(function (para) { %>
+          <p><%= para %></p>
+        <% }); %>
+
+        <% if (page.founder.draftNotice) { %>
+          <div class="notice">
+            <span class="notice__label">Note</span>
+            <span><%= page.founder.draftNotice %> — this account will be rewritten in the founder’s own words.</span>
+          </div>
+        <% } %>
+
+        <div class="founder__meta">
+          <p style="font-family:var(--font-display);font-weight:800;font-size:1.1rem;letter-spacing:-0.02em;"><%= page.founder.name %></p>
+          <p class="person__role"><%= page.founder.role %></p>
+          <% if (page.founder.linkedin) { %>
+            <a class="person__link" href="<%= page.founder.linkedin %>" rel="noopener noreferrer" target="_blank">LinkedIn</a>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--navy">
+  <div class="shell">
+    <span class="eyebrow eyebrow--onNavy">Mission</span>
+    <p class="pullquote pullquote--wide"><%= page.mission.statement %></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="section-head reveal">
+      <span class="eyebrow"><%= page.roadmap.eyebrow %></span>
+      <h2 class="display-2"><%= page.roadmap.headline %></h2>
+      <p class="lede"><%= page.roadmap.body %></p>
+    </div>
+
+    <div class="table-scroll reveal">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th scope="col">Division</th>
+            <th scope="col">Status</th>
+            <th scope="col">Scope</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% page.roadmap.divisions.forEach(function (d) { %>
+            <tr>
+              <td><%= d.name %></td>
+              <td><%- include('partials/badge', { status: d.status }) %></td>
+              <td><%= d.scope %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/cta-band', { closing: page.closing }) %>

@@ -1,0 +1,54 @@
+<section class="hero hero--inner">
+  <div class="shell">
+    <div class="hero__copy">
+      <span class="eyebrow"><%= page.hero.eyebrow %></span>
+      <h1 class="display-1"><%= page.hero.headline %></h1>
+    </div>
+    <p class="lede"><%= page.hero.body %></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="grid grid--2">
+      <% page.items.forEach(function (ind) { %>
+        <article class="card card--media reveal" id="<%= ind.slug %>">
+          <% if (ind.image) { %>
+            <div class="card__media">
+              <img src="<%= ind.image %>" alt="" loading="lazy" width="800" height="500">
+            </div>
+          <% } %>
+          <div class="card__inner">
+            <span class="card__icon"><%- include('partials/industry-icon', { slug: ind.slug }) %></span>
+            <h2 class="card__title" style="font-size:1.45rem;"><%= ind.name %></h2>
+            <ul class="pain-list">
+              <% ind.painPoints.forEach(function (p) { %>
+                <li><%= p %></li>
+              <% }); %>
+            </ul>
+          </div>
+        </article>
+      <% }); %>
+    </div>
+  </div>
+</section>
+
+<section class="section section--alt">
+  <div class="shell">
+    <div class="section-head reveal">
+      <span class="eyebrow"><%= page.fit.eyebrow %></span>
+      <h2 class="display-2"><%= page.fit.headline %></h2>
+    </div>
+
+    <div class="grid grid--2 reveal">
+      <% page.fit.criteria.forEach(function (c, i) { %>
+        <div class="step" style="grid-template-columns:3.5rem minmax(0,1fr);border-top:1px solid var(--rule);">
+          <div class="step__number"><%= String(i + 1).padStart(2, '0') %></div>
+          <p class="step__body" style="color:var(--ink);font-weight:500;"><%= c %></p>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/cta-band', { closing: page.closing }) %>

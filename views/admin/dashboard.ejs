@@ -1,0 +1,42 @@
+<h1>Dashboard</h1>
+<p class="amuted">
+  Edit any wording on the public site from here. Changes go live immediately — no restart,
+  no deploy. Anything you haven’t edited falls back to the copy the site shipped with.
+</p>
+
+<h2 class="ah2">Pre-launch checklist</h2>
+<p class="amuted">
+  Computed from the live content each time this page loads, so it can’t go stale.
+</p>
+
+<ul class="acheck">
+  <% checklist.forEach(function (item) { %>
+    <li class="acheck__item <%= item.done ? 'is-done' : '' %>">
+      <span class="acheck__mark" aria-hidden="true"><%= item.done ? '✓' : '' %></span>
+      <span class="acheck__label"><%= item.label %></span>
+      <a class="acheck__go" href="<%= item.where %>"><%= item.done ? 'Review' : 'Fix' %></a>
+    </li>
+  <% }); %>
+</ul>
+
+<h2 class="ah2">Sections</h2>
+<div class="agrid">
+  <% sections.forEach(function (s) { %>
+    <a class="acard acard--link" href="/admin/edit/<%= s.key %>">
+      <h3><%= s.label %></h3>
+      <p class="amuted"><%= s.blurb %></p>
+      <% if (edited.indexOf(s.key) !== -1) { %>
+        <span class="apill">Edited</span>
+      <% } else { %>
+        <span class="apill apill--quiet">Original</span>
+      <% } %>
+    </a>
+  <% }); %>
+</div>
+
+<h2 class="ah2">Safety net</h2>
+<p class="amuted">
+  <%= backupCount %> backup<%= backupCount === 1 ? '' : 's' %> stored.
+  <a href="/admin/backups">Manage backups</a> or
+  <a href="/admin/export">export a JSON copy</a> to keep outside the server.
+</p>

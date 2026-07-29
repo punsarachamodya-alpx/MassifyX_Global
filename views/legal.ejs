@@ -1,0 +1,25 @@
+<section class="hero hero--inner">
+  <div class="shell shell--narrow">
+    <span class="eyebrow">Legal</span>
+    <h1 class="display-2"><%= page.title %></h1>
+    <p class="lede" style="margin-top:1.5rem;"><%= page.intro %></p>
+    <% if (!page.counselReviewed) { %>
+      <div class="notice">
+        <span class="notice__label">Draft</span>
+        <span>Pending legal review. This document has not yet been reviewed by counsel and may change.</span>
+      </div>
+    <% } %>
+    <p class="legal-meta">Last updated: <%= page.updated %></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell shell--narrow legal-body">
+    <% page.sections.forEach(function (s) { %>
+      <h2><%= s.heading %></h2>
+      <% s.body.forEach(function (para) { %>
+        <p><%= para %></p>
+      <% }); %>
+    <% }); %>
+  </div>
+</section>

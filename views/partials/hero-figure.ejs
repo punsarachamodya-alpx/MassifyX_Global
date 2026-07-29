@@ -1,0 +1,85 @@
+<%# The abstract brand diagram: fragmented supplier inputs converging through a single
+    control point, then leaving as ordered, connected lanes — literally
+    "One Chain. Total Control." Inline SVG, no external image, no photography. %>
+<svg class="hero-figure" viewBox="0 0 660 520" role="img"
+     aria-labelledby="heroFigTitle heroFigDesc" xmlns="http://www.w3.org/2000/svg">
+  <title id="heroFigTitle">One chain, total control</title>
+  <desc id="heroFigDesc">Scattered supplier inputs converge on a single control point and leave as four ordered, connected lanes.</desc>
+
+  <defs>
+    <linearGradient id="mxLane" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2e7bff"/>
+      <stop offset="100%" stop-color="#46d3ff"/>
+    </linearGradient>
+
+    <pattern id="mxGrid" width="34" height="34" patternUnits="userSpaceOnUse">
+      <path d="M34 0H0V34" fill="none" stroke="#0a1b3c" stroke-opacity="0.16" stroke-width="1"/>
+    </pattern>
+
+    <%# Radial mask fades the grid toward the edges so the figure sits on the page
+        rather than reading as a boxed-in illustration. %>
+    <radialGradient id="mxFade" cx="50%" cy="50%" r="62%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="1"/>
+      <stop offset="58%" stop-color="#fff" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <mask id="mxGridMask">
+      <rect width="660" height="520" fill="url(#mxFade)"/>
+    </mask>
+  </defs>
+
+  <rect width="660" height="520" fill="url(#mxGrid)" mask="url(#mxGridMask)"/>
+
+  <%# --- Fragmented inputs: irregular nodes, muted navy, converging left-to-centre --- %>
+  <g stroke="#0a1b3c" stroke-opacity="0.34" fill="none" stroke-width="1.4">
+    <path d="M52 74 C 150 96, 218 176, 292 244"/>
+    <path d="M34 168 C 130 182, 210 208, 292 252"/>
+    <path d="M62 262 C 140 262, 214 260, 290 260"/>
+    <path d="M40 356 C 132 342, 212 310, 292 270"/>
+    <path d="M74 446 C 162 414, 226 328, 294 278"/>
+    <path d="M148 118 C 206 154, 250 202, 288 246"/>
+    <path d="M132 402 C 198 358, 246 310, 290 274"/>
+  </g>
+
+  <g fill="#fff" stroke="#0a1b3c" stroke-opacity="0.42" stroke-width="1.4">
+    <rect x="42" y="64" width="20" height="20" rx="2"/>
+    <rect x="24" y="158" width="20" height="20" rx="2"/>
+    <rect x="52" y="252" width="20" height="20" rx="2"/>
+    <rect x="30" y="346" width="20" height="20" rx="2"/>
+    <rect x="64" y="436" width="20" height="20" rx="2"/>
+    <circle cx="148" cy="118" r="7"/>
+    <circle cx="132" cy="402" r="7"/>
+  </g>
+
+  <%# --- The control point: two rings, white fill, cobalt stroke --- %>
+  <g class="hero-figure__pulse">
+    <circle cx="326" cy="260" r="62" fill="none" stroke="#2e7bff" stroke-opacity="0.22" stroke-width="1.4"/>
+  </g>
+  <circle cx="326" cy="260" r="44" fill="#fff" stroke="#2e7bff" stroke-width="2"/>
+  <circle cx="326" cy="260" r="27" fill="#fff" stroke="#2e7bff" stroke-opacity="0.55" stroke-width="1.4"/>
+  <path d="M316 250 L336 270 M336 250 L316 270" stroke="#0a1b3c" stroke-width="2.4"
+        stroke-linecap="round" fill="none"/>
+
+  <%# --- Ordered outbound lanes, cobalt-to-cyan --- %>
+  <g stroke="url(#mxLane)" stroke-width="2.4" fill="none" stroke-linecap="round">
+    <path d="M370 244 C 452 216, 520 152, 632 140"/>
+    <path d="M372 254 C 460 246, 528 218, 634 210"/>
+    <path d="M372 268 C 460 278, 528 304, 634 312"/>
+    <path d="M370 278 C 452 306, 520 370, 632 382"/>
+  </g>
+
+  <%# Thin dashed cross-lane links: one connected chain, not four parallel lines --%>
+  <g class="hero-figure__dash" stroke="#46d3ff" stroke-opacity="0.6" stroke-width="1.1" fill="none">
+    <path d="M486 176 L488 244"/>
+    <path d="M486 292 L488 352"/>
+    <path d="M568 156 L570 226"/>
+    <path d="M568 320 L570 388"/>
+  </g>
+
+  <g fill="#2e7bff">
+    <circle cx="632" cy="140" r="4.5"/>
+    <circle cx="634" cy="210" r="4.5"/>
+    <circle cx="634" cy="312" r="4.5"/>
+    <circle cx="632" cy="382" r="4.5"/>
+  </g>
+</svg>

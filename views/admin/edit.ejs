@@ -1,0 +1,43 @@
+<h1><%= section.label %></h1>
+<p class="amuted"><%= section.blurb %></p>
+
+<% if (saved) { %>
+  <p class="anotice anotice--ok">Saved. The public site is already showing this.</p>
+<% } %>
+
+<form method="post" action="/admin/edit/<%= section.key %>" class="aform" data-warn-unsaved>
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+  <% section.fields.forEach(function (field) { %>
+    <%- include('_field', {
+          field: field,
+          value: paths.getPath(data, field.path),
+          name: 'f:' + field.path,
+          paths: paths
+        }) %>
+  <% }); %>
+
+  <div class="aform__actions">
+    <button type="submit" class="abtn abtn--primary">Save changes</button>
+    <a class="abtn abtn--quiet" href="/admin">Cancel</a>
+  </div>
+</form>
+
+<form method="post" action="/admin/reset/<%= section.key %>" class="areset"
+      data-confirm="Reset this whole section back to the original shipped copy? A backup is taken first.">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <button type="submit" class="abtn abtn--danger">Reset section to original</button>
+  <span class="afield__hint">Discards your edits to <%= section.label %> only. A backup is taken first.</span>
+</form>
+
+<% if (section.key === 'site') { %>
+  <div class="acard" style="margin-top:2.5rem;">
+    <h2 class="ah2" style="margin-top:0;">Upload images</h2>
+    <p class="amuted">JPG, PNG, or WebP. Up to 4 files, 4 MB each. You’ll get back a path to paste into any image field.</p>
+    <form method="post" action="/admin/upload" enctype="multipart/form-data">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="file" name="images" accept="image/jpeg,image/png,image/webp" multiple>
+      <button type="submit" class="abtn abtn--quiet" style="margin-top:1rem;">Upload</button>
+    </form>
+  </div>
+<% } %>

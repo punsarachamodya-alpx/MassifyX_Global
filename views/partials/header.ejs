@@ -1,0 +1,21 @@
+<header class="header">
+  <div class="shell header__inner">
+    <a class="header__logo" href="/" aria-label="<%= site.publicName %> — home">
+      <img src="/brand/massifyx-lockup-light.png" alt="<%= site.publicName %>" width="360" height="110">
+    </a>
+
+    <button class="header__toggle" type="button" id="navToggle"
+            aria-expanded="false" aria-controls="primaryNav" aria-label="Open menu">
+      <span></span>
+    </button>
+
+    <nav class="header__nav" id="primaryNav" aria-label="Primary">
+      <% nav.primary.forEach(function (item) { %>
+        <a class="header__link <%= currentPath === item.href ? 'is-current' : '' %>"
+           href="<%= item.href %>"
+           <%= currentPath === item.href ? 'aria-current="page"' : '' %>><%= item.label %></a>
+      <% }); %>
+      <a class="btn btn--primary header__cta" href="<%= nav.ctaHref %>"><%= nav.ctaLabel %></a>
+    </nav>
+  </div>
+</header>

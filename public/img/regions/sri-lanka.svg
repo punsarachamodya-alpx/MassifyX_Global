@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" role="img">
+<defs>
+  <linearGradient id="land" x1="0" y1="0" x2="0.6" y2="1">
+    <stop offset="0%" stop-color="#0a1b3c"/>
+    <stop offset="100%" stop-color="#16305c"/>
+  </linearGradient>
+  <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse">
+    <path d="M28 0H0V28" fill="none" stroke="#0a1b3c" stroke-opacity="0.09" stroke-width="1"/>
+  </pattern>
+</defs>
+<style>
+  .pz { animation: pz 3.6s ease-in-out infinite; transform-origin: 321.8px 330.2px; }
+  @keyframes pz { 0%,100% { opacity:.15; transform: scale(.72) } 50% { opacity:.85; transform: scale(1.12) } }
+  .sp { animation: sp 48s linear infinite; transform-origin: 400.0px 250.0px; }
+  @keyframes sp { to { transform: rotate(360deg) } }
+  @media (prefers-reduced-motion: reduce) { .pz, .sp { animation: none } }
+</style>
+<rect width="800" height="500" fill="#f1f6ff"/>
+<rect width="800" height="500" fill="url(#grid)"/>
+
+<g class="sp">
+  <circle cx="400.0" cy="250.0" r="196" fill="none" stroke="#0a1b3c" stroke-opacity="0.13"
+          stroke-width="1.5" stroke-dasharray="2 18"/>
+</g>
+<circle cx="400.0" cy="250.0" r="160" fill="none" stroke="#0a1b3c" stroke-opacity="0.11" stroke-width="1.5"/>
+
+<path d="M351.3 85.0 C356.9 87.4 366.7 99.8 371.4 107.9 C376.2 116.0 372.1 124.2 379.8 133.4 C387.5 142.5 407.8 153.1 417.7 163.0 C427.5 172.9 432.8 182.1 438.7 192.7 C444.5 203.3 448.3 214.7 453.0 226.7 C457.6 238.7 461.4 252.8 466.4 264.8 C471.4 276.9 479.0 287.5 483.2 298.8 C487.4 310.1 492.7 320.7 491.6 332.7 C490.5 344.7 483.9 361.3 476.5 370.9 C469.1 380.5 457.6 385.4 447.1 390.4 C436.6 395.3 424.0 396.8 413.4 400.6 C402.9 404.4 392.4 410.9 384.0 413.3 C375.6 415.7 370.7 416.4 363.0 415.0 C355.3 413.6 344.4 411.5 337.8 404.8 C331.2 398.2 326.3 387.1 323.5 375.1 C320.7 363.1 322.7 345.4 321.0 332.7 C319.3 320.0 315.5 310.8 313.4 298.8 C311.3 286.8 308.1 272.6 308.4 260.6 C308.7 248.6 312.3 237.3 315.1 226.7 C317.9 216.1 326.0 206.9 325.2 197.0 C324.4 187.1 308.7 176.5 310.1 167.3 C311.5 158.1 330.8 151.0 333.6 141.8 C336.4 132.6 326.2 120.2 326.9 112.1 C327.6 104.1 333.7 98.0 337.8 93.5 C341.9 89.0 345.6 82.6 351.3 85.0 Z" fill="url(#land)" stroke="#0a1b3c" stroke-width="1.5" stroke-linejoin="round"/>
+
+<g class="pz"><circle cx="321.8" cy="330.2" r="26" fill="#2e7bff"/></g>
+<circle cx="321.8" cy="330.2" r="17" fill="none" stroke="#46d3ff" stroke-width="1.6" stroke-opacity="0.8"/>
+<circle cx="321.8" cy="330.2" r="7" fill="#2e7bff" stroke="#fff" stroke-width="2.5"/>
+</svg>

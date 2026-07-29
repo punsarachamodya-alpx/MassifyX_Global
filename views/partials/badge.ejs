@@ -1,0 +1,8 @@
+<%# Single render point for every Live/Roadmap claim on the site.
+    Routing every product and division reference through here is what keeps the
+    honesty constraint structural rather than a matter of careful copy each time. %>
+<% if (status === 'live') { %>
+  <span class="badge badge--live">Live today</span>
+<% } else { %>
+  <span class="badge badge--roadmap">Roadmap</span>
+<% } %>

@@ -1,0 +1,99 @@
+<section class="hero hero--inner">
+  <div class="shell">
+    <div class="hero__copy">
+      <span class="eyebrow"><%= page.hero.eyebrow %></span>
+      <h1 class="display-1"><%= page.hero.headline %></h1>
+    </div>
+    <p class="lede"><%= page.hero.body %></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <% if (submitted) { %>
+      <div class="success-panel">
+        <span class="eyebrow">Message sent</span>
+        <h2 class="display-2" style="font-size:clamp(1.7rem,3vw,2.4rem);"><%= page.success.headline %></h2>
+        <p class="lede" style="margin-top:1.2rem;"><%= page.success.body %></p>
+        <div class="btn-row">
+          <a class="btn btn--ghost" href="/">Back to home</a>
+        </div>
+      </div>
+    <% } else { %>
+      <div class="contact-grid">
+        <div>
+          <% if (Object.keys(errors).length) { %>
+            <p class="form-error-summary" role="alert">
+              Please check the highlighted fields and try again.
+            </p>
+          <% } %>
+
+          <form method="post" action="/contact" novalidate>
+            <%# Honeypot: positioned off-screen rather than hidden, so bots fill it.
+                A filled trap is accepted silently — no signal that it was rejected. %>
+            <div class="field field--trap" aria-hidden="true">
+              <label for="website">Leave this field empty</label>
+              <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+            </div>
+
+            <% page.fields.forEach(function (f) { %>
+              <div class="field <%= errors[f.name] ? 'field--error' : '' %>">
+                <label class="field__label" for="<%= f.name %>">
+                  <%= f.label %><% if (f.required) { %> <span class="field__req">*</span><% } %>
+                </label>
+
+                <% if (f.type === 'textarea') { %>
+                  <textarea id="<%= f.name %>" name="<%= f.name %>" maxlength="4000"
+                    <%= errors[f.name] ? 'aria-invalid="true" aria-describedby=\'err-' + f.name + '\'' : '' %>
+                  ><%= values[f.name] || '' %></textarea>
+                <% } else { %>
+                  <input type="<%= f.type === 'email' ? 'email' : 'text' %>"
+                         id="<%= f.name %>" name="<%= f.name %>" maxlength="4000"
+                         value="<%= values[f.name] || '' %>"
+                         <%= f.autocomplete ? 'autocomplete="' + f.autocomplete + '"' : '' %>
+                         <%= f.required ? 'required' : '' %>
+                         <%= errors[f.name] ? 'aria-invalid="true" aria-describedby=\'err-' + f.name + '\'' : '' %>>
+                <% } %>
+
+                <% if (errors[f.name]) { %>
+                  <span class="field__error" id="err-<%= f.name %>"><%= errors[f.name] %></span>
+                <% } %>
+              </div>
+            <% }); %>
+
+            <button type="submit" class="btn btn--primary"><%= page.submitLabel %></button>
+          </form>
+        </div>
+
+        <aside>
+          <div class="aside-card">
+            <h2 class="aside-card__title">
+              <%= page.bookingEmbedUrl ? 'Book directly' : page.bookingFallbackTitle %>
+            </h2>
+            <% if (page.bookingEmbedUrl) { %>
+              <iframe class="booking-frame" src="<%= page.bookingEmbedUrl %>"
+                      title="Booking calendar" loading="lazy"></iframe>
+            <% } else { %>
+              <%# Never a broken iframe — a plain note until a real URL is configured. %>
+              <p class="aside-card__body"><%= page.bookingFallbackBody %></p>
+            <% } %>
+          </div>
+
+          <div class="aside-card">
+            <dl>
+              <dt>Response time</dt>
+              <dd><%= page.responseCommitment %></dd>
+              <dt>Email</dt>
+              <dd><a href="mailto:<%= site.contactEmail %>" style="color:var(--cobalt);"><%= site.contactEmail %></a></dd>
+              <dt>Engagement point</dt>
+              <dd><%= site.engagementPoint %></dd>
+              <dt>Delivery hub</dt>
+              <dd><%= site.deliveryHub %></dd>
+            </dl>
+            <p class="aside-card__body" style="margin-top:1.3rem;"><%= page.engagementNote %></p>
+          </div>
+        </aside>
+      </div>
+    <% } %>
+  </div>
+</section>

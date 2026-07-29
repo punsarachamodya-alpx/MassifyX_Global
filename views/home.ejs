@@ -1,0 +1,163 @@
+<section class="hero">
+  <div class="shell hero__grid">
+    <%# Copy comes first in DOM order: a visitor should read what the company does
+        before meeting an abstract graphic of it. %>
+    <div class="hero__copy">
+      <span class="eyebrow"><%= page.hero.eyebrow %></span>
+      <h1 class="display-1"><%= page.hero.headline %></h1>
+      <p class="lede hero__body"><%= page.hero.body %></p>
+      <div class="btn-row">
+        <a class="btn btn--primary" href="<%= page.hero.primaryCta.href %>"><%= page.hero.primaryCta.label %></a>
+        <a class="btn btn--ghost" href="<%= page.hero.secondaryCta.href %>"><%= page.hero.secondaryCta.label %></a>
+      </div>
+    </div>
+    <div class="hero__figure">
+      <%- include('partials/hero-figure') %>
+    </div>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="shell">
+    <div class="factbar">
+      <% page.valueProps.forEach(function (vp) { %>
+        <div class="factbar__item reveal">
+          <h2 class="factbar__title"><%= vp.title %></h2>
+          <p class="factbar__body"><%= vp.body %></p>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</section>
+
+<section class="section section--alt">
+  <div class="shell">
+    <div class="section-head reveal">
+      <span class="eyebrow"><%= page.services.eyebrow %></span>
+      <h2 class="display-2"><%= page.services.headline %></h2>
+      <p class="lede"><%= page.services.body %></p>
+    </div>
+
+    <div class="grid grid--2">
+      <% page.services.items.forEach(function (item) { %>
+        <div class="card reveal">
+          <div style="display:flex;align-items:center;gap:0.9rem;flex-wrap:wrap;">
+            <h3 class="card__title" style="font-size:1.6rem;"><%= item.name %></h3>
+            <%- include('partials/badge', { status: item.status }) %>
+          </div>
+          <ul class="capability-list">
+            <% item.capabilities.forEach(function (c) { %>
+              <li><%= c %></li>
+            <% }); %>
+          </ul>
+        </div>
+      <% }); %>
+    </div>
+
+    <div style="margin-top:2.5rem;">
+      <a class="arrow-link" href="<%= page.services.cta.href %>"><%= page.services.cta.label %></a>
+    </div>
+  </div>
+</section>
+
+<%# Full-bleed motion band: the supply-chain thesis in one moving image. %>
+<section class="motion-band" aria-hidden="true">
+  <img src="/img/motion/supply-flow.svg" alt="" width="1600" height="420" loading="lazy">
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="section-head reveal">
+      <span class="eyebrow"><%= page.process.eyebrow %></span>
+      <h2 class="display-2"><%= page.process.headline %></h2>
+    </div>
+
+    <div class="steps">
+      <% page.process.steps.forEach(function (step) { %>
+        <div class="step reveal">
+          <div class="step__number"><%= step.number %></div>
+          <h3 class="step__title"><%= step.title %></h3>
+          <p class="step__body"><%= step.body %></p>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</section>
+
+<section class="section section--alt">
+  <div class="shell">
+    <div class="section-head reveal">
+      <span class="eyebrow"><%= page.industriesStrip.eyebrow %></span>
+      <h2 class="display-2"><%= page.industriesStrip.headline %></h2>
+      <p class="lede"><%= page.industriesStrip.body %></p>
+    </div>
+
+    <div class="grid grid--4">
+      <% industries.items.forEach(function (ind) { %>
+        <a class="card card--link reveal" href="/industries#<%= ind.slug %>">
+          <span class="card__icon"><%- include('partials/industry-icon', { slug: ind.slug }) %></span>
+          <h3 class="card__title" style="font-size:1.06rem;"><%= ind.name %></h3>
+        </a>
+      <% }); %>
+    </div>
+
+    <div style="margin-top:2.5rem;">
+      <a class="arrow-link" href="<%= page.industriesStrip.cta.href %>"><%= page.industriesStrip.cta.label %></a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="section-head reveal">
+      <span class="eyebrow"><%= page.why.eyebrow %></span>
+      <h2 class="display-2"><%= page.why.headline %></h2>
+    </div>
+
+    <div class="grid grid--3">
+      <% page.why.items.forEach(function (item) { %>
+        <div class="card reveal">
+          <h3 class="card__title"><%= item.title %></h3>
+          <p class="card__body"><%= item.body %></p>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</section>
+
+<% if (page.team && page.team.members && page.team.members.length) { %>
+<section class="section section--alt">
+  <div class="shell">
+    <div class="section-head reveal">
+      <span class="eyebrow"><%= page.team.eyebrow %></span>
+      <h2 class="display-2"><%= page.team.headline %></h2>
+    </div>
+
+    <div class="people">
+      <% page.team.members.forEach(function (m) { %>
+        <article class="person reveal">
+          <div class="person__portrait">
+            <% if (m.photo) { %>
+              <img src="<%= m.photo %>" alt="<%= m.name %>" width="84" height="84">
+            <% } else { %>
+              <%= m.name.split(' ').map(function (w) { return w[0]; }).slice(0, 2).join('') %>
+            <% } %>
+          </div>
+          <div>
+            <h3 class="person__name"><%= m.name %></h3>
+            <p class="person__role"><%= m.role %></p>
+            <% if (m.quote) { %>
+              <p class="person__quote"><%= m.quote %></p>
+            <% } %>
+            <% if (m.linkedin) { %>
+              <a class="person__link" href="<%= m.linkedin %>" rel="noopener noreferrer" target="_blank">LinkedIn</a>
+            <% } %>
+          </div>
+        </article>
+      <% }); %>
+    </div>
+  </div>
+</section>
+<% } %>
+
+<%- include('partials/cta-band', { closing: page.closing }) %>

@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" role="img">
+<defs>
+  <linearGradient id="lane" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#2e7bff"/><stop offset="100%" stop-color="#46d3ff"/>
+  </linearGradient>
+  <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#0a1b3c" stop-opacity="0.9"/>
+    <stop offset="100%" stop-color="#16305c" stop-opacity="0.72"/>
+  </linearGradient>
+  <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse">
+    <path d="M28 0H0V28" fill="none" stroke="#0a1b3c" stroke-opacity="0.09" stroke-width="1"/>
+  </pattern>
+</defs>
+<style>
+  .fl { animation: fl 7s linear infinite; }
+  @keyframes fl { to { stroke-dashoffset: -180; } }
+  .pz { animation: pz 4.5s ease-in-out infinite; transform-origin: center; }
+  @keyframes pz { 0%,100% { opacity:.28 } 50% { opacity:.95 } }
+  .dr { animation: dr 9s linear infinite; }
+  @keyframes dr { to { transform: translateX(120px); } }
+  .sp { animation: sp 16s linear infinite; transform-origin: 50% 50%; }
+  @keyframes sp { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    .fl, .pz, .dr, .sp { animation: none; }
+  }
+</style>
+<rect width="800" height="500" fill="#f1f6ff"/>
+<rect width="800" height="500" fill="url(#grid)"/>
+
+<path d="M0 300 C 160 262, 300 330, 460 296 C 600 266, 700 306, 800 288 L800 500 L0 500 Z"
+      fill="#0a1b3c" opacity="0.1"/>
+<path d="M0 344 C 170 306, 320 372, 470 340 C 620 310, 710 348, 800 332 L800 500 L0 500 Z"
+      fill="#0a1b3c" opacity="0.16"/>
+<path d="M0 392 C 180 356, 330 418, 490 388 C 640 360, 720 392, 800 380 L800 500 L0 500 Z"
+      fill="#0a1b3c" opacity="0.26"/>
+<g fill="none" stroke="url(#lane)" stroke-width="3" stroke-linecap="round">
+  <path class="fl" stroke-dasharray="10 14" d="M0 262 C 170 224, 320 288, 480 254 C 630 222, 720 258, 800 244"/>
+</g>
+<g fill="#0a1b3c" opacity="0.88">
+  <path d="M150 372 v-110 a34 34 0 0 1 68 0 v110 z"/>
+  <path d="M244 372 v-84 a26 26 0 0 1 52 0 v84 z"/>
+</g>
+<g class="pz"><circle cx="184" cy="228" r="13" fill="#2e7bff"/></g>
+<g fill="#0a1b3c" opacity="0.75">
+  <circle cx="566" cy="196" r="26"/>
+  <path d="M566 170 v-28 M566 222 v28 M540 196 h-28 M592 196 h28" stroke="#0a1b3c"
+        stroke-width="4" stroke-linecap="round"/>
+</g>
+</svg>

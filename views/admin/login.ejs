@@ -1,0 +1,26 @@
+<div class="alogin">
+  <img src="/brand/massifyx-lockup-light.png" alt="MassifyX Global" height="34" class="alogin__logo">
+  <h1>Sign in</h1>
+  <p class="amuted">Content administration for massifyx.com.</p>
+
+  <% if (!configured) { %>
+    <p class="anotice anotice--warn">
+      <strong>Admin access is not configured.</strong>
+      Set the <code>ADMIN_PASSWORD</code> environment variable on the server and restart.
+      Until then every login attempt is refused.
+    </p>
+  <% } %>
+
+  <% if (error) { %>
+    <p class="anotice anotice--error" role="alert"><%= error %></p>
+  <% } %>
+
+  <form method="post" action="/admin/login">
+    <input type="hidden" name="next" value="<%= next %>">
+    <label class="afield">
+      <span class="afield__label">Password</span>
+      <input type="password" name="password" autocomplete="current-password" autofocus required>
+    </label>
+    <button type="submit" class="abtn abtn--primary abtn--full">Sign in</button>
+  </form>
+</div>

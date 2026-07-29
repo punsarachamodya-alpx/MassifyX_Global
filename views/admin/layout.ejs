@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title><%= title %> — MassifyX admin</title>
+  <link rel="icon" href="/brand/favicon-32.png" sizes="32x32">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+  <% if (typeof csrfToken !== 'undefined') { %>
+    <header class="abar">
+      <div class="abar__inner">
+        <a class="abar__brand" href="/admin">
+          <img src="/brand/massifyx-lockup-dark.png" alt="MassifyX" height="24">
+          <span>Admin</span>
+        </a>
+        <nav class="abar__nav">
+          <a href="/admin">Dashboard</a>
+          <a href="/admin/backups">Backups</a>
+          <a href="/admin/export">Export</a>
+          <a href="/" target="_blank" rel="noopener">View site</a>
+        </nav>
+        <form method="post" action="/admin/logout" class="abar__out">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button type="submit" class="abtn abtn--quiet">Sign out</button>
+        </form>
+      </div>
+    </header>
+
+    <div class="ashell">
+      <aside class="aside">
+        <p class="aside__label">Sections</p>
+        <nav class="aside__nav">
+          <% sections.forEach(function (s) { %>
+            <a href="/admin/edit/<%= s.key %>"><%= s.label %></a>
+          <% }); %>
+        </nav>
+      </aside>
+      <main class="amain">
+        <%- body %>
+      </main>
+    </div>
+  <% } else { %>
+    <main class="alogin-wrap">
+      <%- body %>
+    </main>
+  <% } %>
+  <script src="/js/admin.js" defer></script>
+</body>
+</html>
