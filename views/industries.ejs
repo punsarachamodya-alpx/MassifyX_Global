@@ -19,7 +19,13 @@
             </div>
           <% } %>
           <div class="card__inner">
-            <span class="card__icon"><%- include('partials/industry-icon', { slug: ind.slug }) %></span>
+            <span class="card__icon">
+              <% if (ind.icon) { %>
+                <img src="<%= ind.icon %>" alt="">
+              <% } else { %>
+                <%- include('partials/industry-icon', { slug: ind.slug }) %>
+              <% } %>
+            </span>
             <h2 class="card__title" style="font-size:1.45rem;"><%= ind.name %></h2>
             <ul class="pain-list">
               <% ind.painPoints.forEach(function (p) { %>

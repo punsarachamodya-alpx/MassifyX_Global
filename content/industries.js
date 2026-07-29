@@ -20,6 +20,7 @@ module.exports = {
       slug: 'manufacturing',
       name: 'Manufacturing',
       image: '/img/industries/manufacturing.svg',
+      icon: '', // optional: overrides the built-in line icon
       painPoints: [
         'Purchasing spread across plant-level spreadsheets with no consolidated spend view.',
         'Supplier onboarding and RFQ cycles that stretch weeks longer than production schedules allow.',
@@ -30,6 +31,7 @@ module.exports = {
       slug: 'medical-devices',
       name: 'Medical Devices',
       image: '/img/industries/medical-devices.svg',
+      icon: '', // optional: overrides the built-in line icon
       painPoints: [
         'Supplier qualification and documentation overhead that outpaces a lean procurement team.',
         'Component sourcing decisions made without consistent vendor performance tracking.',
@@ -40,6 +42,7 @@ module.exports = {
       slug: 'renewable-energy',
       name: 'Renewable Energy',
       image: '/img/industries/renewable-energy.svg',
+      icon: '', // optional: overrides the built-in line icon
       painPoints: [
         'Fast-scaling procurement volume outpacing the internal team that originally set it up.',
         'Multi-region supplier coordination with inconsistent lead-time visibility.',
@@ -50,6 +53,7 @@ module.exports = {
       slug: 'automotive-suppliers',
       name: 'Automotive Suppliers',
       image: '/img/industries/automotive-suppliers.svg',
+      icon: '', // optional: overrides the built-in line icon
       painPoints: [
         'Tier-2/3 supplier management stretched thin against OEM delivery windows.',
         'PO and change-order volume that overwhelms a generalist purchasing desk.',
@@ -60,6 +64,7 @@ module.exports = {
       slug: 'electronics-ems',
       name: 'Electronics / EMS',
       image: '/img/industries/electronics-ems.svg',
+      icon: '', // optional: overrides the built-in line icon
       painPoints: [
         'Component sourcing across volatile lead times with no dedicated analyst tracking it.',
         'Supplier onboarding backlog as production lines add new vendors under time pressure.',
@@ -70,6 +75,7 @@ module.exports = {
       slug: 'fmcg',
       name: 'FMCG',
       image: '/img/industries/fmcg.svg',
+      icon: '', // optional: overrides the built-in line icon
       painPoints: [
         'High SKU count driving procurement admin a lean team can’t keep pace with.',
         'Demand swings that outrun manual replenishment and inventory tracking.',
@@ -80,6 +86,7 @@ module.exports = {
       slug: 'food-production',
       name: 'Food Production',
       image: '/img/industries/food-production.svg',
+      icon: '', // optional: overrides the built-in line icon
       painPoints: [
         'Supplier onboarding and documentation cycles competing with seasonal production pressure.',
         'Inventory and demand planning done in spreadsheets as volume outgrows the process.',
@@ -90,6 +97,7 @@ module.exports = {
       slug: 'e-commerce',
       name: 'E-commerce',
       image: '/img/industries/e-commerce.svg',
+      icon: '', // optional: overrides the built-in line icon
       painPoints: [
         'Inventory and demand planning that hasn’t kept pace with order volume growth.',
         'Vendor and fulfilment-partner performance with no consolidated dashboard.',

@@ -11,7 +11,16 @@ module.exports = {
     body:
       'MassifyX Global gives mid-market companies an EU-based engagement point and a senior-led delivery team in Sri Lanka — running procurement, purchase orders, supplier onboarding, and analytics inside your existing systems.',
     primaryCta: { label: 'Book a Discovery Call', href: '/contact' },
-    secondaryCta: { label: 'See what we do', href: '/what-we-do' }
+    secondaryCta: { label: 'See what we do', href: '/what-we-do' },
+    // Leave empty to keep the built-in animated diagram (views/partials/hero-figure.ejs).
+    // Set this to replace it with an uploaded image instead.
+    figureImage: ''
+  },
+
+  // The full-bleed moving band beneath the services section. Points at the
+  // shipped SVG by default; change the path to swap in different artwork.
+  motionBand: {
+    image: '/img/motion/supply-flow.svg'
   },
 
   valueProps: [
