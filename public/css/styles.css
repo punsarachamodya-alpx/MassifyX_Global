@@ -232,9 +232,12 @@ button {
 
 /* ---------------------------------------------------------- 5. Structure */
 
+/* Full-bleed: no max-width cap, so content spans the actual viewport rather than
+   sitting in a centered column with visible gutters on wide monitors. Only the
+   side padding (--gutter) keeps text off the literal edge. .shell--narrow below
+   is unaffected — that one is a deliberate reading-width cap for legal copy. */
 .shell {
   width: 100%;
-  max-width: var(--shell);
   margin-inline: auto;
   padding-inline: var(--gutter);
 }
@@ -424,54 +427,12 @@ button {
   top: 6px;
 }
 
-/* 1240px, not 980px: with the enlarged logo (56px), 5 nav links + the CTA button
-   started wrapping onto two lines anywhere below the shell's own max-width
-   (measured wrapping from 1024px up through 1200px) — the desktop nav needs the
-   full 1240px shell to lay out on one line, so the hamburger switch has to cover
-   that whole range, not just phone/tablet widths. */
-@media (max-width: 1240px) {
-  /* A full-size lockup would crowd the hamburger on narrow screens. */
-  :root {
-    --header-h: 88px;
-    --logo-h: 52px;
-  }
-
-  .header__toggle {
-    display: flex;
-  }
-
-  .header__nav {
-    position: fixed;
-    inset: var(--header-h) 0 auto 0;
-    background: #fff;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0;
-    padding: 1rem var(--gutter) 2rem;
-    border-bottom: 1px solid var(--rule);
-    box-shadow: 0 24px 40px -28px rgba(10, 27, 60, 0.4);
-    display: none;
-  }
-
-  .header__nav.is-open {
-    display: flex;
-  }
-
-  .header__link {
-    padding-block: 0.95rem;
-    border-bottom: 1px solid var(--rule);
-    font-size: 1.05rem;
-  }
-
-  .header__link::after {
-    display: none;
-  }
-
-  .header__cta {
-    margin: 1.25rem 0 0;
-    text-align: center;
-  }
-}
+/* The hamburger media query (nav position, link sizing, the mobile --logo-h /
+   --header-h override) lives entirely in views/layout.ejs, not here. Its
+   breakpoint has to shift with whatever logo height is set in the admin panel —
+   a wider logo needs a wider viewport before the nav fits on one line — and CSS
+   media queries can't reference a custom property, so the breakpoint has to be
+   computed server-side and the ruleset rendered with it, together, in one place. */
 
 /* ---------------------------------------------------- 7. Buttons & links */
 
