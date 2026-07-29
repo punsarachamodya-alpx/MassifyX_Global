@@ -21,6 +21,21 @@
   </div>
 </section>
 
+<%# Full-bleed cinematic still beneath the hero: a slow, continuous zoom gives
+    motion without the weight of a video. Disabled entirely under
+    prefers-reduced-motion (see styles.css). %>
+<% if (page.showcase && page.showcase.image) { %>
+  <section class="showcase">
+    <div class="showcase__media">
+      <img src="<%= page.showcase.image %>" alt="" width="1600" height="700" loading="lazy">
+    </div>
+    <div class="shell showcase__caption">
+      <span class="eyebrow"><%= page.showcase.eyebrow %></span>
+      <h2 class="display-2"><%= page.showcase.headline %></h2>
+    </div>
+  </section>
+<% } %>
+
 <section class="section section--tight">
   <div class="shell">
     <div class="factbar">
@@ -71,19 +86,29 @@
 
 <section class="section">
   <div class="shell">
-    <div class="section-head reveal">
-      <span class="eyebrow"><%= page.process.eyebrow %></span>
-      <h2 class="display-2"><%= page.process.headline %></h2>
-    </div>
-
-    <div class="steps">
-      <% page.process.steps.forEach(function (step) { %>
-        <div class="step reveal">
-          <div class="step__number"><%= step.number %></div>
-          <h3 class="step__title"><%= step.title %></h3>
-          <p class="step__body"><%= step.body %></p>
+    <div class="process-layout<%= page.process.image ? ' process-layout--with-image' : '' %>">
+      <div>
+        <div class="section-head reveal">
+          <span class="eyebrow"><%= page.process.eyebrow %></span>
+          <h2 class="display-2"><%= page.process.headline %></h2>
         </div>
-      <% }); %>
+
+        <div class="steps">
+          <% page.process.steps.forEach(function (step) { %>
+            <div class="step reveal">
+              <div class="step__number"><%= step.number %></div>
+              <h3 class="step__title"><%= step.title %></h3>
+              <p class="step__body"><%= step.body %></p>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+
+      <% if (page.process.image) { %>
+        <div class="process-media reveal">
+          <img src="<%= page.process.image %>" alt="" width="800" height="1000" loading="lazy">
+        </div>
+      <% } %>
     </div>
   </div>
 </section>
