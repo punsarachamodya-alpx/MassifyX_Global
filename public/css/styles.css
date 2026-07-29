@@ -75,6 +75,11 @@
   --gutter: clamp(1.25rem, 4vw, 3rem);
   --section-y: clamp(4.5rem, 9vw, 8.5rem);
 
+  /* Header height and the logo it's sized around. The mobile nav drops from
+     exactly --header-h, so these must stay in step — hence the variable. */
+  --header-h: 112px;
+  --logo-h: 68px;
+
   /* Motion */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -330,11 +335,11 @@ button {
   display: flex;
   align-items: center;
   gap: 2rem;
-  min-height: 88px;
+  min-height: var(--header-h);
 }
 
 .header__logo img {
-  height: 46px;
+  height: var(--logo-h);
   width: auto;
 }
 
@@ -420,13 +425,19 @@ button {
 }
 
 @media (max-width: 980px) {
+  /* A full-size lockup would crowd the hamburger on narrow screens. */
+  :root {
+    --header-h: 88px;
+    --logo-h: 52px;
+  }
+
   .header__toggle {
     display: flex;
   }
 
   .header__nav {
     position: fixed;
-    inset: 78px 0 auto 0;
+    inset: var(--header-h) 0 auto 0;
     background: #fff;
     flex-direction: column;
     align-items: stretch;
@@ -1582,7 +1593,7 @@ button {
 }
 
 .footer__logo img {
-  height: 42px;
+  height: 64px;
   width: auto;
   margin-bottom: 1.3rem;
 }
