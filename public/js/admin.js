@@ -46,6 +46,66 @@
     });
   });
 
+  // -------------------------------------------------------- image uploads
+  // Uploads straight from the field itself: pick a file, it lands in
+  // /img/uploads and the path text input + thumbnail update immediately —
+  // no more copying a path from a separate upload page. The path input
+  // still works if typed or pasted by hand; this is additive.
+  var imageFields = document.querySelectorAll('[data-image-field]');
+
+  Array.prototype.forEach.call(imageFields, function (wrap) {
+    var picker = wrap.querySelector('[data-image-pick]');
+    var pathInput = wrap.querySelector('[data-image-path]');
+    var thumb = wrap.querySelector('.athumb');
+    var status = wrap.querySelector('[data-image-status]');
+    var defaultStatus = status ? status.textContent : '';
+    if (!picker || !pathInput) return;
+
+    picker.addEventListener('change', function () {
+      var file = picker.files && picker.files[0];
+      if (!file) return;
+
+      var csrfField = wrap.closest('form').querySelector('input[name="_csrf"]');
+      var data = new FormData();
+      data.append('images', file);
+      if (csrfField) data.append('_csrf', csrfField.value);
+
+      if (status) status.textContent = 'Uploading…';
+      picker.disabled = true;
+
+      fetch('/admin/upload', {
+        method: 'POST',
+        body: data,
+        headers: { Accept: 'application/json' },
+        credentials: 'same-origin'
+      })
+        .then(function (r) {
+          return r.json().then(function (json) {
+            return { ok: r.ok, json: json };
+          });
+        })
+        .then(function (result) {
+          var path = result.json.files && result.json.files[0];
+          if (!result.ok || !path) throw new Error(result.json.error || 'Upload failed.');
+
+          pathInput.value = path;
+          if (thumb) {
+            thumb.src = path;
+            thumb.style.display = '';
+          }
+          if (status) status.textContent = 'Uploaded — click "Save changes" below to publish it.';
+          dirty = true;
+        })
+        .catch(function (err) {
+          if (status) status.textContent = err.message;
+        })
+        .then(function () {
+          picker.disabled = false;
+          picker.value = '';
+        });
+    });
+  });
+
   // -------------------------------------------------------------- confirms
   var confirmForms = document.querySelectorAll('form[data-confirm]');
   Array.prototype.forEach.call(confirmForms, function (form) {

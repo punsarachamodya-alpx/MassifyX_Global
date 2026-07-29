@@ -364,6 +364,16 @@ code {
   background: var(--ice);
 }
 
+.afield--image input[type='text'] {
+  margin-bottom: 0.5rem;
+}
+
+.afield__filepick {
+  display: block;
+  font: inherit;
+  font-size: 0.88rem;
+}
+
 /* -------------------------------------------------------------- repeater */
 
 .arep {

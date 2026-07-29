@@ -9,7 +9,9 @@
     "dev": "node --watch --env-file-if-exists=.env server.js",
     "test": "node --test test/*.test.js"
   },
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "compression": "^1.8.1",
     "ejs": "^6.0.1",
@@ -17,6 +19,7 @@
     "express-ejs-layouts": "^2.5.1",
     "express-session": "^1.19.0",
     "helmet": "^8.1.0",
-    "multer": "^2.2.0"
+    "multer": "^2.2.0",
+    "nodemailer": "^9.0.3"
   }
 }

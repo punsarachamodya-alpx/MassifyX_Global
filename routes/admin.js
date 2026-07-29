@@ -10,6 +10,7 @@ const auth = require('../lib/auth');
 const store = require('../lib/store');
 const schema = require('../lib/schema');
 const paths = require('../lib/paths');
+const mailer = require('../lib/mailer');
 
 const router = express.Router();
 
@@ -113,7 +114,9 @@ function checklist() {
   const items = [
     {
       label: 'Contact form delivery wired to a real inbox',
-      done: Boolean(contact.deliveryConfigured),
+      // Computed from the live SMTP environment, not a checkbox someone could
+      // tick without actually configuring anything — see lib/mailer.js.
+      done: mailer.isConfigured(),
       where: '/admin/edit/contact'
     },
     {
@@ -266,9 +269,15 @@ router.get('/export', (req, res) => {
 // multipart body, and the "_csrf" field lives inside that body. Checking CSRF
 // first (as a normal route-level middleware would) always sees an empty
 // req.body and rejects every upload.
+// The image-field file pickers (views/admin/_field.ejs) POST here via fetch and
+// expect JSON back; the standalone bulk-upload panel on the Site page is a plain
+// form post and expects the HTML result page. Both hit the same endpoint —
+// wantsJson decides which response a given request gets.
 router.post('/upload', (req, res, next) => {
   upload.array('images', 4)(req, res, (err) => {
     if (err) {
+      const wantsJson = req.xhr || (req.get('Accept') || '').includes('application/json');
+      if (wantsJson) return res.status(400).json({ error: err.message, files: [] });
       return res.status(400).render('admin/message', {
         title: 'Upload failed',
         heading: 'Upload failed',
@@ -279,6 +288,15 @@ router.post('/upload', (req, res, next) => {
   });
 }, auth.verifyCsrf, (req, res) => {
   const files = (req.files || []).map((f) => `/img/uploads/${f.filename}`);
+  const wantsJson = req.xhr || (req.get('Accept') || '').includes('application/json');
+
+  if (wantsJson) {
+    return res.json({
+      files,
+      error: files.length ? null : 'Only JPG, PNG, and WebP files under 4 MB are accepted.'
+    });
+  }
+
   res.render('admin/message', {
     title: 'Uploaded',
     heading: files.length ? 'Upload complete' : 'Nothing uploaded',
