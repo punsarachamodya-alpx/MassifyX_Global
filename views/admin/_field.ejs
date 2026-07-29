@@ -89,15 +89,14 @@
   </label>
 
 <% } else if (field.type === 'image') { %>
-  <div class="afield">
+  <div class="afield afield--image" data-image-field>
     <span class="afield__label"><%= field.label %></span>
-    <% if (value) { %>
-      <img class="athumb" src="<%= value %>" alt="">
-    <% } %>
+    <img class="athumb" src="<%= value %>" alt="" style="<%= value ? '' : 'display:none;' %>">
     <input type="text" name="<%= name %>" value="<%= value || '' %>"
-           placeholder="/img/uploads/… or leave empty">
-    <span class="afield__hint">
-      Upload images from the <a href="/admin/edit/site">upload panel</a>, then paste the path here.
+           placeholder="/img/uploads/… or leave empty" data-image-path>
+    <input type="file" class="afield__filepick" accept="image/jpeg,image/png,image/webp" data-image-pick>
+    <span class="afield__hint afield__uploadstatus" data-image-status>
+      Choose a file to upload it directly, or paste an existing path above. JPG, PNG, or WebP, up to 4 MB.
     </span>
   </div>
 

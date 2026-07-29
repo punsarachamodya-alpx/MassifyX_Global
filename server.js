@@ -8,6 +8,7 @@ const session = require('express-session');
 const expressLayouts = require('express-ejs-layouts');
 
 const store = require('./lib/store');
+const mailer = require('./lib/mailer');
 const adminRouter = require('./routes/admin');
 
 const app = express();
@@ -153,7 +154,7 @@ function renderContact(res, opts = {}) {
 
 app.get('/contact', (req, res) => renderContact(res));
 
-app.post('/contact', (req, res) => {
+app.post('/contact', async (req, res) => {
   const page = store.getSection('contact');
   const body = req.body || {};
 
@@ -193,9 +194,20 @@ app.post('/contact', (req, res) => {
     });
   }
 
-  if (!page.deliveryConfigured) {
-    // TODO(founder): wire SMTP or a CRM webhook. Logged rather than dropped until then.
-    console.log('[contact] submission (delivery not configured):', JSON.stringify(values));
+  // Always logged as a fallback audit trail, whether or not email delivery
+  // succeeds — a submission should never vanish without a trace.
+  console.log('[contact] submission:', JSON.stringify(values));
+
+  if (mailer.isConfigured()) {
+    try {
+      await mailer.sendContactNotification(values);
+    } catch (err) {
+      // The visitor's message was already logged above and their form still
+      // succeeds — an SMTP outage on our end shouldn't become their problem.
+      console.error('[contact] notification email failed:', err.message);
+    }
+  } else {
+    console.warn('[contact] SMTP not configured (SMTP_HOST unset) — notification email not sent.');
   }
 
   return renderContact(res, { submitted: true });
