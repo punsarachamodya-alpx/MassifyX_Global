@@ -56,9 +56,11 @@
     <circle cx="326" cy="260" r="62" fill="none" stroke="#2e7bff" stroke-opacity="0.22" stroke-width="1.4"/>
   </g>
   <circle cx="326" cy="260" r="44" fill="#fff" stroke="#2e7bff" stroke-width="2"/>
-  <circle cx="326" cy="260" r="27" fill="#fff" stroke="#2e7bff" stroke-opacity="0.55" stroke-width="1.4"/>
-  <path d="M316 250 L336 270 M336 250 L316 270" stroke="#0a1b3c" stroke-width="2.4"
-        stroke-linecap="round" fill="none"/>
+  <%# The brand X-mark itself sits at the control point. This partial is inlined
+      into the page HTML, not loaded via <img>, so an external href renders fine
+      here (unlike the motion band, which needs a data URI). %>
+  <image href="/brand/massifyx-x-mark.png" x="294" y="229" width="64" height="62"
+         preserveAspectRatio="xMidYMid meet"/>
 
   <%# --- Ordered outbound lanes, cobalt-to-cyan --- %>
   <g stroke="url(#mxLane)" stroke-width="2.4" fill="none" stroke-linecap="round">

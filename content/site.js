@@ -4,7 +4,7 @@
 module.exports = {
   legalEntity: 'MassifyX Global (Private) Limited',
   publicName: 'MassifyX Global',
-  tagline: 'Intelligence That Moves Business',
+  tagline: 'Precision. Partnership. Progress',
   description:
     'MassifyX Global is a knowledge process outsourcing partner running procurement and supply chain operations for mid-market companies - an EU-based engagement point paired with senior-led delivery from Sri Lanka.',
   contactEmail: 'info@massifyx.com',

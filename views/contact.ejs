@@ -66,18 +66,15 @@
         </div>
 
         <aside>
-          <div class="aside-card">
-            <h2 class="aside-card__title">
-              <%= page.bookingEmbedUrl ? 'Book directly' : page.bookingFallbackTitle %>
-            </h2>
-            <% if (page.bookingEmbedUrl) { %>
+          <%# Omitted entirely until a real booking URL is configured — no
+              placeholder, and never a broken iframe. %>
+          <% if (page.bookingEmbedUrl) { %>
+            <div class="aside-card">
+              <h2 class="aside-card__title">Book directly</h2>
               <iframe class="booking-frame" src="<%= page.bookingEmbedUrl %>"
                       title="Booking calendar" loading="lazy"></iframe>
-            <% } else { %>
-              <%# Never a broken iframe — a plain note until a real URL is configured. %>
-              <p class="aside-card__body"><%= page.bookingFallbackBody %></p>
-            <% } %>
-          </div>
+            </div>
+          <% } %>
 
           <div class="aside-card">
             <dl>

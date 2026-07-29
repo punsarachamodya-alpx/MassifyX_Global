@@ -135,39 +135,4 @@
   </div>
 </section>
 
-<% if (page.team && page.team.members && page.team.members.length) { %>
-<section class="section section--alt">
-  <div class="shell">
-    <div class="section-head reveal">
-      <span class="eyebrow"><%= page.team.eyebrow %></span>
-      <h2 class="display-2"><%= page.team.headline %></h2>
-    </div>
-
-    <div class="people">
-      <% page.team.members.forEach(function (m) { %>
-        <article class="person reveal">
-          <div class="person__portrait">
-            <% if (m.photo) { %>
-              <img src="<%= m.photo %>" alt="<%= m.name %>" width="84" height="84">
-            <% } else { %>
-              <%= m.name.split(' ').map(function (w) { return w[0]; }).slice(0, 2).join('') %>
-            <% } %>
-          </div>
-          <div>
-            <h3 class="person__name"><%= m.name %></h3>
-            <p class="person__role"><%= m.role %></p>
-            <% if (m.quote) { %>
-              <p class="person__quote"><%= m.quote %></p>
-            <% } %>
-            <% if (m.linkedin) { %>
-              <a class="person__link" href="<%= m.linkedin %>" rel="noopener noreferrer" target="_blank">LinkedIn</a>
-            <% } %>
-          </div>
-        </article>
-      <% }); %>
-    </div>
-  </div>
-</section>
-<% } %>
-
 <%- include('partials/cta-band', { closing: page.closing }) %>

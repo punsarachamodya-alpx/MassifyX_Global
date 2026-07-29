@@ -108,7 +108,6 @@ router.use((req, res, next) => {
 function checklist() {
   const contact = store.getSection('contact');
   const whoWeAre = store.getSection('who-we-are');
-  const home = store.getSection('home');
   const legal = store.getSection('legal');
   const founder = whoWeAre.founder || {};
   const items = [
@@ -139,8 +138,8 @@ function checklist() {
     },
     {
       label: 'Team LinkedIn URLs set',
-      done: (home.team?.members || []).every((m) => Boolean(m.linkedin)),
-      where: '/admin/edit/home'
+      done: (whoWeAre.team?.members || []).every((m) => Boolean(m.linkedin)),
+      where: '/admin/edit/who-we-are'
     }
   ];
   for (const doc of legal.all) {
