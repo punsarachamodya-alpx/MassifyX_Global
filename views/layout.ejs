@@ -29,16 +29,22 @@
   <%
     // Admin-editable sizing (Appearance section). Parsed with a fallback to the
     // shipped defaults, so a blank or corrupted value can never break layout.
-    const logoH = parseInt(appearance.logoHeaderHeight, 10) || 68;
-    const logoHMobile = Math.round(logoH * 0.765);
-    const footerLogoH = parseInt(appearance.logoFooterHeight, 10) || 64;
+    const logoH = parseInt(appearance.logoHeaderHeight, 10) || 56;
+    // 0.714 was picked so the default (56px) lands mobile at 40px — the same
+    // height as the footer logo, which measured well on a phone. Not derived
+    // from the footer value directly, so an admin changing one doesn't silently
+    // resize the other.
+    const logoHMobile = Math.round(logoH * 0.714);
+    const footerLogoH = parseInt(appearance.logoFooterHeight, 10) || 52;
     const iconSize = parseInt(appearance.industryIconSize, 10) || 44;
   %>
   <style>
     :root { --logo-h: <%= logoH %>px; --header-h: calc(var(--logo-h) + 44px); }
     .footer__logo img { height: <%= footerLogoH %>px; }
     .card__icon { width: <%= iconSize %>px; height: <%= iconSize %>px; }
-    @media (max-width: 980px) {
+    <%# Kept in sync with the hamburger breakpoint in styles.css — see the comment
+        there for why it's 1240px and not a phone/tablet-sized value. %>
+    @media (max-width: 1240px) {
       :root { --logo-h: <%= logoHMobile %>px; --header-h: calc(var(--logo-h) + 36px); }
     }
   </style>

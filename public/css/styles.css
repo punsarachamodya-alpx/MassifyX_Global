@@ -424,7 +424,12 @@ button {
   top: 6px;
 }
 
-@media (max-width: 980px) {
+/* 1240px, not 980px: with the enlarged logo (56px), 5 nav links + the CTA button
+   started wrapping onto two lines anywhere below the shell's own max-width
+   (measured wrapping from 1024px up through 1200px) — the desktop nav needs the
+   full 1240px shell to lay out on one line, so the hamburger switch has to cover
+   that whole range, not just phone/tablet widths. */
+@media (max-width: 1240px) {
   /* A full-size lockup would crowd the hamburger on narrow screens. */
   :root {
     --header-h: 88px;
