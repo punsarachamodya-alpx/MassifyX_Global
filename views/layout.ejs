@@ -19,6 +19,10 @@
   <meta name="twitter:image" content="<%= site.baseUrl %>/og-image.png">
 
   <meta name="theme-color" content="#0a1b3c">
+  <%# SVG favicon for browsers that support scalable tab icons; PNG fallbacks
+      (regenerated from the same source SVG) for everyone else, and Apple touch
+      icon specifically — Safari doesn't accept SVG there. %>
+  <link rel="icon" href="/brand/massifyx-x-mark.svg" type="image/svg+xml">
   <link rel="icon" href="/brand/favicon-32.png" sizes="32x32">
   <link rel="icon" href="/brand/favicon-256.png" sizes="256x256">
   <link rel="apple-touch-icon" href="/brand/apple-icon-180.png">
@@ -44,23 +48,42 @@
     const logoHMobile = Math.min(MOBILE_LOGO_CAP, logoH);
     const footerLogoHMobile = Math.min(MOBILE_LOGO_CAP, footerLogoH);
 
-    // The wordmark PNG is cropped to its ink (708x122 — see public/brand/), so
-    // this is its true aspect ratio, not the old padded-canvas one.
-    const LOGO_ASPECT = 708 / 122;
+    // The wordmark's own viewBox (public/brand/massifyx-lockup-light.svg) —
+    // its true aspect ratio, straight from the source vector.
+    const LOGO_ASPECT = 1233.1688 / 183.2357;
     const desktopLogoWidth = logoH * LOGO_ASPECT;
 
     // How much room the 5 nav links + CTA button + gutters need beside the logo
-    // to fit on one line, measured in a real browser at two logo sizes (56px and
-    // 112px) and solved for the constant: breakpoint = logoWidth + ~915px, with
-    // a small safety margin added here. A fixed pixel breakpoint (the previous
-    // approach) only holds for the logo size it was measured at — this one
-    // holds for whatever the admin sets, including much larger custom values.
+    // to fit on one line, measured in a real browser at two logo sizes and
+    // solved for the constant: breakpoint = logoWidth + ~915px, with a small
+    // safety margin added here. A fixed pixel breakpoint (the previous approach)
+    // only holds for the logo size and aspect ratio it was measured at — this
+    // one holds for whatever the admin sets, including much larger values.
     const NAV_ROOM = 930;
     const navBreakpoint = Math.ceil(desktopLogoWidth + NAV_ROOM);
   %>
   <style>
+    <%# object-fit: contain matters here, not just cosmetically: the footer's
+        fr-based grid column is often narrower than this logo's natural width at
+        a large configured height (confirmed: a 507px column vs. a 701px natural
+        width at the 104px default on a 1440px viewport). Once the global
+        `img { max-width: 100% }` rule caps the width AND height is separately
+        fixed in px, both dimensions count as "definite" to the browser —
+        aspect-ratio alone doesn't reconcile two already-definite dimensions, it
+        only fills in a dimension that's still auto, so it silently doesn't help
+        here and the image stretches non-uniformly (Chromium confirmed via
+        getComputedStyle: aspect-ratio was correctly set, box size still didn't
+        honor it). object-fit: contain fixes it at the paint step instead: the
+        content scales proportionally within whatever box results, never
+        stretched, at the cost of possibly not filling the box exactly. Applied
+        to the header logo too as a no-cost safety net. %>
     :root { --logo-h: <%= logoH %>px; --header-h: calc(var(--logo-h) + 44px); }
-    .footer__logo img { height: <%= footerLogoH %>px; }
+    .header__logo img { aspect-ratio: <%= LOGO_ASPECT %>; object-fit: contain; }
+    .footer__logo img {
+      height: <%= footerLogoH %>px;
+      aspect-ratio: <%= LOGO_ASPECT %>;
+      object-fit: contain;
+    }
     .card__icon { width: <%= iconSize %>px; height: <%= iconSize %>px; }
     <%# See the comment above navBreakpoint: this is not a fixed value because a
         wider admin-set logo needs a wider viewport before the nav fits on one
@@ -117,7 +140,7 @@
       description: site.description,
       email: site.contactEmail,
       url: site.baseUrl,
-      logo: site.baseUrl + '/brand/massifyx-lockup-light.png',
+      logo: site.baseUrl + '/brand/massifyx-lockup-light.svg',
       sameAs: [site.linkedinUrl].filter(Boolean)
     }) %>
   </script>
