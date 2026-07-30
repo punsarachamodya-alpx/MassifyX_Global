@@ -11,3 +11,7 @@ public/img/uploads/*
 npm-debug.log*
 .env
 .DS_Store
+
+# Personal planning notes for the MIS fork-and-build workflow — not part of
+# the shared repo's history.
+docs/internal/

@@ -9,11 +9,16 @@ const expressLayouts = require('express-ejs-layouts');
 
 const store = require('./lib/store');
 const mailer = require('./lib/mailer');
+const misClient = require('./lib/misClient');
 const adminRouter = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const isProd = process.env.NODE_ENV === 'production';
+// The MassifyX Intelligence Service (MIS) — a separate, independently
+// deployed microservice. Unset in dev by default: /live degrades cleanly
+// with no MIS_BASE_URL configured, same as it would if MIS were down.
+const MIS_BASE_URL = process.env.MIS_BASE_URL || '';
 
 // Correct secure-cookie and req.ip behaviour behind a reverse proxy.
 app.set('trust proxy', 1);
@@ -134,6 +139,35 @@ app.get('/how-we-work', (req, res) => {
 app.get('/who-we-are', (req, res) => {
   const page = store.getSection('who-we-are');
   res.render('who-we-are', { page, meta: page.meta });
+});
+
+// ------------------------------------------------------------ live monitor
+
+// Deliberately not in PUBLIC_ROUTES / sitemap.xml — this is an experimental
+// feature (DESIGN.md), kept off the homepage and out of primary nav, reachable
+// only by direct link for now.
+app.get('/live', async (req, res) => {
+  const health = await misClient.getHealth(MIS_BASE_URL);
+  const events = health ? await misClient.getDisruptions(MIS_BASE_URL) : null;
+
+  // MIS being unset, down, slow, or returning garbage all collapse to the
+  // same degraded state — /live must render 200 regardless.
+  res.render('live', {
+    meta: {
+      title: `Live Disruption Monitor — ${res.locals.site.publicName}`,
+      description: 'A live view of global supply chain disruptions, monitored and classified in real time.'
+    },
+    misAvailable: Boolean(health && events),
+    events: events || []
+  });
+});
+
+// Same-origin proxy so the browser never learns MIS's real address — the
+// client-side globe polls this instead of MIS directly.
+app.get('/live/data', async (req, res) => {
+  const events = await misClient.getDisruptions(MIS_BASE_URL);
+  res.set('Cache-Control', 'no-store');
+  res.json({ available: events !== null, events: events || [] });
 });
 
 // ------------------------------------------------------------- contact form

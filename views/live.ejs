@@ -1,0 +1,55 @@
+<section class="hero hero--inner">
+  <div class="shell">
+    <div class="hero__copy">
+      <span class="eyebrow">Live</span>
+      <h1 class="display-1">Global Disruption Monitor</h1>
+    </div>
+    <p class="lede">Real-time supply chain disruptions — port strikes, weather, geopolitical restrictions, and logistics failures — classified and scored as they're detected.</p>
+  </div>
+</section>
+
+<% if (!misAvailable) { %>
+  <section class="section">
+    <div class="shell shell--narrow">
+      <div class="live-unavailable reveal">
+        <h2 class="display-2">Live monitor temporarily unavailable</h2>
+        <p class="lede">We can't reach the intelligence service right now. Please check back shortly — every other page on this site is unaffected.</p>
+      </div>
+    </div>
+  </section>
+<% } else { %>
+  <section class="section">
+    <div class="shell">
+      <div
+        id="live-globe"
+        class="live-globe reveal"
+        role="img"
+        aria-label="World map of live supply chain disruptions"
+      ></div>
+
+      <div class="live-feed">
+        <h2 class="display-2">Recent events</h2>
+        <ul class="live-feed__list">
+          <% events.forEach(function (e) { %>
+            <li class="live-feed__item">
+              <span class="live-feed__severity live-feed__severity--<%= e.severity %>"><%= e.severity %></span>
+              <span class="live-feed__category"><%= e.category %></span>
+              <span class="live-feed__location"><%= e.location %></span>
+              <p class="live-feed__summary"><%= e.summary %></p>
+              <% if (e.sourceUrl) { %>
+                <a class="live-feed__source" href="<%= e.sourceUrl %>" target="_blank" rel="noopener noreferrer">Source</a>
+              <% } %>
+            </li>
+          <% }); %>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <%# Server-rendered snapshot for first paint; live.js polls /live/data (a
+      same-origin proxy — MIS's real address is never sent to the browser)
+      for updates. < escaping prevents a summary/title containing
+      "</script>" from breaking out of this JSON island. %>
+  <script type="application/json" id="live-initial-data"><%- JSON.stringify(events).replace(/</g, '\\u003c') %></script>
+  <script src="/js/live.js" defer></script>
+<% } %>
