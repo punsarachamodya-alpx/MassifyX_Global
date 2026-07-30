@@ -19,6 +19,7 @@
   <meta name="twitter:image" content="<%= site.baseUrl %>/og-image.png">
 
   <meta name="theme-color" content="#0a1b3c">
+  <meta name="google-site-verification" content="7gYId43Lho6wGtoeaNaLe2Dn677lgGabxZ31fi0BUEI" />
   <%# SVG favicon for browsers that support scalable tab icons; PNG fallbacks
       (regenerated from the same source SVG) for everyone else, and Apple touch
       icon specifically — Safari doesn't accept SVG there. %>
@@ -131,18 +132,21 @@
       when JavaScript is actually available. External, never inline: script-src is 'self'. %>
   <script src="/js/js-on.js"></script>
 
+  <%# Requested verbatim (2026-07-30): name/legalName/url/logo hardcoded rather than
+      driven from the site.* admin fields like the rest of this layout, so this exactly
+      matches what was asked for. Only one Organization block is kept — a second,
+      slightly different one describing the same entity would confuse rather than help. %>
   <script type="application/ld+json">
-    <%- JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'Organization',
-      name: site.publicName,
-      legalName: site.legalEntity,
-      description: site.description,
-      email: site.contactEmail,
-      url: site.baseUrl,
-      logo: site.baseUrl + '/brand/massifyx-lockup-light.svg',
-      sameAs: [site.linkedinUrl].filter(Boolean)
-    }) %>
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "MassifyX Global",
+      "legalName": "MassifyX Global (Private) Limited",
+      "alternateName": ["MassifyX", "MassifyX Global Pvt Ltd"],
+      "url": "https://massifyx.com",
+      "logo": "https://massifyx.com/logo.png",
+      "sameAs": []
+    }
   </script>
 </head>
 <body>
