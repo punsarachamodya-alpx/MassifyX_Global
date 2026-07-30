@@ -38,6 +38,17 @@
     const footerLogoH = parseInt(appearance.logoFooterHeight, 10) || 52;
     const iconSize = parseInt(appearance.industryIconSize, 10) || 44;
 
+    // Text scales are percentages of the designed size. Clamped rather than
+    // trusted: a stray "1000" would blow the layout apart, and 0 would make text
+    // invisible, so both ends are bounded before the value reaches CSS.
+    const clampPct = (v, dflt) => {
+      const n = parseInt(v, 10);
+      return Number.isFinite(n) ? Math.min(300, Math.max(50, n)) / 100 : dflt;
+    };
+    const eyebrowScale = clampPct(appearance.eyebrowScale, 1);
+    const headingScale = clampPct(appearance.sectionHeadingScale, 1);
+    const founderPhotoMax = parseInt(appearance.founderPhotoMaxWidth, 10) || 520;
+
     // Mobile screen width doesn't grow with a bigger desktop logo choice, so
     // phone sizing is capped at a fixed, separately-verified-safe height rather
     // than scaled as a fraction of the desktop value. 40px measured well next to
@@ -86,6 +97,28 @@
       object-fit: contain;
     }
     .card__icon { width: <%= iconSize %>px; height: <%= iconSize %>px; }
+
+    <%# Base values mirror styles.css — .eyebrow 0.72rem, .panel__label 0.68rem,
+        .footer__heading 0.66rem, .display-2's clamp(). They're multiplied here
+        rather than replaced so the responsive clamp and rem units survive: the
+        heading still grows with the viewport and still honours a visitor's
+        browser font-size setting, just scaled. The three small labels move
+        together because they're one visual tier — scaling only .eyebrow would
+        leave the panel and footer labels visibly out of step. %>
+    .eyebrow { font-size: calc(0.72rem * <%= eyebrowScale %>); }
+    .panel__label { font-size: calc(0.68rem * <%= eyebrowScale %>); }
+    .footer__heading { font-size: calc(0.66rem * <%= eyebrowScale %>); }
+    .display-2 { font-size: calc(clamp(2rem, 4.2vw, 3.4rem) * <%= headingScale %>); }
+
+    <%# Cap only — the portrait keeps its fluid grid column and still shrinks on
+        narrower screens; this stops it running away on wide monitors. %>
+    .founder__portrait { max-width: <%= founderPhotoMax %>px; }
+    @media (max-width: 860px) {
+      <%# Below 860 the founder grid is a single column and styles.css caps the
+          portrait at 260px so it doesn't dominate a phone. min() keeps that cap
+          while still honouring a deliberately smaller setting. %>
+      .founder__portrait { max-width: min(<%= founderPhotoMax %>px, 260px); }
+    }
     <%# See the comment above navBreakpoint: this is not a fixed value because a
         wider admin-set logo needs a wider viewport before the nav fits on one
         line. Also carries the full hamburger-mode ruleset — CSS media queries
