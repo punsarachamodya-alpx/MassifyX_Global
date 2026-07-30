@@ -20,9 +20,10 @@ module.exports = {
     // TODO(founder): upload a headshot; initials render until then.
     photo: '',
     linkedin: 'https://www.linkedin.com/in/punsara-wimalasena',
-    // TODO(founder): rewrite in the founder's own first-person words, then clear
-    // draftNotice to remove the visible review marker.
-    draftNotice: 'Draft — pending founder review',
+    // Signed off by the founder — the story below reads as finished, so no
+    // visible review marker. Setting this to a non-empty string brings the
+    // notice back (see views/who-we-are.ejs).
+    draftNotice: '',
     story: [
       'I started MassifyX because I’d spent years inside supply chain and procurement operations — across telecom, garments, seafood, and logistics — and kept running into the same gap. Mid-market companies need senior procurement talent, but can’t justify a full in-house team for it.',
       'Sri Lanka gave me a way to close that gap without cutting the corner most outsourcing does. The analysts running your account aren’t junior; they have real supply chain backgrounds. And Sweden gives you a genuine point of contact, in your time zone, accountable for the work.',
