@@ -92,4 +92,25 @@
   </div>
 </section>
 
+<%# Native <details>, not a JS accordion: it expands, is keyboard-operable, and
+    is findable by in-page search with no script at all — consistent with the rest
+    of the site, where JavaScript only ever enhances. %>
+<section class="section">
+  <div class="shell">
+    <div class="section-head reveal">
+      <span class="eyebrow"><%= page.faq.eyebrow %></span>
+      <h2 class="display-2"><%= page.faq.headline %></h2>
+    </div>
+
+    <div class="faq">
+      <% page.faq.items.forEach(function (item) { %>
+        <details class="faq__item reveal">
+          <summary class="faq__q"><%= item.question %></summary>
+          <p class="faq__a"><%= item.answer %></p>
+        </details>
+      <% }); %>
+    </div>
+  </div>
+</section>
+
 <%- include('partials/cta-band', { closing: page.closing }) %>

@@ -25,9 +25,9 @@ module.exports = {
 
   valueProps: [
     {
-      title: 'Cost structure that works',
+      title: 'Senior capacity, junior-hire economics',
       body:
-        'Delivery from Sri Lanka gives you senior analyst capacity at a cost a local hire can’t match — without cutting the corner most outsourcing does.'
+        'You get senior supply chain and procurement analysts running your account, at a cost structure closer to a junior hire than a full in-house department — without cutting the corner most outsourcing does.'
     },
     {
       title: 'An EU engagement point',
@@ -37,7 +37,7 @@ module.exports = {
     {
       title: 'Senior-led, not junior-BPO',
       body:
-        'Your account is run by analysts with genuine supply chain and procurement backgrounds — not a rotating call-centre desk.'
+        'Your account is run by analysts with genuine supply chain and procurement backgrounds — the caliber you’d expect from a senior in-house hire, not an outsourced generalist pool.'
     }
   ],
 
@@ -124,6 +124,28 @@ module.exports = {
           'Every recurring workflow becomes a written SOP with a QA loop, so quality never depends on one person’s memory.'
       }
     ]
+  },
+
+  // Deliberately a condensed echo of the How We Work security section rather
+  // than new claims: the point is that a visitor meets the honest posture
+  // before the final CTA, without having to find the other page first.
+  posture: {
+    eyebrow: 'Data security & compliance',
+    headline: 'What’s actually in place today.',
+    body: 'We’d rather tell you what’s real than borrow language we haven’t earned.',
+    inPlaceLabel: 'In place today',
+    inPlace: [
+      'GDPR-aligned data handling across every engagement',
+      'A Data Processing Agreement (DPA) available on request',
+      'Confidentiality terms in every engagement agreement',
+      'Access limited to the analysts assigned to your account'
+    ],
+    roadmapLabel: 'On the roadmap — not yet true',
+    roadmap: [
+      'ISO 27001 certification: planned, not held today',
+      'SOC 2: not claimed until an audit is actually complete'
+    ],
+    cta: { label: 'See the full picture on How We Work', href: '/how-we-work' }
   },
 
   closing: {

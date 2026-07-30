@@ -94,6 +94,37 @@ module.exports = {
     ]
   },
 
+  // Pre-empts the objections a skeptical EU buyer has before they'll book a
+  // call. Two further questions — the engagement-size floor and the list of
+  // systems we work inside — are pending founder input and are deliberately
+  // absent rather than answered vaguely; add them here when confirmed.
+  faq: {
+    eyebrow: 'Questions',
+    headline: 'Frequently asked questions.',
+    items: [
+      {
+        question: 'Why is MassifyX so new — should that concern me?',
+        answer:
+          'It’s a fair question, so here’s a straight answer: we’re early, and we’ve said so throughout this site rather than dressing it up. What you get today is senior attention on your operation, run by someone with hands-on supply chain and procurement experience across telecom, garments, seafood, and logistics — not scale we haven’t earned yet. A discovery call costs you thirty minutes and tells you directly whether that trade-off works for your operation.'
+      },
+      {
+        question: 'How does our data actually move between Sweden and Sri Lanka?',
+        answer:
+          'Your engagement point in Sweden handles contracting and communication. Where work is delivered from Sri Lanka, access is limited to the analysts assigned to your account, under confidentiality terms in every engagement agreement, with a Data Processing Agreement available on request. Full detail is in the data security section above.'
+      },
+      {
+        question: 'Do you replace our procurement team, or work alongside it?',
+        answer:
+          'Alongside, by default. Most engagements start with one defined process — PO management or supplier onboarding, for example — running inside your existing tools, not replacing your systems or your team.'
+      },
+      {
+        question: 'How is pricing structured?',
+        answer:
+          'Every engagement is scoped and priced against your actual process — we don’t publish a rate card because a generic one wouldn’t reflect what you actually need. Tell us what you run today and we’ll come back with a scoped proposal.'
+      }
+    ]
+  },
+
   closing: {
     headline: 'Want to see how this maps to your operation?',
     body:

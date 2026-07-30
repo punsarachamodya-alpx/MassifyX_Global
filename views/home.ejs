@@ -135,4 +135,44 @@
   </div>
 </section>
 
+<%# Same in-place / not-yet-true split as How We Work, condensed. Breaks up the
+    run of three-card sections above it, and puts the honest posture in front of
+    a visitor before the closing CTA rather than only on a page they may not reach. %>
+<section class="section section--alt">
+  <div class="shell">
+    <div class="section-head reveal">
+      <span class="eyebrow"><%= page.posture.eyebrow %></span>
+      <h2 class="display-2"><%= page.posture.headline %></h2>
+      <p class="lede"><%= page.posture.body %></p>
+    </div>
+
+    <div class="split">
+      <article class="panel panel--plain reveal">
+        <div class="panel__inner">
+          <span class="panel__label"><%= page.posture.inPlaceLabel %></span>
+          <ul class="posture-list posture-list--yes">
+            <% page.posture.inPlace.forEach(function (i) { %>
+              <li><%= i %></li>
+            <% }); %>
+          </ul>
+        </div>
+      </article>
+      <article class="panel panel--plain panel--roadmap reveal">
+        <div class="panel__inner">
+          <span class="panel__label"><%= page.posture.roadmapLabel %></span>
+          <ul class="posture-list posture-list--no">
+            <% page.posture.roadmap.forEach(function (i) { %>
+              <li><%= i %></li>
+            <% }); %>
+          </ul>
+        </div>
+      </article>
+    </div>
+
+    <div style="margin-top:2.5rem;">
+      <a class="arrow-link" href="<%= page.posture.cta.href %>"><%= page.posture.cta.label %></a>
+    </div>
+  </div>
+</section>
+
 <%- include('partials/cta-band', { closing: page.closing }) %>
