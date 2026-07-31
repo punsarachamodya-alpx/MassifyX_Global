@@ -58,6 +58,50 @@ app.use(
 );
 
 app.use(compression());
+
+// ------------------------------------------------- canonical host redirect
+//
+// A safety net, not the primary mechanism: the reverse proxy should be doing
+// this (see deploy/nginx.conf). But the proxy config lives outside this repo
+// and can't be verified from here, so the app enforces the canonical origin
+// too. If the proxy already redirects, a non-canonical request never reaches
+// Node and this is dead weight — which is the intended outcome.
+//
+// Still a single hop either way: this jumps straight to the final origin
+// rather than fixing scheme and host in separate steps.
+const CANONICAL_ORIGIN = (() => {
+  // Only from an explicitly set BASE_URL. Falling back to the default in
+  // content/site.js would make a plain `node server.js` on a laptop start
+  // 301ing to the production domain.
+  if (!process.env.BASE_URL) return null;
+  try {
+    return new URL(process.env.BASE_URL);
+  } catch {
+    console.warn('[boot] BASE_URL is not a valid URL — canonical redirect disabled.');
+    return null;
+  }
+})();
+
+app.use((req, res, next) => {
+  if (!isProd || !CANONICAL_ORIGIN) return next();
+
+  const host = req.headers.host;
+  if (!host) return next();
+
+  const hostWrong = host.toLowerCase() !== CANONICAL_ORIGIN.host.toLowerCase();
+
+  // Scheme is only corrected when the proxy actually tells us the original
+  // scheme. Without the header we cannot know it, and assuming http would
+  // redirect to https forever once the proxy forwards over http internally.
+  const forwarded = req.headers['x-forwarded-proto'];
+  const schemeWrong = forwarded
+    ? forwarded.split(',')[0].trim().toLowerCase() !== CANONICAL_ORIGIN.protocol.slice(0, -1)
+    : false;
+
+  if (!hostWrong && !schemeWrong) return next();
+  return res.redirect(301, CANONICAL_ORIGIN.origin + req.originalUrl);
+});
+
 app.use(express.urlencoded({ extended: false }));
 
 app.use(
