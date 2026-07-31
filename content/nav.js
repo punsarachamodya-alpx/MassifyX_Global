@@ -7,6 +7,7 @@ module.exports = {
     { label: 'Industries We Serve', href: '/industries' },
     { label: 'How We Work', href: '/how-we-work' },
     { label: 'Who We Are', href: '/who-we-are' },
+    { label: 'Live Monitor', href: '/live' },
     { label: 'Contact', href: '/contact' }
   ],
   legal: [

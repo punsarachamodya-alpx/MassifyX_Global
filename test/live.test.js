@@ -17,9 +17,14 @@ const sampleEvents = JSON.parse(
   fs.readFileSync(path.join(__dirname, 'fixtures', 'mis-api-contract-sample.json'), 'utf8'),
 );
 
+const sampleVessels = [
+  { mmsi: '123456789', shipName: 'Ever Given', lat: 30.01, lon: 32.58, headingDeg: 87, speedKnots: 12.3, lastUpdatedAt: new Date().toISOString() },
+];
+
 let fakeMis;
 let fakeMisPort;
 let misShouldFail = false;
+let vesselsAvailable = true;
 let app;
 let server;
 let base;
@@ -49,6 +54,19 @@ function startFakeMis() {
             generatedAt: new Date().toISOString(),
             count: sampleEvents.length,
             events: sampleEvents,
+          }),
+        );
+        return;
+      }
+      if (req.url.startsWith('/api/v1/vessels')) {
+        res.setHeader('Content-Type', 'application/json');
+        const vessels = vesselsAvailable ? sampleVessels : [];
+        res.end(
+          JSON.stringify({
+            generatedAt: new Date().toISOString(),
+            available: vesselsAvailable,
+            count: vessels.length,
+            vessels,
           }),
         );
         return;
@@ -127,4 +145,31 @@ test('a valid https sourceUrl survives end to end into the rendered page', async
   const res = await fetch(`${base}/live`);
   const body = await res.text();
   assert.ok(body.includes('href="https://example.com/rotterdam-storm-port-congestion"'));
+});
+
+test('GET /live embeds live vessel data and shows the "live ships" legend/caption when available', async () => {
+  const res = await fetch(`${base}/live`);
+  const body = await res.text();
+  assert.ok(body.includes('Ever Given'));
+  assert.ok(body.includes('world-map__legend-vessel'));
+  assert.ok(body.includes('live AIS data via aisstream.io'));
+});
+
+test('GET /live omits the "live ships" legend/caption when no vessels are available', async () => {
+  vesselsAvailable = false;
+  try {
+    const res = await fetch(`${base}/live`);
+    const body = await res.text();
+    assert.ok(!body.includes('world-map__legend-vessel'));
+    assert.ok(!body.includes('live AIS data via aisstream.io'));
+  } finally {
+    vesselsAvailable = true;
+  }
+});
+
+test('GET /live/data includes vessels alongside disruption events', async () => {
+  const res = await fetch(`${base}/live/data`);
+  const body = await res.json();
+  assert.equal(body.vessels.length, 1);
+  assert.equal(body.vessels[0].mmsi, '123456789');
 });

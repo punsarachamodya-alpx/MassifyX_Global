@@ -1834,12 +1834,18 @@ button {
 
 /* ------------------------------------------------------- 28. Live monitor */
 
-.live-globe {
-  width: 100%;
-  height: 480px;
-  border-radius: 3px;
-  background: var(--navy-deep);
-  margin-bottom: clamp(2rem, 4vw, 3rem);
+/* Severity ramp: one hue (blue), monotone lightness, validated against this
+   page's dark navy surface with the dataviz skill's palette validator
+   (light end #184f95 clears 2:1 on --navy-deep). Severity 1 recedes toward
+   the surface; 5 is the brightest, most-attention-grabbing step. The same
+   five steps are reused for both the map markers and the feed badges so
+   severity reads as one consistent channel across the page. */
+:root {
+  --severity-1: #184f95;
+  --severity-2: #256abf;
+  --severity-3: #3987e5;
+  --severity-4: #6da7ec;
+  --severity-5: #9ec5f4;
 }
 
 .live-unavailable {
@@ -1848,6 +1854,249 @@ button {
   border-radius: 3px;
   padding: clamp(2rem, 5vw, 3.5rem);
   text-align: center;
+}
+
+.world-map {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 960 / 480;
+  border-radius: 6px;
+  /* Same two brand tokens used everywhere else on the site (--navy-deep,
+     --navy-soft) -- no ad-hoc hex, so this reads as the same system. */
+  background: linear-gradient(160deg, var(--navy-soft) 0%, var(--navy-deep) 100%);
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.world-map__base {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.world-map__lanes {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.world-map__lane {
+  fill: none;
+  stroke: var(--cyan);
+  stroke-width: 1.4;
+  stroke-dasharray: 5 4;
+  stroke-linecap: round;
+  opacity: 0.55;
+}
+
+.world-map__lane-dot {
+  fill: var(--cyan);
+  filter: drop-shadow(0 0 3px var(--cyan));
+}
+
+.world-map__markers {
+  position: absolute;
+  inset: 0;
+}
+
+.world-map__marker {
+  position: absolute;
+  translate: -50% -50%;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The visible dot sits inside the 24px transparent hit target (interaction.md:
+   "give each point a transparent hit area of at least 24px"). A 2px surface
+   ring keeps it legible over the map/other dots without a border's data-weight.
+   The soft pulse ring is decorative-only (aria-hidden via the parent), signaling
+   "live" without implying real-time vessel-style precision. */
+.world-map__marker::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--marker-color, var(--severity-3));
+  box-shadow: 0 0 0 2px var(--navy-deep), 0 0 10px 1px var(--marker-color, var(--severity-3));
+  z-index: 1;
+}
+
+.world-map__marker::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--marker-color, var(--severity-3));
+  opacity: 0.6;
+  animation: marker-pulse 2.4s ease-out infinite;
+}
+
+@keyframes marker-pulse {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+.world-map__marker--sev5::before,
+.world-map__marker--sev4::before,
+.world-map__marker--sev5::after,
+.world-map__marker--sev4::after {
+  width: 14px;
+  height: 14px;
+}
+
+.world-map__marker:hover::before,
+.world-map__marker:focus-visible::before {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world-map__marker::after { animation: none; }
+}
+
+.world-map__vessels {
+  position: absolute;
+  inset: 0;
+}
+
+/* Distinct shape (arrow) and hue (cyan) from the disruption markers
+   (colored circles) -- two different entities never share one visual
+   channel. Heading rotates the arrow when AIS provides it; unknown
+   heading falls back to pointing "up" rather than guessing. */
+.world-map__vessel {
+  position: absolute;
+  translate: -50% -50%;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.world-map__vessel::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  background: var(--cyan);
+  clip-path: polygon(50% 0%, 100% 100%, 50% 78%, 0% 100%);
+  rotate: var(--vessel-heading, 0deg);
+  filter: drop-shadow(0 0 3px var(--cyan));
+}
+
+.world-map__vessel:hover::before,
+.world-map__vessel:focus-visible::before {
+  filter: drop-shadow(0 0 5px #fff);
+}
+
+.world-map__legend-vessel {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 9px solid var(--cyan);
+}
+
+.world-map__tooltip {
+  position: absolute;
+  translate: -50% calc(-100% - 10px);
+  max-width: 260px;
+  background: #fff;
+  color: var(--ink);
+  border-radius: 3px;
+  padding: 0.75rem 0.9rem;
+  box-shadow: 0 16px 32px -16px rgba(6, 15, 38, 0.5);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.world-map__tooltip-severity {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.world-map__tooltip-meta {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+  margin-top: 0.15rem;
+}
+
+.world-map__tooltip-summary {
+  margin: 0.4rem 0 0;
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+}
+
+.world-map__legend {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  background: rgba(6, 15, 38, 0.6);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 0.4rem 0.7rem;
+}
+
+.world-map__legend-group {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.world-map__legend-label {
+  color: #fff;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-right: 0.15rem;
+}
+
+.world-map__legend-swatch {
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-family: var(--font-mono);
+}
+
+.world-map__legend-swatch--1 { background: var(--severity-1); color: #fff; }
+.world-map__legend-swatch--2 { background: var(--severity-2); color: #fff; }
+.world-map__legend-swatch--3 { background: var(--severity-3); color: #fff; }
+.world-map__legend-swatch--4 { background: var(--severity-4); color: var(--navy); }
+.world-map__legend-swatch--5 { background: var(--severity-5); color: var(--navy); }
+
+.world-map__legend-line {
+  width: 1.1rem;
+  height: 0;
+  border-top: 1px dashed var(--cyan);
+}
+
+.world-map__caption {
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+  margin: 0 0 clamp(2rem, 4vw, 3rem);
 }
 
 .live-feed__list {
@@ -1881,11 +2130,11 @@ button {
   font-size: 0.85rem;
 }
 
-.live-feed__severity--1 { background: #4dabf7; }
-.live-feed__severity--2 { background: #2f9e44; }
-.live-feed__severity--3 { background: #e8a800; }
-.live-feed__severity--4 { background: #e8590c; }
-.live-feed__severity--5 { background: #c92a2a; }
+.live-feed__severity--1 { background: var(--severity-1); }
+.live-feed__severity--2 { background: var(--severity-2); }
+.live-feed__severity--3 { background: var(--severity-3); }
+.live-feed__severity--4 { background: var(--severity-4); color: var(--navy); }
+.live-feed__severity--5 { background: var(--severity-5); color: var(--navy); }
 
 .live-feed__category {
   text-transform: uppercase;

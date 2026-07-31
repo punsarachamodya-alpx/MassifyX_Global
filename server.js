@@ -149,6 +149,10 @@ app.get('/who-we-are', (req, res) => {
 app.get('/live', async (req, res) => {
   const health = await misClient.getHealth(MIS_BASE_URL);
   const events = health ? await misClient.getDisruptions(MIS_BASE_URL) : null;
+  // Vessels are a separate, optional layer — MIS itself may have no
+  // AISSTREAM_API_KEY configured, which is not a degraded state, just an
+  // empty list. Only fetched once MIS is confirmed healthy either way.
+  const vessels = health ? await misClient.getVessels(MIS_BASE_URL) : [];
 
   // MIS being unset, down, slow, or returning garbage all collapse to the
   // same degraded state — /live must render 200 regardless.
@@ -158,16 +162,18 @@ app.get('/live', async (req, res) => {
       description: 'A live view of global supply chain disruptions, monitored and classified in real time.'
     },
     misAvailable: Boolean(health && events),
-    events: events || []
+    events: events || [],
+    vessels
   });
 });
 
 // Same-origin proxy so the browser never learns MIS's real address — the
-// client-side globe polls this instead of MIS directly.
+// client-side map polls this instead of MIS directly.
 app.get('/live/data', async (req, res) => {
   const events = await misClient.getDisruptions(MIS_BASE_URL);
+  const vessels = await misClient.getVessels(MIS_BASE_URL);
   res.set('Cache-Control', 'no-store');
-  res.json({ available: events !== null, events: events || [] });
+  res.json({ available: events !== null, events: events || [], vessels });
 });
 
 // ------------------------------------------------------------- contact form
