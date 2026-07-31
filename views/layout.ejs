@@ -165,22 +165,39 @@
       when JavaScript is actually available. External, never inline: script-src is 'self'. %>
   <script src="/js/js-on.js"></script>
 
-  <%# Requested verbatim (2026-07-30): name/legalName/url/logo hardcoded rather than
-      driven from the site.* admin fields like the rest of this layout, so this exactly
-      matches what was asked for. Only one Organization block is kept — a second,
-      slightly different one describing the same entity would confuse rather than help. %>
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "MassifyX Global",
-      "legalName": "MassifyX Global (Private) Limited",
-      "alternateName": ["MassifyX", "MassifyX Global Pvt Ltd"],
-      "url": "https://massifyx.com",
-      "logo": "https://massifyx.com/logo.png",
-      "sameAs": []
-    }
-  </script>
+  <%# Homepage only. This is the shared layout, so an unguarded block here would
+      emit Organization + WebSite on all nine pages — search engines expect one
+      declaration of each per site, not one per URL. currentPath is set in
+      server.js; '/' is the only route that renders views/home.ejs.
+
+      URLs come from site.baseUrl rather than being hardcoded, so these can never
+      drift from the canonical and og:url tags above, which already use it. That
+      makes BASE_URL the single switch for the site's hostname — it must be
+      https://www.massifyx.com in the server's env for these to emit www. %>
+  <% if (currentPath === '/') { %>
+    <script type="application/ld+json">
+      <%- JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: site.publicName,
+        alternateName: 'MassifyX',
+        url: site.baseUrl + '/'
+      }) %>
+    </script>
+
+    <script type="application/ld+json">
+      <%- JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: site.publicName,
+        legalName: site.legalEntity,
+        alternateName: ['MassifyX', 'MassifyX Global Pvt Ltd'],
+        url: site.baseUrl + '/',
+        logo: site.baseUrl + '/brand/massifyx-lockup-light.svg',
+        sameAs: [site.linkedinUrl].filter(Boolean)
+      }) %>
+    </script>
+  <% } %>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
