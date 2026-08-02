@@ -8,5 +8,18 @@
 module.exports = {
   logoHeaderHeight: '112',
   logoFooterHeight: '104',
-  industryIconSize: '44'
+  industryIconSize: '44',
+
+  // Text sizes are percentages, not pixels, for two reasons: the type scale is
+  // responsive (section headings are a clamp() that grows with the viewport) and
+  // a fixed px value would flatten that, and rem-based sizes respect a visitor's
+  // browser font-size setting where px would override it. 100 = as designed.
+  eyebrowScale: '100',
+  sectionHeadingScale: '100',
+
+  // A maximum, not a fixed width: the portrait still shrinks with the viewport,
+  // it just stops growing past this. The default matches its natural width at a
+  // 1440px viewport, so anything at or below that is unchanged — this only reins
+  // in very wide monitors, where the column was reaching ~700px.
+  founderPhotoMaxWidth: '520'
 };
