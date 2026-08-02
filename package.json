@@ -7,7 +7,9 @@
   "scripts": {
     "start": "node --env-file-if-exists=.env server.js",
     "dev": "node --watch --env-file-if-exists=.env server.js",
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
+    "test:sweden-trade": "node --test scripts/sweden-trade/*.test.js",
+    "data:sweden-trade": "node scripts/sweden-trade/build.js"
   },
   "engines": {
     "node": ">=20"

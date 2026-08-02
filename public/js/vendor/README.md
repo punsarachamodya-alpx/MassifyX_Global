@@ -13,3 +13,9 @@ from the style entirely).
 
 `public/css/vendor/maplibre-gl.css` is the matching stylesheet, same
 version/license.
+
+`d3.v7.min.js` — [D3](https://d3js.org) v7.9.0, ISC license. Official UMD
+bundle (exposes a global `d3`), unmodified, downloaded from
+`unpkg.com/d3@7.9.0/dist/d3.min.js`. Used by the Sweden Trade Intelligence
+scrollytelling story (`public/js/story.js`) for the sticky-graphic
+transitions (enter/update/exit) that page's narrative depends on.

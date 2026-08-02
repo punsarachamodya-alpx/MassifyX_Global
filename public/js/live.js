@@ -6,9 +6,12 @@
    because self-drawing coastlines/borders/graticule ourselves was the
    thing being replaced. No API token is required for this basemap, but its
    attribution is required and stays on (see the AttributionControl below).
-   Disruption events and trade lanes are our own data, added as GeoJSON
-   sources/layers on top of that basemap. Polls the same-origin /live/data
-   proxy for updates -- MIS's real address is never sent to the browser. */
+   Shipping lanes are real, static maritime geography (persistent sea
+   corridors don't change minute to minute) loaded from
+   public/geo/shipping-lanes.geojson -- see public/geo/README.md for
+   source/license. Disruption events are our own live data, added as a
+   GeoJSON source/layer on top. Polls the same-origin /live/data proxy for
+   updates -- MIS's real address is never sent to the browser. */
 (function () {
   'use strict';
 
@@ -16,7 +19,6 @@
 
   var CARTO_STYLE_URL = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
   var POLL_INTERVAL_MS = 15000;
-  var LANE_ANIMATION_INTERVAL_MS = 120;
 
   // A status-style ramp (severity behaves like a threat level, not a
   // generic magnitude). Never the only channel: every marker/popup also
@@ -53,11 +55,9 @@
   }
 
   // The MIS API contract (lib/misContract.js) emits an integer severity
-  // 1-5 and a fixed category enum -- not the string
-  // critical/high/medium/low tier, "type", or 0-100 "score" fields a
-  // generic reference implementation might assume. "score" here is
-  // derived purely for circle-radius scaling; it is not an MIS-provided
-  // field and nothing invents facts MIS didn't assert.
+  // 1-5 and a fixed category enum -- "score" here is derived purely for
+  // circle-radius scaling; it is not an MIS-provided field and nothing
+  // invents facts MIS didn't assert.
   function toEventsGeoJSON(items) {
     return {
       type: 'FeatureCollection',
@@ -66,6 +66,7 @@
         .map(function (item) {
           return {
             type: 'Feature',
+            id: item.id,
             geometry: { type: 'Point', coordinates: [item.lon, item.lat] },
             properties: {
               id: item.id,
@@ -83,12 +84,16 @@
 
   maplibregl.setWorkerUrl('/js/vendor/maplibre-gl-csp-worker.js');
 
+  // Atlantic/Europe-leaning framing (not a bare equirectangular [0,0]) so
+  // the map reads as a deliberately composed section of the page rather
+  // than the whole planet shrunk to fit -- paired with the max-height cap
+  // in styles.css (.world-map).
   var map = new maplibregl.Map({
     container: root,
     style: CARTO_STYLE_URL,
-    center: [20, 25],
-    zoom: 1.4,
-    minZoom: 1.2,
+    center: [10, 35],
+    zoom: 1.75,
+    minZoom: 1.3,
     maxZoom: 6,
     attributionControl: false,
     dragRotate: false,
@@ -102,32 +107,6 @@
   // CARTO's basemap is free but requires attribution -- kept on and
   // undisturbed, just moved out from under our own bottom-right legend.
   map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
-
-  // No separate fitBounds() call: center [20, 25] / zoom 1.4 is already the
-  // "crop the wasted polar space" choice (an equirectangular center of
-  // [0, 0] at this zoom would waste far more frame on empty Arctic/
-  // Antarctic than a mid-latitude center does).
-
-  // --------------------------------------------------------- lane "flow"
-  // WebGL has no SVG-style animateMotion/stroke-dashoffset; the standard
-  // MapLibre/Mapbox technique is cycling the dasharray pattern itself.
-  var DASH_FRAMES = [
-    [0, 4, 3],
-    [1, 4, 2],
-    [2, 4, 1],
-    [3, 4, 0],
-    [0, 1, 3, 3],
-  ];
-  var dashFrame = 0;
-  var laneAnimationTimer = null;
-  var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  function animateLanes() {
-    dashFrame = (dashFrame + 1) % DASH_FRAMES.length;
-    if (map.getLayer('lanes')) {
-      map.setPaintProperty('lanes', 'line-dasharray', DASH_FRAMES[dashFrame]);
-    }
-  }
 
   // --------------------------------------------------------------- popup
 
@@ -165,76 +144,109 @@
     return wrap;
   }
 
+  function openEventPopup(feature) {
+    popup.setLngLat(feature.geometry.coordinates).setDOMContent(buildEventPopupContent(feature.properties)).addTo(map);
+  }
+
   // ---------------------------------------------------- event/lane layers
+
+  var hoveredEventId = null;
 
   function renderEventLayers() {
     var source = map.getSource('events');
     var collection = toEventsGeoJSON(events);
     if (source) {
       source.setData(collection);
-    } else {
-      map.addSource('events', { type: 'geojson', data: collection });
-
-      var severityColorExpression = [
-        'match', ['get', 'severity'],
-        1, SEVERITY_COLORS[1],
-        2, SEVERITY_COLORS[2],
-        3, SEVERITY_COLORS[3],
-        4, SEVERITY_COLORS[4],
-        5, SEVERITY_COLORS[5],
-        '#94a3b8',
-      ];
-
-      map.addLayer({
-        id: 'events-glow',
-        type: 'circle',
-        source: 'events',
-        paint: {
-          'circle-color': severityColorExpression,
-          'circle-radius': ['interpolate', ['linear'], ['get', 'score'], 20, 12, 100, 26],
-          'circle-opacity': 0.18,
-          'circle-blur': 0.6,
-        },
-      });
-
-      map.addLayer({
-        id: 'events-dots',
-        type: 'circle',
-        source: 'events',
-        paint: {
-          'circle-color': severityColorExpression,
-          'circle-radius': ['interpolate', ['linear'], ['get', 'score'], 20, 5, 100, 13],
-          'circle-stroke-width': 1.5,
-          'circle-stroke-color': '#0a1628',
-        },
-      });
-
-      map.on('mouseenter', 'events-dots', function () { map.getCanvas().style.cursor = 'pointer'; });
-      map.on('mouseleave', 'events-dots', function () { map.getCanvas().style.cursor = ''; });
-      map.on('click', 'events-dots', function (e) {
-        var feature = e.features && e.features[0];
-        if (!feature) return;
-        popup.setLngLat(feature.geometry.coordinates.slice(0, 2)).setDOMContent(buildEventPopupContent(feature.properties)).addTo(map);
-      });
+      return;
     }
+
+    // promoteId lets MapLibre key feature-state (used for the hover
+    // highlight below) by our own stable event id.
+    map.addSource('events', { type: 'geojson', data: collection, promoteId: 'id' });
+
+    var severityColorExpression = [
+      'match', ['get', 'severity'],
+      1, SEVERITY_COLORS[1],
+      2, SEVERITY_COLORS[2],
+      3, SEVERITY_COLORS[3],
+      4, SEVERITY_COLORS[4],
+      5, SEVERITY_COLORS[5],
+      '#94a3b8',
+    ];
+    var hovered = ['boolean', ['feature-state', 'hover'], false];
+
+    map.addLayer({
+      id: 'events-glow',
+      type: 'circle',
+      source: 'events',
+      paint: {
+        'circle-color': severityColorExpression,
+        'circle-radius': ['interpolate', ['linear'], ['get', 'score'], 20, 12, 100, 26],
+        'circle-opacity': 0.18,
+        'circle-blur': 0.6,
+      },
+    });
+
+    map.addLayer({
+      id: 'events-dots',
+      type: 'circle',
+      source: 'events',
+      paint: {
+        'circle-color': severityColorExpression,
+        'circle-radius': [
+          '+',
+          ['interpolate', ['linear'], ['get', 'score'], 20, 5, 100, 13],
+          ['case', hovered, 3, 0],
+        ],
+        'circle-stroke-width': ['case', hovered, 2.5, 1.5],
+        'circle-stroke-color': ['case', hovered, '#ffffff', '#0a1628'],
+      },
+    });
+
+    map.on('mousemove', 'events-dots', function (e) {
+      map.getCanvas().style.cursor = 'pointer';
+      var feature = e.features && e.features[0];
+      if (!feature) return;
+      if (hoveredEventId !== null && hoveredEventId !== feature.id) {
+        map.setFeatureState({ source: 'events', id: hoveredEventId }, { hover: false });
+      }
+      hoveredEventId = feature.id;
+      map.setFeatureState({ source: 'events', id: hoveredEventId }, { hover: true });
+    });
+    map.on('mouseleave', 'events-dots', function () {
+      map.getCanvas().style.cursor = '';
+      if (hoveredEventId !== null) {
+        map.setFeatureState({ source: 'events', id: hoveredEventId }, { hover: false });
+      }
+      hoveredEventId = null;
+    });
+    map.on('click', 'events-dots', function (e) {
+      var feature = e.features && e.features[0];
+      if (feature) openEventPopup(feature);
+    });
   }
 
   function renderLaneLayer() {
-    if (!map.getSource('lanes')) {
-      map.addSource('lanes', { type: 'geojson', data: window.MXG_LANES_GEOJSON || { type: 'FeatureCollection', features: [] } });
-      map.addLayer({
-        id: 'lanes',
-        type: 'line',
-        source: 'lanes',
-        layout: { 'line-cap': 'round' },
-        paint: {
-          'line-color': '#22d3ee',
-          'line-width': ['interpolate', ['linear'], ['get', 'volume'], 3, 0.6, 10, 2],
-          'line-opacity': ['interpolate', ['linear'], ['get', 'volume'], 3, 0.15, 10, 0.4],
-          'line-dasharray': DASH_FRAMES[0],
-        },
-      }, 'events-glow');
-    }
+    if (map.getSource('lanes')) return;
+    map.addSource('lanes', { type: 'geojson', data: '/geo/shipping-lanes.geojson' });
+    // Real, static maritime corridors -- texture, not subject. Thin,
+    // low-opacity, muted (not the site's vivid cyan/severity hues) and
+    // deliberately unanimated: this is persistent geography, not a live
+    // feed, and looks it. No per-lane width variation either -- the
+    // source dataset carries no real traffic-volume figure to scale by,
+    // and inventing one would be exactly the "looks real but isn't" trap
+    // this is meant to avoid.
+    map.addLayer({
+      id: 'lanes',
+      type: 'line',
+      source: 'lanes',
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: {
+        'line-color': '#5b7699',
+        'line-width': 0.9,
+        'line-opacity': 0.32,
+      },
+    }, 'events-glow');
   }
 
   map.on('load', function () {
@@ -243,9 +255,6 @@
     // lanes -> event glow -> event dots.
     renderEventLayers();
     renderLaneLayer();
-    if (!reducedMotion) {
-      laneAnimationTimer = setInterval(animateLanes, LANE_ANIMATION_INTERVAL_MS);
-    }
   });
 
   // -------------------------------------------------------------- vessels
@@ -323,12 +332,49 @@
 
   // ----------------------------------------------------------------- feed
 
+  function findEventById(id) {
+    for (var i = 0; i < events.length; i++) {
+      if (events[i].id === id) return events[i];
+    }
+    return null;
+  }
+
+  // Clicking (or Enter/Space-ing) a feed item flies the map to it and
+  // opens the same popup a direct map click would -- the list and the map
+  // are two views over the same data, so they stay cross-linked.
+  function focusEventOnMap(id) {
+    var event = findEventById(id);
+    if (!event || !Number.isFinite(event.lat) || !Number.isFinite(event.lon)) return;
+    map.flyTo({ center: [event.lon, event.lat], zoom: Math.max(map.getZoom(), 4), essential: true });
+    var geoJsonEvent = toEventsGeoJSON([event]).features[0];
+    openEventPopup(geoJsonEvent);
+  }
+
+  if (feedList) {
+    feedList.addEventListener('click', function (e) {
+      if (e.target.closest('.live-feed__source')) return; // let the source link behave normally
+      var item = e.target.closest('.live-feed__item');
+      if (item && item.dataset.eventId) focusEventOnMap(item.dataset.eventId);
+    });
+    feedList.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      var item = e.target.closest('.live-feed__item');
+      if (!item || !item.dataset.eventId) return;
+      e.preventDefault();
+      focusEventOnMap(item.dataset.eventId);
+    });
+  }
+
   function renderFeed() {
     if (!feedList) return;
     feedList.innerHTML = '';
     events.forEach(function (e) {
       var li = document.createElement('li');
       li.className = 'live-feed__item';
+      li.dataset.eventId = e.id;
+      li.tabIndex = 0;
+      li.setAttribute('role', 'button');
+      li.setAttribute('aria-label', 'Show this disruption on the map');
 
       var sev = document.createElement('span');
       sev.className = 'live-feed__severity live-feed__severity--' + e.severity;
@@ -365,12 +411,14 @@
     });
   }
 
-  function updateTimestamp() {
+  function updateStatusLine() {
     if (!updatedEl) return;
-    updatedEl.textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+    var count = events.length;
+    var noun = count === 1 ? 'active disruption' : 'active disruptions';
+    updatedEl.textContent = count + ' ' + noun + ' · Last updated ' + new Date().toLocaleTimeString();
   }
 
-  updateTimestamp();
+  updateStatusLine();
 
   function poll() {
     fetch('/live/data')
@@ -383,7 +431,7 @@
           renderEventLayers();
           renderFeed();
         }
-        updateTimestamp();
+        updateStatusLine();
       })
       .catch(function () {
         // A transient poll failure just keeps showing the last-known data.
@@ -391,8 +439,4 @@
   }
 
   setInterval(poll, POLL_INTERVAL_MS);
-
-  window.addEventListener('beforeunload', function () {
-    if (laneAnimationTimer) clearInterval(laneAnimationTimer);
-  });
 })();

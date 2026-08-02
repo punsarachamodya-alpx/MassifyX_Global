@@ -1,5 +1,6 @@
 'use strict';
 
+const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const helmet = require('helmet');
@@ -181,6 +182,38 @@ app.get('/live/data', async (req, res) => {
   const vessels = await misClient.getVessels(MIS_BASE_URL);
   res.set('Cache-Control', 'no-store');
   res.json({ available: events !== null, events: events || [], vessels });
+});
+
+// ---------------------------------------------------- sweden trade story
+
+// Part 2 of the "Intelligence" umbrella (part 1 is /live above) — see
+// docs/internal/SWEDEN_TRADE_BUILD_INSTRUCTIONS.md. Renders entirely from
+// the committed, pre-baked content/sweden-trade-data.json; the live site has
+// zero runtime dependency on SCB (§3 of that doc — the data updates monthly,
+// so a static file is strictly better than a live call here). The file is
+// owned/refreshed by a separate offline job; this route only ever reads it.
+// Deliberately not in PUBLIC_ROUTES / sitemap.xml yet — same first-launch
+// precedent as /live above.
+const SWEDEN_TRADE_DATA_PATH = path.join(__dirname, 'content', 'sweden-trade-data.json');
+
+app.get('/insights/sweden-trade', (req, res) => {
+  let tradeData = null;
+  try {
+    tradeData = JSON.parse(fs.readFileSync(SWEDEN_TRADE_DATA_PATH, 'utf8'));
+  } catch (err) {
+    // Committed static file should always parse; fail closed to the page's
+    // own "unavailable" state (views/story.ejs) rather than a 500.
+    tradeData = null;
+  }
+
+  res.render('story', {
+    meta: {
+      title: `Sweden Trade Intelligence — ${res.locals.site.publicName}`,
+      description:
+        "A scroll-driven look at what Sweden imports, who from, and what that concentration means — the same analytical rigor MassifyX applies to a single company's supplier base."
+    },
+    data: tradeData
+  });
 });
 
 // ------------------------------------------------------------- contact form

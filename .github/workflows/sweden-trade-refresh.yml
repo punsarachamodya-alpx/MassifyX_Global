@@ -1,0 +1,60 @@
+# Monthly refresh of the Sweden Trade Intelligence story's pre-baked
+# dataset (docs/internal/SWEDEN_TRADE_BUILD_INSTRUCTIONS.md §3, §6, §9
+# Stage 6). SCB updates its foreign-trade tables monthly, so a live
+# runtime dependency buys nothing -- this job pulls fresh data, validates
+# it, and opens a PR with the updated content/sweden-trade-data.json. It
+# never pushes to main directly, matching this repo's PR-only convention;
+# a human reviews and merges like any other change.
+name: Sweden trade data refresh
+
+on:
+  schedule:
+    # 06:00 UTC on the 5th of each month -- a few days after SCB's own
+    # monthly release cadence, so the pull picks up the latest data.
+    - cron: '0 6 5 * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - run: npm ci
+
+      # Fails loudly (non-zero exit) on any data-integrity violation --
+      # see scripts/sweden-trade/validate.js. A failed run opens no PR,
+      # so a bad SCB pull never reaches the site.
+      - name: Run the offline analysis job
+        run: npm run data:sweden-trade
+
+      - name: Open a PR if the dataset changed
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: 'chore: refresh Sweden trade data'
+          title: 'chore: monthly Sweden trade data refresh'
+          body: |
+            Automated monthly refresh of `content/sweden-trade-data.json` from
+            Statistics Sweden (SCB), via `npm run data:sweden-trade`.
+
+            Data-integrity checks (totals reconciliation, no impossible
+            negatives, sane YoY bounds) passed -- see
+            `scripts/sweden-trade/validate.js`. Review the diff for anything
+            that looks like a genuine, newsworthy shift before merging; this
+            is a public-facing analysis piece, so a wrong number here is
+            worse than a stale one.
+          branch: chore/sweden-trade-data-refresh
+          delete-branch: true
+          add-paths: |
+            content/sweden-trade-data.json
+            scripts/sweden-trade/fixtures/*

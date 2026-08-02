@@ -1,0 +1,224 @@
+<link rel="stylesheet" href="/css/story.css">
+
+<% if (!data) { %>
+  <section class="hero hero--inner">
+    <div class="shell">
+      <div class="hero__copy">
+        <span class="eyebrow">Intelligence · Data Story</span>
+        <h1 class="display-1">Sweden Trade Intelligence</h1>
+      </div>
+      <p class="lede">A scroll-driven look at what Sweden buys from the world, who it depends on, and why that concentration is exactly the kind of risk MassifyX's Analytics practice is built to surface.</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="shell shell--narrow">
+      <div class="live-unavailable reveal">
+        <h2 class="display-2">This story is temporarily unavailable</h2>
+        <p class="lede">We can't load the underlying dataset right now. Please check back shortly — every other page on this site is unaffected.</p>
+      </div>
+    </div>
+  </section>
+<% } else { %>
+  <%
+    // Mirrors the client-side formatSek/formatPct in public/js/story.js --
+    // two runtimes, same source numbers, same formatting rules. Never a
+    // hardcoded figure: every number these touch comes straight out of the
+    // parsed content/sweden-trade-data.json passed in as `data`.
+    function formatSek(thousandsSek) {
+      if (typeof thousandsSek !== 'number' || !isFinite(thousandsSek)) return null;
+      var sek = thousandsSek * 1000;
+      var abs = Math.abs(sek);
+      var sign = sek < 0 ? '-' : '';
+      if (abs >= 1e12) return sign + 'SEK ' + (abs / 1e12).toFixed(2) + 'tn';
+      if (abs >= 1e9) return sign + 'SEK ' + (abs / 1e9).toFixed(1) + 'bn';
+      if (abs >= 1e6) return sign + 'SEK ' + (abs / 1e6).toFixed(1) + 'm';
+      return sign + 'SEK ' + Math.round(abs).toLocaleString('en-US');
+    }
+    function formatPct(fraction, digits) {
+      if (typeof fraction !== 'number' || !isFinite(fraction)) return null;
+      return (fraction * 100).toFixed(digits == null ? 1 : digits) + '%';
+    }
+
+    const hero = data.hero || {};
+    const topGoods = Array.isArray(data.topGoodsCategories) ? data.topGoodsCategories : [];
+    const topPartners = Array.isArray(data.topPartners) ? data.topPartners : [];
+    const concentration = data.concentration || {};
+    const balance = data.balance || {};
+    const trend = data.trend || {};
+    const dataMeta = data.meta || {};
+
+    const hasHero = typeof hero.totalImportsSek === 'number' && typeof hero.totalExportsSek === 'number' && typeof hero.tradeBalanceSek === 'number';
+    const hasGoods = topGoods.length > 0;
+    const hasPartners = topPartners.length > 0;
+    const hasConcentration = typeof concentration.top5PartnerImportShare === 'number';
+    const hasGoodsConcentration = typeof concentration.top5GoodsImportShare === 'number';
+    const hasBalance = Array.isArray(balance.years) && balance.years.length > 0 && Array.isArray(balance.importsSek) && Array.isArray(balance.exportsSek);
+    const hasTrend = Array.isArray(trend.years) && trend.years.length > 0;
+
+    const isSurplus = hasHero && hero.tradeBalanceSek >= 0;
+    const topGood = hasGoods ? topGoods[0] : null;
+    const topPartner = hasPartners ? topPartners[0] : null;
+  %>
+
+  <section class="hero hero--inner">
+    <div class="shell">
+      <div class="hero__copy">
+        <span class="eyebrow">Intelligence · Data Story</span>
+        <h1 class="display-1">Sweden Trade Intelligence</h1>
+      </div>
+      <p class="lede">A scroll-driven look at what Sweden buys from the world, who it depends on, and why that concentration is exactly the kind of risk MassifyX's Analytics practice is built to surface.</p>
+      <p class="crosslink"><a class="arrow-link" href="/live">See the live disruption monitor</a></p>
+    </div>
+  </section>
+
+  <div class="story" id="story">
+    <div class="story__sticky-wrap">
+      <div class="story__sticky" id="storySticky">
+        <p class="story__stat-value" id="storyStat" aria-hidden="true"></p>
+        <p class="story__annotation" id="storyAnnotation" aria-live="polite"></p>
+        <svg id="storyGraphic" class="story__svg" viewBox="0 0 640 400" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Sweden trade chart"></svg>
+        <p class="story__caption" id="storyCaption"></p>
+      </div>
+    </div>
+
+    <div class="story__steps">
+      <% if (hasHero) { %>
+        <section class="story__step" data-scene="hook">
+          <span class="eyebrow">The hook</span>
+          <h2 class="display-2">This is everything Sweden buys from the world</h2>
+          <p class="lede">
+            In <%= hero.year %>, Sweden imported <strong><%= formatSek(hero.totalImportsSek) %></strong> worth of goods from its trading partners, and sold <strong><%= formatSek(hero.totalExportsSek) %></strong> back to them.
+          </p>
+          <p>
+            <% if (isSurplus) { %>
+              The result was a trade <strong>surplus</strong> of <%= formatSek(Math.abs(hero.tradeBalanceSek)) %>.
+            <% } else { %>
+              The result was a trade <strong>deficit</strong> of <%= formatSek(Math.abs(hero.tradeBalanceSek)) %>.
+            <% } %>
+            Everything that follows is where that money actually went.
+          </p>
+          <p class="story__figure-fallback">Imports: <%= formatSek(hero.totalImportsSek) %> · Exports: <%= formatSek(hero.totalExportsSek) %></p>
+        </section>
+      <% } %>
+
+      <% if (hasGoods) { %>
+        <section class="story__step" data-scene="goods">
+          <span class="eyebrow">What Sweden imports</span>
+          <h2 class="display-2"><%= topGood.label %> leads the import bill</h2>
+          <p class="lede">
+            <%= topGood.label %> is Sweden's largest import category at <%= formatSek(topGood.importValueSek) %> — <%= formatPct(topGood.share) %> of everything the country imports.
+          </p>
+          <p>The next beats show who Sweden buys that from, and how much of the total sits with just a handful of partners.</p>
+          <ul class="story__figure-fallback story__figure-fallback--list">
+            <% topGoods.slice(0, 10).forEach(function (g) { %>
+              <li><%= g.label %> — <%= formatSek(g.importValueSek) %><% if (typeof g.share === 'number') { %> (<%= formatPct(g.share) %>)<% } %></li>
+            <% }); %>
+          </ul>
+        </section>
+      <% } %>
+
+      <% if (hasPartners) { %>
+        <section class="story__step" data-scene="partners">
+          <span class="eyebrow">Who Sweden buys from</span>
+          <h2 class="display-2"><%= topPartner.label %> is Sweden's single biggest supplier</h2>
+          <p class="lede">
+            Sweden imported <%= formatSek(topPartner.importValueSek) %> from <%= topPartner.label %> in <%= hero.year %> alone — <%= formatPct(topPartner.share) %> of everything the country bought from abroad.
+          </p>
+          <p>The next nine partners on this list account for most of the rest — and that clustering is exactly the concentration risk the next beat measures.</p>
+          <ul class="story__figure-fallback story__figure-fallback--list">
+            <% topPartners.slice(0, 10).forEach(function (p) { %>
+              <li><%= p.label %> — <%= formatSek(p.importValueSek) %><% if (typeof p.share === 'number') { %> (<%= formatPct(p.share) %>)<% } %></li>
+            <% }); %>
+          </ul>
+        </section>
+      <% } %>
+
+      <% if (hasConcentration) { %>
+        <section class="story__step" data-scene="concentration">
+          <span class="eyebrow">Concentration risk</span>
+          <h2 class="display-2">Five countries, <%= formatPct(concentration.top5PartnerImportShare) %> of the bill</h2>
+          <p class="lede">
+            Sweden's top 5 trading partners account for <%= formatPct(concentration.top5PartnerImportShare) %> of all imports<% if (typeof concentration.top10PartnerImportShare === 'number') { %> — <%= formatPct(concentration.top10PartnerImportShare) %> once you count the top 10<% } %>.
+          </p>
+          <p>
+            <% if (typeof concentration.hhiPartners === 'number') { %>
+              The Herfindahl-Hirschman Index across all partners sits at <%= Math.round(concentration.hhiPartners) %> — <%= concentration.hhiPartners >= 1500 ? 'a moderately concentrated' : 'a fairly diversified' %> supplier base by that standard measure.
+            <% } %>
+            <% if (hasGoodsConcentration) { %>
+              The same pattern shows up in goods: the top 5 import categories make up <%= formatPct(concentration.top5GoodsImportShare) %> of the total.
+            <% } %>
+          </p>
+          <p class="story__figure-fallback">Top 5 partners: <%= formatPct(concentration.top5PartnerImportShare) %> · Everyone else: <%= formatPct(Math.max(0, 1 - concentration.top5PartnerImportShare)) %></p>
+        </section>
+      <% } %>
+
+      <% if (hasBalance) { %>
+        <% const lastIdx = balance.years.length - 1; const lastBalance = Array.isArray(balance.balanceSek) ? balance.balanceSek[lastIdx] : null; %>
+        <section class="story__step" data-scene="balance">
+          <span class="eyebrow">The balance</span>
+          <h2 class="display-2">Imports and exports, <%= balance.years[0] %>–<%= balance.years[lastIdx] %></h2>
+          <p class="lede">
+            Sweden has swung between trade surplus and deficit over this period.
+            <% if (typeof lastBalance === 'number') { %>
+              In <%= balance.years[lastIdx] %>, the balance was <%= lastBalance >= 0 ? 'a surplus' : 'a deficit' %> of <%= formatSek(Math.abs(lastBalance)) %>.
+            <% } %>
+          </p>
+          <ul class="story__figure-fallback story__figure-fallback--list">
+            <% balance.years.forEach(function (year, i) { %>
+              <li><%= year %> — Imports <%= formatSek(balance.importsSek[i]) %>, Exports <%= formatSek(balance.exportsSek[i]) %></li>
+            <% }); %>
+          </ul>
+        </section>
+      <% } %>
+
+      <% if (hasTrend) { %>
+        <% const lastTrendIdx = trend.years.length - 1; const lastImportGrowth = Array.isArray(trend.importGrowthPct) ? trend.importGrowthPct[lastTrendIdx] : null; %>
+        <section class="story__step" data-scene="trend">
+          <span class="eyebrow">The trend</span>
+          <h2 class="display-2">Year-over-year swings, <%= trend.years[0] %>–<%= trend.years[lastTrendIdx] %></h2>
+          <p class="lede">
+            <% if (typeof lastImportGrowth === 'number') { %>
+              Imports moved <%= lastImportGrowth >= 0 ? 'up' : 'down' %> <%= Math.abs(lastImportGrowth).toFixed(1) %>% year-over-year in <%= trend.years[lastTrendIdx] %>.
+            <% } else { %>
+              Both imports and exports have moved in sharp year-over-year swings across this period — shocks, recoveries, and everything between.
+            <% } %>
+          </p>
+          <ul class="story__figure-fallback story__figure-fallback--list">
+            <% trend.years.forEach(function (year, i) { %>
+              <li><%= year %> — Imports <%= typeof trend.importGrowthPct[i] === 'number' ? (trend.importGrowthPct[i] >= 0 ? '+' : '') + trend.importGrowthPct[i].toFixed(1) + '%' : '—' %>, Exports <%= typeof trend.exportGrowthPct[i] === 'number' ? (trend.exportGrowthPct[i] >= 0 ? '+' : '') + trend.exportGrowthPct[i].toFixed(1) + '%' : '—' %></li>
+            <% }); %>
+          </ul>
+        </section>
+      <% } %>
+
+      <section class="story__step" data-scene="sowhat">
+        <span class="eyebrow">So what</span>
+        <h2 class="display-2">National-scale volatility, company-scale exposure</h2>
+        <p class="lede">
+          A country the size of Sweden tracks this — thousands of suppliers, shifting shares, real concentration risk — with a national statistics office and a monthly reporting cycle. A mid-market company carries the same exposure on a spreadsheet nobody has time to rebuild every week.
+        </p>
+        <p>
+          This is the analysis MassifyX runs continuously for a single business: Spend Analysis to see where the money actually goes, Vendor Performance to track who's reliable, Inventory Analytics and Demand Planning to catch concentration risk before it becomes a disruption. The rigor above is the same rigor we apply — the difference is we run it for one company, every week, not once for a whole nation.
+        </p>
+        <div class="btn-row">
+          <a class="btn btn--primary" href="/contact">Book a call</a>
+          <a class="arrow-link" href="/what-we-do">See the Analytics service line</a>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <p class="story__provenance">
+    Data: <% if (dataMeta.sourceUrl) { %><a href="<%= dataMeta.sourceUrl %>" target="_blank" rel="noopener noreferrer"><%= dataMeta.source || 'Statistics Sweden (SCB)' %></a><% } else { %><%= dataMeta.source || 'Statistics Sweden (SCB)' %><% } %><% if (dataMeta.latestYear) { %> · <%= dataMeta.latestYear %> figures<% } %> · refreshed monthly<% if (dataMeta.generatedAt) { %> · generated <%= new Date(dataMeta.generatedAt).toISOString().slice(0, 10) %><% } %>
+  </p>
+
+  <%# Server-rendered dataset for the sticky-graphic upgrade -- public/js/story.js
+      reads this instead of re-fetching anything (this page has zero runtime
+      dependency on SCB). < escaping prevents a label/source string containing
+      "</script>" from breaking out of this JSON island -- same pattern as
+      views/live.ejs's #live-initial-data island. %>
+  <script type="application/json" id="story-data"><%- JSON.stringify(data).replace(/</g, '\\u003c') %></script>
+  <script src="/js/vendor/d3.v7.min.js" defer></script>
+  <script src="/js/story-engine.js" defer></script>
+  <script src="/js/story.js" defer></script>
+<% } %>

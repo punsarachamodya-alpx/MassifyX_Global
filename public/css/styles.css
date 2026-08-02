@@ -230,6 +230,12 @@ button {
   color: var(--ink-muted);
 }
 
+/* Small follow-up link under a hero lede -- used to cross-link the two
+   "Intelligence" pages (/live and /insights/sweden-trade) to each other. */
+.crosslink {
+  margin-top: 1.4rem;
+}
+
 /* ---------------------------------------------------------- 5. Structure */
 
 /* Full-bleed: no max-width cap, so content spans the actual viewport rather than
@@ -1860,6 +1866,9 @@ button {
   width: 100%;
   aspect-ratio: 960 / 480;
   min-height: 320px;
+  /* A section of the page, not the whole screen -- aspect-ratio alone
+     would make this taller than the viewport on wide desktop windows. */
+  max-height: 60vh;
   border-radius: 6px;
   /* CARTO's dark-matter basemap paints its own background layer once
      loaded; this is only the fallback color shown for the instant before
@@ -2053,7 +2062,7 @@ button {
 .world-map__legend-line {
   width: 1.1rem;
   height: 0;
-  border-top: 1px dashed var(--cyan);
+  border-top: 1px solid #5b7699;
 }
 
 .world-map__caption {
@@ -2069,6 +2078,9 @@ button {
   margin-top: 1.5rem;
 }
 
+/* role="button"/tabindex on the <li> itself (see live.ejs / live.js
+   renderFeed): clicking or Enter/Space-ing an item flies the map to it and
+   opens its popup, so this needs visible interactive affordance. */
 .live-feed__item {
   display: grid;
   grid-template-columns: auto auto 1fr;
@@ -2078,6 +2090,15 @@ button {
   border: 1px solid var(--rule);
   border-radius: 3px;
   background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease);
+}
+
+.live-feed__item:hover,
+.live-feed__item:focus-visible {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 1px var(--cyan);
+  outline: none;
 }
 
 .live-feed__severity {

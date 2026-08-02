@@ -7,6 +7,7 @@
       <h1 class="display-1">Global Disruption Monitor</h1>
     </div>
     <p class="lede">Real-time supply chain disruptions — port strikes, weather, geopolitical restrictions, and logistics failures — classified and scored as they're detected.</p>
+    <p class="crosslink"><a class="arrow-link" href="/insights/sweden-trade">Read the Sweden Trade Intelligence data story</a></p>
   </div>
 </section>
 
@@ -25,8 +26,9 @@
       <%# MapLibre GL renders into this container -- see public/js/live.js.
           Basemap is CARTO's free dark-matter vector style, fetched
           client-side from *.basemaps.cartocdn.com (named CSP exception in
-          server.js); trade lanes are our own GeoJSON, built at runtime in
-          public/js/ports.js from real port coordinates. %>
+          server.js). Shipping lanes are real, static maritime geography
+          (public/geo/shipping-lanes.geojson -- see public/geo/README.md for
+          source/license), not generated or illustrative. %>
       <div id="live-globe" class="world-map reveal">
         <div class="world-map__legend" aria-hidden="true">
           <span class="world-map__legend-group">
@@ -39,7 +41,7 @@
           </span>
           <span class="world-map__legend-group">
             <span class="world-map__legend-line"></span>
-            <span class="world-map__legend-label">Major trade routes</span>
+            <span class="world-map__legend-label">Major shipping lanes</span>
           </span>
           <% if (vessels.length > 0) { %>
             <span class="world-map__legend-group">
@@ -51,7 +53,7 @@
         <p class="world-map__updated" data-role="last-updated" aria-live="polite"></p>
       </div>
       <p class="world-map__caption">
-        Trade routes shown are illustrative reference lines through known maritime corridors, not live vessel tracking.
+        Shipping lanes are real maritime corridors (<a href="https://doi.org/10.5281/zenodo.6361763" target="_blank" rel="noopener noreferrer">Global Shipping Lanes dataset</a>, CC BY-SA 4.0), not live vessel tracking.
         <% if (vessels.length > 0) { %>
           Ship positions are live AIS data via aisstream.io.
         <% } %>
@@ -61,7 +63,7 @@
         <h2 class="display-2">Recent events</h2>
         <ul class="live-feed__list">
           <% events.forEach(function (e) { %>
-            <li class="live-feed__item">
+            <li class="live-feed__item" data-event-id="<%= e.id %>" tabindex="0" role="button" aria-label="Show this disruption on the map">
               <span class="live-feed__severity live-feed__severity--<%= e.severity %>"><%= e.severity %></span>
               <span class="live-feed__category"><%= e.category %></span>
               <span class="live-feed__location"><%= e.location %></span>
@@ -83,6 +85,5 @@
   <script type="application/json" id="live-initial-data"><%- JSON.stringify(events).replace(/</g, '\\u003c') %></script>
   <script type="application/json" id="live-initial-vessels"><%- JSON.stringify(vessels).replace(/</g, '\\u003c') %></script>
   <script src="/js/vendor/maplibre-gl-csp.js" defer></script>
-  <script src="/js/ports.js" defer></script>
   <script src="/js/live.js" defer></script>
 <% } %>

@@ -1,0 +1,225 @@
+/* ==========================================================================
+   Sweden Trade Intelligence — scrollytelling story page
+   Reuses the design tokens and structural classes from styles.css (colors,
+   type scale, .shell/.section/.hero/.btn/.arrow-link/.eyebrow/.lede) and
+   only adds what's specific to the sticky-graphic + stepped-text layout.
+
+   Progressive enhancement: everything under .story is a single readable
+   column with no sticky graphic until the `.js` class lands on <html> (see
+   /js/js-on.js, same technique the site already uses for .reveal). Only
+   then does the two-column sticky layout and the D3-driven chart appear.
+   ========================================================================== */
+
+.story {
+  padding-block: clamp(2rem, 4vw, 3rem) clamp(3rem, 6vw, 5rem);
+}
+
+.story__steps {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(3rem, 6vw, 5rem);
+  max-width: var(--shell-narrow);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.story__step {
+  padding-block: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.story__step .eyebrow {
+  margin-bottom: 1rem;
+}
+
+.story__step .lede {
+  margin-bottom: 1rem;
+}
+
+.story__step p + p {
+  margin-top: 1rem;
+}
+
+.story__figure-fallback {
+  margin-top: 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+}
+
+.story__figure-fallback--list {
+  display: grid;
+  gap: 0.4rem;
+  border-top: 1px solid var(--rule);
+  padding-top: 1rem;
+}
+
+/* The sticky graphic itself: hidden entirely without JS, since a pinned
+   panel that never updates is worse than no panel -- the fallback list
+   above already carries the same numbers in normal reading flow. */
+.story__sticky-wrap {
+  display: none;
+}
+
+.story__sticky {
+  background: var(--navy);
+  color: #fff;
+  border-radius: 6px;
+  padding: clamp(1.5rem, 2.5vw, 2.25rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.story__stat-value {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.7rem, 3vw, 2.5rem);
+  letter-spacing: -0.02em;
+  margin: 0;
+  min-height: 1.1em;
+}
+
+.story__annotation {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+  min-height: 2.6em;
+}
+
+.story__svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.story__caption {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.03em;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+}
+
+.story__provenance {
+  max-width: var(--shell-narrow);
+  margin: 0 auto clamp(3rem, 6vw, 5rem);
+  padding-inline: var(--gutter);
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+}
+
+.story__provenance a {
+  color: var(--cobalt);
+  text-decoration: underline;
+}
+
+/* D3-drawn bars/lines (public/js/story.js) -- one muted tone by default,
+   the cyan accent reserved for the single item each scene calls out. Same
+   restraint rule as the rest of the site: one accent, used deliberately. */
+.story-bar {
+  fill: var(--slate-light);
+}
+
+.story-bar--highlight {
+  fill: var(--cyan);
+}
+
+.story-value-label {
+  fill: #fff;
+  font-family: var(--font-body);
+  font-size: 12px;
+}
+
+.story-axis-label {
+  fill: rgba(255, 255, 255, 0.6);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.story-line {
+  fill: none;
+  stroke-width: 2.5px;
+}
+
+.story-line--imports {
+  stroke: var(--slate-light);
+}
+
+.story-line--exports {
+  stroke: var(--cyan);
+}
+
+.story-zero-line {
+  stroke: rgba(255, 255, 255, 0.25);
+  stroke-width: 1px;
+}
+
+/* --------------------------------------------------- JS-enhanced layout */
+
+.js .story__figure-fallback {
+  display: none;
+}
+
+.js .story__sticky-wrap {
+  display: block;
+  position: sticky;
+  top: calc(var(--header-h) + 1rem);
+  z-index: 2;
+  margin-bottom: clamp(1.5rem, 3vw, 2rem);
+}
+
+.js .story__sticky {
+  min-height: 300px;
+  justify-content: center;
+}
+
+.js .story__step {
+  opacity: 0.4;
+  transition: opacity 0.4s var(--ease);
+}
+
+.js .story__step.is-active {
+  opacity: 1;
+}
+
+@media (min-width: 901px) {
+  .js .story {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(2rem, 4vw, 4rem);
+    align-items: start;
+    max-width: var(--shell);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .js .story__steps {
+    grid-column: 1;
+    max-width: none;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+
+  .js .story__sticky-wrap {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: start;
+    top: calc(var(--header-h) + 2rem);
+    margin-bottom: 0;
+  }
+
+  .js .story__step {
+    min-height: 62vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js .story__step {
+    opacity: 1;
+    transition: none;
+  }
+}
