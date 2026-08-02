@@ -32,17 +32,25 @@ the public site works, `/admin` stays locked). Production: `npm start`.
 | `SESSION_SECRET` | Recommended | Keeps admin sessions alive across restarts |
 | `NODE_ENV=production` | Recommended | Secure cookies, static-asset caching |
 | `BASE_URL` | Recommended | Canonical URLs, Open Graph tags, sitemap |
+| `MIS_BASE_URL` | Optional | Address of the [MassifyX Intelligence Service](https://github.com/Viraj97-SL/massifyx-intelligence) — see below |
+
+Unset or unreachable `MIS_BASE_URL` is not an error — `/live` degrades to a
+"temporarily unavailable" panel and still returns 200.
+`/insights/sweden-trade` needs no env var at all; it renders entirely from
+the committed `content/sweden-trade-data.json` (see **Intelligence** below).
 
 ## Layout
 
 ```
-server.js          Express app — routes, contact validation, sitemap/robots
-content/           Default copy as plain JS modules — the site's substance
-lib/               store (merge), schema (fields + write allow-list), auth, paths
-routes/admin.js    All /admin routes
-views/             EJS templates + partials
-public/            One CSS file, vanilla JS, self-hosted fonts, brand assets
-data/              git-ignored — admin overrides and backups
+server.js               Express app — routes, contact validation, sitemap/robots
+content/                Default copy as plain JS modules — the site's substance
+content/sweden-trade-data.json  Pre-baked Statistics Sweden dataset (see Intelligence below)
+lib/                    store (merge), schema (fields + write allow-list), auth, paths
+routes/admin.js         All /admin routes
+scripts/sweden-trade/   Offline job that produces content/sweden-trade-data.json
+views/                  EJS templates + partials
+public/                 CSS, vanilla JS, self-hosted fonts/libraries, brand assets
+data/                   git-ignored — admin overrides and backups
 ```
 
 Copy lives in `content/*.js`. `lib/store.js` merges JSON overrides written by the
@@ -58,6 +66,44 @@ Two ways:
    live immediately. Backups are taken before every save; "reset to original" is
    always available.
 2. **`content/*.js`** — edit the shipped defaults directly and restart.
+
+## Intelligence
+
+Two pages under the "Intelligence" nav item, both designed so a down or
+missing upstream never takes the marketing site with it:
+
+- **`/live` — Global Disruption Monitor.** Server-side proxies
+  [MassifyX Intelligence Service](https://github.com/Viraj97-SL/massifyx-intelligence)
+  (`MIS_BASE_URL`) for live supply-chain disruption events; the browser
+  never learns MIS's real address (`GET /live/data` is a same-origin
+  proxy). The map is MapLibre GL JS (self-hosted, CSP-safe build) on
+  CARTO's free dark-matter vector basemap — a named CSP exception for
+  `*.basemaps.cartocdn.com` (`server.js`), the only origin exception on
+  the whole site. Shipping lanes drawn on it are real, static maritime
+  geography (`public/geo/shipping-lanes.geojson`, sourced from the
+  [Global Shipping Lanes dataset](https://doi.org/10.5281/zenodo.6361763),
+  CC BY-SA 4.0 — see `public/geo/README.md`), not generated or
+  illustrative paths. If MIS is unset, down, or slow, `/live` still
+  returns 200 with a "temporarily unavailable" panel.
+- **`/insights/sweden-trade` — Sweden Trade Intelligence.** A
+  scrollytelling data story analysing Sweden's trade (imports/exports by
+  goods category, partner country, concentration risk, balance, YoY
+  trend), sourced from Statistics Sweden's key-free PxWebApi v2. Static
+  by design — SCB updates monthly, so the site has **zero runtime
+  dependency on SCB**. `scripts/sweden-trade/` is the offline job that
+  produces the committed `content/sweden-trade-data.json`:
+  ```bash
+  npm run data:sweden-trade        # re-run the pipeline, overwrite the dataset
+  npm run test:sweden-trade        # unit tests for the pipeline (separate from npm test)
+  ```
+  The job fails loudly (non-zero exit, dataset untouched) on any
+  data-integrity violation — see `scripts/sweden-trade/RUNBOOK.md`.
+  A GitHub Action (`.github/workflows/sweden-trade-refresh.yml`) reruns it
+  monthly and opens a PR with the diff rather than pushing to `main`.
+  Charts are self-hosted D3 v7 (`public/js/vendor/d3.v7.min.js`) with a
+  hand-rolled scroll-position stepper (`public/js/story-engine.js`) — no
+  CDN, no new CSP exceptions. The page is fully readable with JavaScript
+  disabled; JS only upgrades it to the sticky-scroll experience.
 
 ## Honesty constraints
 
@@ -114,7 +160,9 @@ unconditionally in case the IntersectionObserver misses an element.
 
 - Helmet CSP: `script-src 'self'`, no inline scripts anywhere. `frame-src` is
   evaluated per request against the live booking URL, so adding a Calendly link in the
-  admin panel widens the policy with no restart.
+  admin panel widens the policy with no restart. The one standing origin exception is
+  `connect-src`/`img-src` for `/live`'s CARTO basemap tiles (`*.basemaps.cartocdn.com`)
+  — named and minimal, not a blanket relaxation.
 - Admin: one shared password via `ADMIN_PASSWORD`, SHA-256 + `timingSafeEqual`
   comparison, session regeneration on login, per-session CSRF on every POST, and a
   15-minute lockout after 6 failed attempts from one IP.
@@ -131,7 +179,9 @@ live in `data/content.json` and uploads in `public/img/uploads/`. Hosts that giv
 deploy a fresh filesystem silently discard both on redeploy. Either attach a
 persistent disk, treat the admin panel as edit-locally-then-commit, or export a JSON
 copy before every redeploy. If the site is only ever edited via `content/*.js` in
-code, none of this applies.
+code, none of this applies. `content/sweden-trade-data.json` is unaffected either
+way — it's a committed file in git, refreshed by a scheduled job (see
+**Intelligence** above), not written at runtime.
 
 ## Outstanding founder TODOs
 
