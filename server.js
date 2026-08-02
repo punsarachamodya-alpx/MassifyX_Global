@@ -37,7 +37,14 @@ app.use(
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"], // per-element accent styles only
         scriptSrc: ["'self'"], // no inline scripts anywhere
-        imgSrc: ["'self'", 'data:'],
+        // /live's map (public/js/live.js) loads CARTO's free dark-matter
+        // basemap directly client-side: a style.json plus vector tiles,
+        // glyphs, and a sprite, all served from *.basemaps.cartocdn.com.
+        // This is a deliberate, minimal, named-origin exception (same
+        // per-request-widening pattern as the booking-embed frameSrc below)
+        // -- not a blanket relaxation.
+        imgSrc: ["'self'", 'data:', 'https://basemaps.cartocdn.com', 'https://*.basemaps.cartocdn.com'],
+        connectSrc: ["'self'", 'https://basemaps.cartocdn.com', 'https://*.basemaps.cartocdn.com'],
         // Evaluated per request against the live bookingEmbedUrl, so adding a
         // Calendly link in the admin panel widens the policy with no restart.
         // Helmet requires the function wrapped in an array — a bare function throws at boot.

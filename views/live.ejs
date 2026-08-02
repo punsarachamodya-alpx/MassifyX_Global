@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="/css/vendor/maplibre-gl.css">
+
 <section class="hero hero--inner">
   <div class="shell">
     <div class="hero__copy">
@@ -20,59 +22,12 @@
 <% } else { %>
   <section class="section">
     <div class="shell">
+      <%# MapLibre GL renders into this container -- see public/js/live.js.
+          Basemap is CARTO's free dark-matter vector style, fetched
+          client-side from *.basemaps.cartocdn.com (named CSP exception in
+          server.js); trade lanes are our own GeoJSON, built at runtime in
+          public/js/ports.js from real port coordinates. %>
       <div id="live-globe" class="world-map reveal">
-        <img
-          class="world-map__base"
-          src="/img/world-map.svg"
-          alt="World map"
-          width="960"
-          height="480"
-        >
-
-        <%# Illustrative major trade-route reference lines -- fixed geography
-            through known maritime corridors (Gibraltar, Suez, Malacca, Panama),
-            NOT live vessel positions. Real AIS ship tracking would be a
-            separate, licensed data source; see the caption below. %>
-        <svg class="world-map__lanes" viewBox="0 0 960 480" aria-hidden="true" focusable="false">
-          <path id="lane-europe-asia" class="world-map__lane" d="M491,101.5L474.7,125.3L465.7,143.6L528,146.7L566.1,156.6L573.3,168L608,206.7L693.3,224L752.7,234.1L756.9,236.6" />
-          <path id="lane-intra-asia" class="world-map__lane" d="M756.9,236.6L752.7,234.1L770.7,218.7L781.3,197.3L794.7,181.3L803.9,156.7" />
-          <path id="lane-trans-atlantic" class="world-map__lane" d="M282.5,131.5L373.3,120L453.3,109.3L491,101.5" />
-          <path id="lane-panama" class="world-map__lane" d="M164.8,150L226.7,200L267.8,216.1L266.9,215L280,173.3L282.5,131.5" />
-          <path id="lane-pacific-w" class="world-map__lane" d="M803.9,156.7L880,146.7L959.7,138.7" />
-          <path id="lane-pacific-e" class="world-map__lane" d="M0.3,138.7L80,144L164.8,150" />
-
-          <circle class="world-map__lane-dot" r="2.4">
-            <animateMotion dur="11s" repeatCount="indefinite" begin="0s"><mpath href="#lane-europe-asia" /></animateMotion>
-          </circle>
-          <circle class="world-map__lane-dot" r="2.4">
-            <animateMotion dur="6s" repeatCount="indefinite" begin="0.5s"><mpath href="#lane-intra-asia" /></animateMotion>
-          </circle>
-          <circle class="world-map__lane-dot" r="2.4">
-            <animateMotion dur="9s" repeatCount="indefinite" begin="1.5s"><mpath href="#lane-trans-atlantic" /></animateMotion>
-          </circle>
-          <circle class="world-map__lane-dot" r="2.4">
-            <animateMotion dur="10s" repeatCount="indefinite" begin="2.2s"><mpath href="#lane-panama" /></animateMotion>
-          </circle>
-          <circle class="world-map__lane-dot" r="2.4">
-            <animateMotion dur="4s" repeatCount="indefinite" begin="0.8s"><mpath href="#lane-pacific-w" /></animateMotion>
-          </circle>
-          <circle class="world-map__lane-dot" r="2.4">
-            <animateMotion dur="4s" repeatCount="indefinite" begin="3s"><mpath href="#lane-pacific-e" /></animateMotion>
-          </circle>
-        </svg>
-
-        <div
-          class="world-map__vessels"
-          role="img"
-          aria-label="Live ship positions"
-        ></div>
-
-        <div
-          class="world-map__markers"
-          role="img"
-          aria-label="Map of live supply chain disruptions, colored by severity"
-        ></div>
-
         <div class="world-map__legend" aria-hidden="true">
           <span class="world-map__legend-group">
             <span class="world-map__legend-label">Severity</span>
@@ -93,6 +48,7 @@
             </span>
           <% } %>
         </div>
+        <p class="world-map__updated" data-role="last-updated" aria-live="polite"></p>
       </div>
       <p class="world-map__caption">
         Trade routes shown are illustrative reference lines through known maritime corridors, not live vessel tracking.
@@ -126,5 +82,7 @@
       "</script>" from breaking out of this JSON island. %>
   <script type="application/json" id="live-initial-data"><%- JSON.stringify(events).replace(/</g, '\\u003c') %></script>
   <script type="application/json" id="live-initial-vessels"><%- JSON.stringify(vessels).replace(/</g, '\\u003c') %></script>
+  <script src="/js/vendor/maplibre-gl-csp.js" defer></script>
+  <script src="/js/ports.js" defer></script>
   <script src="/js/live.js" defer></script>
 <% } %>
