@@ -496,6 +496,13 @@ button {
   color: #fff;
 }
 
+/* Compact variant for tight spaces (the War Room popup panel, section 29) --
+   same modifier pattern as --primary/--ghost/--onNavy above. */
+.btn--sm {
+  padding: 0.5rem 0.9rem;
+  font-size: 0.78rem;
+}
+
 /* The chevron text-link that carries most navigation weight in this register */
 .arrow-link {
   display: inline-flex;
@@ -1936,7 +1943,13 @@ button {
      loaded; this is only the fallback color shown for the instant before
      the style/tiles finish their first fetch. */
   background: #0e0e0e;
-  overflow: hidden;
+  /* Not overflow:hidden: the War Room investigate section (section 29) can
+     make .world-map__popup taller than the map box itself, especially near
+     the bottom edge -- clipping it there would silently hide the results
+     panel. The canvas gets its own border-radius immediately below so the
+     map still reads as rounded; only children that intentionally extend
+     past the box (popups) are now allowed to. */
+  overflow: visible;
   margin-bottom: 1rem;
 }
 
@@ -1944,6 +1957,19 @@ button {
   width: 100%;
   height: 100%;
   font-family: var(--font-body);
+}
+
+/* MapLibre adds its own "maplibregl-map" class to this same element at
+   init and maplibre-gl.css sets `.maplibregl-map { overflow: hidden }` --
+   same specificity as .world-map's own rule above, loaded after it in the
+   document, so it would otherwise win and re-clip popups. Two classes on
+   one selector beats one class regardless of source order. */
+.world-map.maplibregl-map {
+  overflow: visible;
+}
+
+.world-map .maplibregl-canvas {
+  border-radius: 6px;
 }
 
 /* Top-left (not bottom-left): MapLibre's own AttributionControl now lives
@@ -2204,4 +2230,301 @@ button {
   grid-column: 1 / -1;
   justify-self: start;
   font-size: 0.85rem;
+}
+
+/* ---------------------------------------------------------- 29. War room */
+
+/* "Investigate" section appended to the disruption popup
+   (public/js/live-warroom.js). It lives inside the same dark
+   .world-map__popup surface as the rest of the popup (section 28 above),
+   so it inherits that dark-on-navy treatment rather than introducing a
+   second visual language inside one popup. Gating states (locked teaser,
+   unlock form, progress, results) are separate blocks below in that order.
+   See docs/internal/WARROOM_BUILD_PLAN.md §10 for the access model. */
+
+.warroom-panel {
+  margin-top: 0.65rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* -- locked teaser + request-access/demo CTAs -------------------------- */
+
+.warroom-teaser__title {
+  display: block;
+  font-size: 0.85rem;
+  color: #fff;
+}
+
+.warroom-teaser__body {
+  margin: 0.35rem 0 0.7rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.warroom-teaser__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* -- "already have a code?" inline unlock form --------------------------- */
+
+.warroom-unlock {
+  margin-top: 0.6rem;
+}
+
+.warroom-unlock__toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 0.76rem;
+  color: var(--cyan);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.warroom-unlock-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+/* The class rule above sets display:flex at the same specificity as the
+   browser's default `[hidden] { display: none }` -- without this, setting
+   the `hidden` attribute in live-warroom.js would stop actually hiding
+   the form once this stylesheet loads. */
+.warroom-unlock-form[hidden] {
+  display: none;
+}
+
+.warroom-unlock-form__input {
+  flex: 1 1 120px;
+  min-width: 0;
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.warroom-unlock-form__input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.warroom-unlock-form__input:focus {
+  outline: none;
+  border-color: var(--cyan);
+}
+
+.warroom-unlock-form__error {
+  flex-basis: 100%;
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  color: #ff9d9d;
+}
+
+/* -- unlocked idle / in-flight states ------------------------------------ */
+
+.warroom-investigate-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.warroom-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+}
+
+.warroom-spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: var(--cyan);
+  border-radius: 50%;
+  animation: warroom-spin 0.8s linear infinite;
+}
+
+@keyframes warroom-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.warroom-progress__text {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #fff;
+}
+
+.warroom-progress__note {
+  margin: 0;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* -- unavailable / rate-limited / failed messages ------------------------ */
+
+.warroom-message p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.warroom-message--error p {
+  color: #ff9d9d;
+}
+
+/* -- completed results panel: summary, tables, actions, citations ------- */
+
+.warroom-results {
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 0.3rem;
+}
+
+.warroom-results__capped {
+  margin: 0 0 0.5rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 2px;
+  background: rgba(251, 191, 36, 0.15);
+  color: #fde68a;
+  font-size: 0.75rem;
+}
+
+.warroom-results__summary {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.warroom-table {
+  margin-bottom: 0.75rem;
+}
+
+.warroom-table__heading {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.warroom-table__list,
+.warroom-actions__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.warroom-table__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+}
+
+.warroom-table__name {
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Reuses the severity ramp's semantics (green/amber/muted), not its
+   literal role -- confidence isn't severity, but "good/caution/unclear"
+   maps cleanly onto the same three-step ramp already established. */
+.warroom-table__confidence {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.05rem 0.4rem;
+  border-radius: 8px;
+  border: 1px solid currentColor;
+}
+
+.warroom-table__confidence--high {
+  color: var(--severity-1);
+}
+
+.warroom-table__confidence--medium {
+  color: var(--severity-3);
+}
+
+.warroom-table__confidence--low {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* Every table row carries its own citation link -- never a claim with no
+   visible source (WARROOM_API_CONTRACT.md hard rule). */
+.warroom-table__source {
+  flex-basis: 100%;
+  font-size: 0.75rem;
+  color: var(--cyan);
+}
+
+.warroom-actions__item {
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.warroom-actions__item:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.warroom-actions__urgency {
+  display: inline-block;
+  margin-bottom: 0.2rem;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.05rem 0.4rem;
+  border-radius: 8px;
+}
+
+.warroom-actions__urgency--high {
+  background: var(--severity-5);
+  color: #fff;
+}
+
+.warroom-actions__urgency--medium {
+  background: var(--severity-3);
+  color: var(--navy);
+}
+
+.warroom-actions__urgency--low {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.warroom-actions__action {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #fff;
+}
+
+.warroom-actions__rationale {
+  margin: 0.15rem 0 0;
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.warroom-results__disclaimer {
+  margin: 0.75rem 0 0;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 0.7rem;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.5);
 }

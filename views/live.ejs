@@ -84,6 +84,15 @@
       "</script>" from breaking out of this JSON island. %>
   <script type="application/json" id="live-initial-data"><%- JSON.stringify(events).replace(/</g, '\\u003c') %></script>
   <script type="application/json" id="live-initial-vessels"><%- JSON.stringify(vessels).replace(/</g, '\\u003c') %></script>
+  <%# War Room gating state for the "Investigate" popup action
+      (public/js/live-warroom.js) — session-scoped, never a real service
+      address. See docs/internal/WARROOM_BUILD_PLAN.md §10. %>
+  <script type="application/json" id="live-warroom-state"><%- JSON.stringify({
+    unlocked: Boolean(warroomUnlocked),
+    requestAccessHref: '/contact?topic=warroom',
+    bookingEmbedUrl: warroomBookingEmbedUrl || ''
+  }).replace(/</g, '\\u003c') %></script>
   <script src="/js/vendor/maplibre-gl-csp.js" defer></script>
+  <script src="/js/live-warroom.js" defer></script>
   <script src="/js/live.js" defer></script>
 <% } %>

@@ -70,12 +70,20 @@
             geometry: { type: 'Point', coordinates: [item.lon, item.lat] },
             properties: {
               id: item.id,
+              // title/lat/lon/eventDate aren't used by the base popup below,
+              // but War Room's "Investigate" action (live-warroom.js) needs
+              // them to build its investigation request -- carried here so
+              // that module never has to re-derive them from the raw feed.
+              title: typeof item.title === 'string' ? item.title : item.summary,
               severity: item.severity,
               category: item.category,
               location: item.location,
               summary: item.summary,
               sourceUrl: typeof item.sourceUrl === 'string' ? item.sourceUrl : '',
               score: item.severity * 20,
+              lat: item.lat,
+              lon: item.lon,
+              eventDate: typeof item.firstSeenAt === 'string' ? item.firstSeenAt : (typeof item.lastUpdatedAt === 'string' ? item.lastUpdatedAt : ''),
             },
           };
         }),
@@ -110,7 +118,12 @@
 
   // --------------------------------------------------------------- popup
 
-  var popup = new maplibregl.Popup({ closeButton: true, closeOnClick: true, className: 'world-map__popup', maxWidth: '260px' });
+  // Wider than a bare severity/summary popup would need on its own --
+  // War Room's investigate section (live-warroom.js) can render tables and
+  // citations, which need more room than 260px. .warroom-results also
+  // scrolls internally past a height cap, so this stays a popup, not a
+  // full panel takeover, even for a long result.
+  var popup = new maplibregl.Popup({ closeButton: true, closeOnClick: true, className: 'world-map__popup', maxWidth: '360px' });
 
   function buildEventPopupContent(props) {
     var wrap = document.createElement('div');
@@ -139,6 +152,14 @@
       link.rel = 'noopener noreferrer';
       link.textContent = 'Source';
       wrap.appendChild(link);
+    }
+
+    // War Room's "Investigate" action (public/js/live-warroom.js) -- a
+    // separate, optional script. If it failed to load for any reason the
+    // popup above still works exactly as before; this is additive, never
+    // load-bearing for the base map/feed.
+    if (window.MassifyXWarroom) {
+      wrap.appendChild(window.MassifyXWarroom.buildSection(props));
     }
 
     return wrap;

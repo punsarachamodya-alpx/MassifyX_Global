@@ -11,6 +11,9 @@ const expressLayouts = require('express-ejs-layouts');
 const store = require('./lib/store');
 const mailer = require('./lib/mailer');
 const misClient = require('./lib/misClient');
+const warroomAuth = require('./lib/warroomAuth');
+const warroomClient = require('./lib/warroomClient');
+const warroomContract = require('./lib/warroomContract');
 const adminRouter = require('./routes/admin');
 
 const app = express();
@@ -20,6 +23,11 @@ const isProd = process.env.NODE_ENV === 'production';
 // deployed microservice. Unset in dev by default: /live degrades cleanly
 // with no MIS_BASE_URL configured, same as it would if MIS were down.
 const MIS_BASE_URL = process.env.MIS_BASE_URL || '';
+// The War Room investigation service — a third, separate microservice (see
+// docs/internal/WARROOM_BUILD_PLAN.md). Same posture as MIS_BASE_URL: unset
+// or unreachable is not an error, the "Investigate" action just degrades to
+// an "unavailable" state. Its real address is never sent to the browser.
+const WARROOM_BASE_URL = process.env.WARROOM_BASE_URL || '';
 
 // Correct secure-cookie and req.ip behaviour behind a reverse proxy.
 app.set('trust proxy', 1);
@@ -215,7 +223,13 @@ app.get('/live', async (req, res) => {
     },
     misAvailable: Boolean(health && events),
     events: events || [],
-    vessels
+    vessels,
+    // War Room gating (docs/internal/WARROOM_BUILD_PLAN.md §10): a shared
+    // access code unlocks the "Investigate" action for this browser session
+    // only. Unset/false by default -- anonymous visitors always see the
+    // locked teaser state.
+    warroomUnlocked: Boolean(req.session && req.session.warroomUnlocked),
+    warroomBookingEmbedUrl: store.getSection('contact').bookingEmbedUrl || ''
   });
 });
 
@@ -226,6 +240,83 @@ app.get('/live/data', async (req, res) => {
   const vessels = await misClient.getVessels(MIS_BASE_URL);
   res.set('Cache-Control', 'no-store');
   res.json({ available: events !== null, events: events || [], vessels });
+});
+
+// --------------------------------------------------------------- war room
+
+// Unlocks War Room for this browser session. Mirrors /admin/login's shape
+// exactly (lib/warroomAuth.js mirrors lib/auth.js): timing-safe compare,
+// per-IP lockout after repeated failures, session flag on success. No CSRF
+// token here -- unlike /admin, this isn't behind an authenticated session
+// already, and the lockout + timing-safe compare are the actual defenses
+// against guessing a single shared code, same as MIS/admin's own posture.
+app.post('/live/unlock', express.json({ limit: '1kb' }), (req, res) => {
+  const lockMs = warroomAuth.lockoutFor(req.ip);
+  if (lockMs > 0) {
+    return res.status(429).json({
+      ok: false,
+      error: `Too many attempts. Try again in ${Math.ceil(lockMs / 60000)} minutes.`
+    });
+  }
+
+  const body = req.body || {};
+  if (!warroomAuth.checkCode(body.code)) {
+    warroomAuth.recordFailure(req.ip);
+    return res.status(401).json({
+      ok: false,
+      error: warroomAuth.isConfigured()
+        ? 'Incorrect access code.'
+        : 'War Room access is not configured on this server.'
+    });
+  }
+
+  warroomAuth.clearFailures(req.ip);
+  req.session.warroomUnlocked = true;
+  res.json({ ok: true });
+});
+
+function requireWarroomUnlock(req, res, next) {
+  if (req.session && req.session.warroomUnlocked) return next();
+  res.status(403).json({ available: false, locked: true });
+}
+
+// Same-origin proxy so the browser never learns War Room's real address —
+// mirrors the /live/data pattern exactly. Gated: only unlocked sessions may
+// kick off a job at all, which also keeps cost exposure bounded to
+// approved users (WARROOM_BUILD_PLAN.md §6/§10).
+app.post(
+  '/live/investigate',
+  express.json({ limit: '10kb' }),
+  requireWarroomUnlock,
+  async (req, res) => {
+    const payload = warroomContract.buildInvestigationPayload(req.body);
+    res.set('Cache-Control', 'no-store');
+    if (!payload) {
+      return res.status(400).json({ available: false, error: 'Missing or invalid incident fields.' });
+    }
+
+    const result = await warroomClient.createInvestigation(WARROOM_BASE_URL, payload);
+    if (!result.available) return res.json({ available: false });
+    if (result.rateLimited) return res.status(429).json({ available: true, rateLimited: true });
+    if (result.invalid) {
+      return res.status(400).json({ available: true, error: 'War Room rejected the request.' });
+    }
+    res.status(202).json({
+      available: true,
+      jobId: result.jobId,
+      status: result.status,
+      cachedFrom: result.cachedFrom
+    });
+  }
+);
+
+app.get('/live/investigate/:jobId', requireWarroomUnlock, async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  if (!warroomContract.isValidJobId(req.params.jobId)) {
+    return res.status(400).json({ available: false, error: 'Invalid job id.' });
+  }
+  const result = await warroomClient.getInvestigation(WARROOM_BASE_URL, req.params.jobId);
+  res.json(result);
 });
 
 // ---------------------------------------------------- sweden trade story
@@ -276,7 +367,20 @@ function renderContact(res, opts = {}) {
   });
 }
 
-app.get('/contact', (req, res) => renderContact(res));
+// ?topic=warroom prefills the message field so a War Room "Request access"
+// submission is identifiable in the inbox/logs without any new form field,
+// schema change, or contact-infrastructure work (WARROOM_BUILD_PLAN.md §10:
+// reuse the existing /contact flow as-is). Purely a prefill default — the
+// visitor can still edit or clear it before sending.
+const CONTACT_TOPIC_PREFILLS = {
+  warroom: 'I’d like access to the War Room incident investigation feature.'
+};
+
+app.get('/contact', (req, res) => {
+  const topic = typeof req.query.topic === 'string' ? req.query.topic : '';
+  const prefill = CONTACT_TOPIC_PREFILLS[topic];
+  renderContact(res, prefill ? { values: { message: prefill } } : {});
+});
 
 app.post('/contact', async (req, res) => {
   const page = store.getSection('contact');
@@ -397,6 +501,9 @@ if (require.main === module) {
   }
   if (!process.env.SESSION_SECRET) {
     console.warn('[boot] SESSION_SECRET is not set — admin sessions reset on restart.');
+  }
+  if (!process.env.WARROOM_ACCESS_CODE) {
+    console.warn('[boot] WARROOM_ACCESS_CODE is not set — /live/unlock will refuse every attempt.');
   }
   app.listen(PORT, () => {
     console.log(`MassifyX Global listening on http://localhost:${PORT}`);
