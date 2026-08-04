@@ -78,6 +78,71 @@
     </div>
   </section>
 
+  <%# War Room feature explainer -- the "Investigate" action only lives
+      inside a clicked event's popup, so a visitor who never clicks a
+      marker has no way to discover it exists. This section makes the
+      capability visible regardless. The preview below reuses the exact
+      CSS classes public/js/live-warroom.js renders a real result with
+      (warroom-impact-badge, warroom-impact-strip, warroom-sources) with
+      static, clearly-labeled illustrative content -- not a screenshot, not
+      stock photography (this site's "No photography" honesty constraint
+      applies here too), just the product's own real UI with example data. %>
+  <section class="section section--warroom-intro">
+    <div class="shell">
+      <div class="warroom-intro">
+        <div class="warroom-intro__copy">
+          <span class="eyebrow">War Room</span>
+          <h2 class="display-2">Turn any disruption into an actionable briefing</h2>
+          <p class="lede">Click any marker on the map above, then choose <strong>Investigate</strong>. An AI agent researches that specific incident across news, government, port authority, and social sources, and returns a structured, cited briefing — who's affected, who isn't, and what to do next.</p>
+          <ul class="warroom-intro__features">
+            <li><strong>Multi-source research</strong> — news, government, port authority, and social sources, searched live for the one incident you clicked.</li>
+            <li><strong>Every claim cited</strong> — affected and unaffected entries link back to a real source; nothing is asserted without one.</li>
+            <li><strong>Affected vs. unaffected breakdown</strong> — suppliers, ports, shipping lines, and manufacturers, so you see the full picture, not just the bad news.</li>
+            <li><strong>Recommended next actions</strong> — concrete, urgency-ranked steps grounded in what the research actually found.</li>
+          </ul>
+          <% if (!warroomUnlocked) { %>
+            <p class="warroom-intro__cta">
+              <a class="btn btn--primary btn--sm" href="/contact?topic=warroom" target="_blank" rel="noopener noreferrer">Request access</a>
+              <% if (warroomBookingEmbedUrl) { %>
+                <a class="btn btn--ghost btn--sm" href="<%= warroomBookingEmbedUrl %>" target="_blank" rel="noopener noreferrer">Schedule a demo</a>
+              <% } %>
+            </p>
+          <% } %>
+        </div>
+        <div class="warroom-intro__preview" aria-hidden="true">
+          <p class="warroom-intro__preview-label">Example output (illustrative)</p>
+          <div class="warroom-impact-badge warroom-impact-badge--severe">
+            <span class="warroom-impact-badge__icon">!</span>
+            <div class="warroom-impact-badge__text">
+              <strong class="warroom-impact-badge__label">Severe impact</strong>
+              <p class="warroom-impact-badge__reason">A key regional port suspended operations, creating significant disruption risk for shipping routes through the area.</p>
+            </div>
+          </div>
+          <div class="warroom-impact-strip">
+            <span class="warroom-impact-strip__item">
+              <span class="warroom-impact-strip__tag">PRT</span>
+              <span class="warroom-impact-strip__count">1</span>
+              <span class="warroom-impact-strip__label">Ports</span>
+            </span>
+            <span class="warroom-impact-strip__item">
+              <span class="warroom-impact-strip__tag">SHP</span>
+              <span class="warroom-impact-strip__count">2</span>
+              <span class="warroom-impact-strip__label">Shipping lines</span>
+            </span>
+          </div>
+          <div class="warroom-sources">
+            <h4 class="warroom-table__heading">11 sources</h4>
+            <div class="warroom-sources__chips">
+              <span class="warroom-sources__chip">6 government</span>
+              <span class="warroom-sources__chip">5 news</span>
+            </div>
+          </div>
+          <p class="warroom-results__meta">Deep investigation · 11 sources · completed in under a minute</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <%# Server-rendered snapshot for first paint; live.js polls /live/data (a
       same-origin proxy — MIS's real address is never sent to the browser)
       for updates. < escaping prevents a summary/title containing

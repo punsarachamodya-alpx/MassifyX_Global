@@ -100,6 +100,23 @@ missing upstream never takes the marketing site with it:
   learns War Room's address, and an unset/unreachable/failed/capped job all
   degrade to a clear "unavailable" state, never a broken page. See
   `docs/internal/WARROOM_BUILD_PLAN.md` and `WARROOM_API_CONTRACT.md`.
+  - The result itself is a structured panel, not a flat paragraph: a
+    colored impact badge (`impactLevel` — none/low/moderate/severe, the
+    investigation's own verdict, distinct from the incident's input
+    severity), a collapsed-by-default at-a-glance count strip per affected
+    category, a sources panel (source-type breakdown, computed client-side
+    from the citations already in the response), an investigation
+    metadata line (cost/depth/elapsed time), and up to 3 related-incident
+    chips surfaced from the same semantic-similarity check the service
+    uses for its own cost-saving dedupe cache.
+  - Since the "Investigate" action only lives inside a clicked event's
+    popup, `/live` also has a standalone explainer section below the map
+    (visible to every visitor, locked or unlocked) describing the
+    capability and previewing the real result-panel styling with static,
+    labeled-illustrative example content — not a screenshot or stock
+    photography, the product's own actual UI classes rendered with sample
+    data (see `views/live.ejs`'s War Room explainer section and
+    `public/css/styles.css` section 30).
 - **`/insights/sweden-trade` — Sweden Trade Intelligence.** A
   scrollytelling data story analysing Sweden's trade (imports/exports by
   goods category, partner country, concentration risk, balance, YoY
