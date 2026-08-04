@@ -58,23 +58,6 @@
           Ship positions are live AIS data via aisstream.io.
         <% } %>
       </p>
-
-      <div class="live-feed">
-        <h2 class="display-2">Recent events</h2>
-        <ul class="live-feed__list">
-          <% events.forEach(function (e) { %>
-            <li class="live-feed__item" data-event-id="<%= e.id %>" tabindex="0" role="button" aria-label="Show this disruption on the map">
-              <span class="live-feed__severity live-feed__severity--<%= e.severity %>"><%= e.severity %></span>
-              <span class="live-feed__category"><%= e.category %></span>
-              <span class="live-feed__location"><%= e.location %></span>
-              <p class="live-feed__summary"><%= e.summary %></p>
-              <% if (e.sourceUrl) { %>
-                <a class="live-feed__source" href="<%= e.sourceUrl %>" target="_blank" rel="noopener noreferrer">Source</a>
-              <% } %>
-            </li>
-          <% }); %>
-        </ul>
-      </div>
     </div>
   </section>
 
@@ -139,6 +122,47 @@
           </div>
           <p class="warroom-results__meta">Deep investigation · 11 sources · completed in under a minute</p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <%# Recent events feed -- a separate section, after the War Room
+      explainer above (not nested inside the map section), so a long list
+      of events never buries the explainer beneath it. live.js's
+      renderFeed() rebuilds .live-feed__list client-side on every poll and
+      applies the search/sort controls below; this server-rendered markup
+      is just the first-paint state (identical shape, so there's no
+      flash-of-different-content on load). %>
+  <section class="section">
+    <div class="shell">
+      <div class="live-feed">
+        <div class="live-feed__header">
+          <h2 class="display-2">Recent events</h2>
+          <div class="live-feed__controls">
+            <label class="visually-hidden" for="live-feed-search">Search recent events</label>
+            <input type="search" id="live-feed-search" class="live-feed__search" placeholder="Search by location, category, or summary…" autocomplete="off">
+            <label class="visually-hidden" for="live-feed-sort">Sort recent events</label>
+            <select id="live-feed-sort" class="live-feed__sort">
+              <option value="newest">Newest first</option>
+              <option value="severity-desc">Severity: high to low</option>
+              <option value="severity-asc">Severity: low to high</option>
+            </select>
+          </div>
+        </div>
+        <p class="live-feed__count" data-role="feed-count" aria-live="polite"></p>
+        <ul class="live-feed__list">
+          <% events.forEach(function (e) { %>
+            <li class="live-feed__item" data-event-id="<%= e.id %>" tabindex="0" role="button" aria-label="Show this disruption on the map">
+              <span class="live-feed__severity live-feed__severity--<%= e.severity %>"><%= e.severity %></span>
+              <span class="live-feed__category"><%= e.category %></span>
+              <span class="live-feed__location"><%= e.location %></span>
+              <p class="live-feed__summary"><%= e.summary %></p>
+              <% if (e.sourceUrl) { %>
+                <a class="live-feed__source" href="<%= e.sourceUrl %>" target="_blank" rel="noopener noreferrer">Source</a>
+              <% } %>
+            </li>
+          <% }); %>
+        </ul>
       </div>
     </div>
   </section>

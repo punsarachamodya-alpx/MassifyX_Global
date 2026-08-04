@@ -2159,11 +2159,62 @@ button {
   margin: 0 0 clamp(2rem, 4vw, 3rem);
 }
 
+.live-feed__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.live-feed__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.live-feed__search,
+.live-feed__sort {
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--rule-strong);
+  border-radius: 2px;
+  padding: 0.55rem 0.8rem;
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+
+.live-feed__search {
+  min-width: 15rem;
+}
+
+.live-feed__search:focus,
+.live-feed__sort:focus {
+  outline: none;
+  border-color: var(--cobalt);
+  box-shadow: 0 0 0 3px rgba(46, 123, 255, 0.16);
+}
+
+.live-feed__count {
+  margin: 0.9rem 0 0;
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+}
+
+/* Capped height + internal scroll: with a live feed that can carry
+   hundreds of events, an uncapped list would push everything below it
+   (the War Room explainer moved above this section specifically to avoid
+   that, but the feed itself still needs its own bound) an unbounded
+   distance down the page. */
 .live-feed__list {
   list-style: none;
   display: grid;
   gap: 1rem;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
+  max-height: 640px;
+  overflow-y: auto;
+  padding-right: 0.4rem;
 }
 
 /* role="button"/tabindex on the <li> itself (see live.ejs / live.js

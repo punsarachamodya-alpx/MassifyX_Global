@@ -34,6 +34,9 @@
 
   var root = document.getElementById('live-globe');
   var feedList = document.querySelector('.live-feed__list');
+  var feedSearchInput = document.getElementById('live-feed-search');
+  var feedSortSelect = document.getElementById('live-feed-sort');
+  var feedCountEl = document.querySelector('[data-role="feed-count"]');
   var updatedEl = root ? root.querySelector('[data-role="last-updated"]') : null;
   var dataEl = document.getElementById('live-initial-data');
   var vesselsEl = document.getElementById('live-initial-vessels');
@@ -386,10 +389,64 @@
     });
   }
 
+  // Search/sort apply only to the feed *list* -- the map still shows every
+  // event regardless (renderEventLayers always uses the raw `events`
+  // array), so filtering the list is a reading convenience, never a way to
+  // accidentally hide real data from the map itself.
+  var feedSearchQuery = '';
+  var feedSortMode = 'newest';
+
+  function eventTimestamp(e) {
+    var raw = typeof e.lastUpdatedAt === 'string' ? e.lastUpdatedAt : (typeof e.firstSeenAt === 'string' ? e.firstSeenAt : '');
+    var ms = raw ? Date.parse(raw) : NaN;
+    return Number.isFinite(ms) ? ms : 0;
+  }
+
+  function matchesSearch(e, query) {
+    if (!query) return true;
+    var haystack = [e.summary, e.location, e.category].filter(Boolean).join(' ').toLowerCase();
+    return haystack.indexOf(query) !== -1;
+  }
+
+  function getVisibleFeedEvents() {
+    var query = feedSearchQuery.trim().toLowerCase();
+    var list = events.filter(function (e) { return matchesSearch(e, query); });
+
+    list.sort(function (a, b) {
+      if (feedSortMode === 'severity-desc') return b.severity - a.severity;
+      if (feedSortMode === 'severity-asc') return a.severity - b.severity;
+      return eventTimestamp(b) - eventTimestamp(a); // 'newest' (default)
+    });
+
+    return list;
+  }
+
+  function updateFeedCount(shown, total) {
+    if (!feedCountEl) return;
+    feedCountEl.textContent = shown === total
+      ? shown + (shown === 1 ? ' disruption' : ' disruptions')
+      : shown + ' of ' + total + (total === 1 ? ' disruption' : ' disruptions') + ' shown';
+  }
+
+  if (feedSearchInput) {
+    feedSearchInput.addEventListener('input', function () {
+      feedSearchQuery = feedSearchInput.value;
+      renderFeed();
+    });
+  }
+  if (feedSortSelect) {
+    feedSortSelect.addEventListener('change', function () {
+      feedSortMode = feedSortSelect.value;
+      renderFeed();
+    });
+  }
+
   function renderFeed() {
     if (!feedList) return;
+    var visible = getVisibleFeedEvents();
+    updateFeedCount(visible.length, events.length);
     feedList.innerHTML = '';
-    events.forEach(function (e) {
+    visible.forEach(function (e) {
       var li = document.createElement('li');
       li.className = 'live-feed__item';
       li.dataset.eventId = e.id;
@@ -440,6 +497,7 @@
   }
 
   updateStatusLine();
+  renderFeed(); // populate the feed count immediately, don't wait for the first poll
 
   function poll() {
     fetch('/live/data')
