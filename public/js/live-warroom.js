@@ -23,6 +23,41 @@
   var CONFIDENCE_VALUES = ['high', 'medium', 'low'];
   var URGENCY_VALUES = ['high', 'medium', 'low'];
 
+  // result.impactLevel is new (backend guarantees a fallback even for old
+  // jobs, but a response captured before that landed simply won't have it)
+  // -- any level not in this map is treated as "no badge" rather than
+  // guessed at. Icon glyphs are plain characters (not emoji), matching the
+  // rest of this file's no-innerHTML, textContent-only rendering.
+  var IMPACT_LEVEL_META = {
+    none: { modifier: 'none', label: 'No impact found', icon: '✓' },
+    low: { modifier: 'low', label: 'Low impact', icon: '•' },
+    moderate: { modifier: 'moderate', label: 'Moderate impact', icon: '!' },
+    severe: { modifier: 'severe', label: 'Severe impact', icon: '!!' }
+  };
+
+  // The four "affected" categories the at-a-glance strip summarizes.
+  // "Unaffected alternatives" is deliberately not part of this list -- it's
+  // reassuring context, not an impact signal, so it stays as its own
+  // always-open table below rather than gated behind the strip.
+  var IMPACT_STRIP_CATEGORIES = [
+    { field: 'affectedSuppliers', tag: 'SUP', label: 'Suppliers', tableLabel: 'Affected suppliers' },
+    { field: 'affectedPorts', tag: 'PRT', label: 'Ports', tableLabel: 'Affected ports' },
+    { field: 'affectedShippingLines', tag: 'SHL', label: 'Shipping lines', tableLabel: 'Affected shipping lines' },
+    { field: 'affectedManufacturers', tag: 'MFG', label: 'Manufacturers', tableLabel: 'Affected manufacturers' }
+  ];
+
+  var SOURCE_TYPE_LABELS = {
+    news: 'news',
+    blog: 'blog',
+    local_media: 'local media',
+    port_authority: 'port authority',
+    government: 'government',
+    social: 'social',
+    other: 'other'
+  };
+
+  var impactStripIdCounter = 0;
+
   function parseJsonIsland(id) {
     var el = document.getElementById(id);
     try {
@@ -318,7 +353,22 @@
     if (data.status === 'queued' || data.status === 'running') {
       jobsByEventId[props.id] = { status: 'running', jobId: jobId, stage: data.stage || null };
     } else if (data.status === 'complete' || data.status === 'capped') {
-      jobsByEventId[props.id] = { status: data.status, jobId: jobId, result: data.result || null };
+      // startedAt/completedAt/costEstimateUsd already existed; researchDepth
+      // and relatedIncidents are new top-level fields (sibling of `result`,
+      // not inside it) -- validated defensively here since an old-shape
+      // response (job created before the backend added them) simply won't
+      // have them, and buildResults()/buildMetaLine() must degrade to
+      // omitting that signal rather than throwing on a missing field.
+      jobsByEventId[props.id] = {
+        status: data.status,
+        jobId: jobId,
+        result: data.result || null,
+        startedAt: typeof data.startedAt === 'string' ? data.startedAt : null,
+        completedAt: typeof data.completedAt === 'string' ? data.completedAt : null,
+        costEstimateUsd: typeof data.costEstimateUsd === 'number' ? data.costEstimateUsd : null,
+        researchDepth: data.researchDepth === 'shallow' || data.researchDepth === 'deep' ? data.researchDepth : null,
+        relatedIncidents: Array.isArray(data.relatedIncidents) ? data.relatedIncidents : []
+      };
     } else {
       jobsByEventId[props.id] = { status: 'failed' };
     }
@@ -330,11 +380,18 @@
   // Hard rule (WARROOM_API_CONTRACT.md): every affected/unaffected entry
   // must cite a real finding. Entries whose findingId doesn't resolve to a
   // finding with a safe https(s) sourceUrl are dropped, not shown unsourced.
-  function buildCategoryTable(label, items, findingsById) {
-    var list = (items || []).filter(function (item) {
+  // Shared by buildCategoryTable() below and the at-a-glance impact strip's
+  // counts, so the strip can never show a count higher than what actually
+  // renders when expanded.
+  function filterSourced(items, findingsById) {
+    return (items || []).filter(function (item) {
       var finding = item && findingsById[item.findingId];
       return finding && typeof finding.sourceUrl === 'string' && /^https?:\/\//i.test(finding.sourceUrl);
     });
+  }
+
+  function buildCategoryTable(label, items, findingsById) {
+    var list = filterSourced(items, findingsById);
     if (list.length === 0) return null;
 
     var section = document.createElement('div');
@@ -434,6 +491,235 @@
     if (node) parent.appendChild(node);
   }
 
+  // ---------------------------------------------- impact badge & at-a-glance
+
+  // Above the summary: a colored, confident signal instead of making the
+  // reader parse a paragraph to learn whether anything happened at all.
+  // "none" gets the same treatment as every other level (not a bare empty
+  // state) -- a real severity-2 no-impact result should read as a solid,
+  // reassuring finding, not a shrug.
+  function buildImpactBadge(result) {
+    var meta = IMPACT_LEVEL_META[result.impactLevel];
+    if (!meta) return null; // old-shape response or unrecognized value -- omit, don't guess
+
+    var wrap = document.createElement('div');
+    wrap.className = 'warroom-impact-badge warroom-impact-badge--' + meta.modifier;
+
+    var icon = document.createElement('span');
+    icon.className = 'warroom-impact-badge__icon';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = meta.icon;
+    wrap.appendChild(icon);
+
+    var text = document.createElement('div');
+    text.className = 'warroom-impact-badge__text';
+
+    var label = document.createElement('strong');
+    label.className = 'warroom-impact-badge__label';
+    label.textContent = meta.label;
+    text.appendChild(label);
+
+    if (typeof result.assessmentReason === 'string' && result.assessmentReason.trim()) {
+      var reason = document.createElement('p');
+      reason.className = 'warroom-impact-badge__reason';
+      reason.textContent = result.assessmentReason.trim();
+      text.appendChild(reason);
+    }
+
+    wrap.appendChild(text);
+    return wrap;
+  }
+
+  // A compact row of icon+count pairs that reveals the existing (unchanged)
+  // buildCategoryTable() sections on click, instead of always showing every
+  // table stacked open. Only categories with at least one sourced entry are
+  // shown -- counts always match filterSourced()'s result, so the strip can
+  // never promise more than the tables underneath actually contain.
+  function buildImpactStrip(categoryTables) {
+    var visible = categoryTables.filter(function (c) { return c.count > 0; });
+    if (visible.length === 0) return null;
+
+    var wrap = document.createElement('div');
+    wrap.className = 'warroom-impact-strip';
+
+    visible.forEach(function (c) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'warroom-impact-strip__item';
+      btn.setAttribute('aria-expanded', 'false');
+
+      if (c.node) {
+        impactStripIdCounter += 1;
+        var id = 'warroom-cat-' + impactStripIdCounter;
+        c.node.id = id;
+        btn.setAttribute('aria-controls', id);
+      }
+
+      var tag = document.createElement('span');
+      tag.className = 'warroom-impact-strip__tag';
+      tag.textContent = c.tag;
+      btn.appendChild(tag);
+
+      var count = document.createElement('span');
+      count.className = 'warroom-impact-strip__count';
+      count.textContent = String(c.count);
+      btn.appendChild(count);
+
+      var label = document.createElement('span');
+      label.className = 'warroom-impact-strip__label';
+      label.textContent = c.label;
+      btn.appendChild(label);
+
+      btn.addEventListener('click', function () {
+        if (!c.node) return;
+        var willShow = c.node.hidden;
+        c.node.hidden = !willShow;
+        btn.setAttribute('aria-expanded', String(willShow));
+      });
+
+      wrap.appendChild(btn);
+    });
+
+    return wrap;
+  }
+
+  // ------------------------------------------------------------- sources
+
+  function humanizeSourceType(sourceType) {
+    if (typeof sourceType !== 'string' || !sourceType) return 'other';
+    return SOURCE_TYPE_LABELS[sourceType] || sourceType.replace(/_/g, ' ');
+  }
+
+  // Computed entirely client-side from result.findings -- no backend
+  // dependency. Total count plus a breakdown by sourceType, so source
+  // diversity reads as a first-class signal instead of a buried citation
+  // link on each row.
+  function buildSourcesPanel(findings) {
+    var valid = (findings || []).filter(function (f) {
+      return f && typeof f.sourceUrl === 'string' && /^https?:\/\//i.test(f.sourceUrl);
+    });
+    if (valid.length === 0) return null;
+
+    var counts = {};
+    var order = [];
+    valid.forEach(function (f) {
+      var type = humanizeSourceType(f.sourceType);
+      if (!Object.prototype.hasOwnProperty.call(counts, type)) {
+        counts[type] = 0;
+        order.push(type);
+      }
+      counts[type] += 1;
+    });
+    order.sort(function (a, b) { return counts[b] - counts[a]; });
+
+    var section = document.createElement('div');
+    section.className = 'warroom-sources';
+
+    var heading = document.createElement('h4');
+    heading.className = 'warroom-table__heading';
+    heading.textContent = valid.length + (valid.length === 1 ? ' source' : ' sources');
+    section.appendChild(heading);
+
+    var chips = document.createElement('div');
+    chips.className = 'warroom-sources__chips';
+    order.forEach(function (type) {
+      var chip = document.createElement('span');
+      chip.className = 'warroom-sources__chip';
+      chip.textContent = counts[type] + ' ' + type;
+      chips.appendChild(chip);
+    });
+    section.appendChild(chips);
+
+    return section;
+  }
+
+  // --------------------------------------------------- related incidents
+
+  // No cross-event navigation mechanism exists yet in this popup system --
+  // building one is out of scope here. v1 is exactly this: render the
+  // titles as informational chips, nothing clickable to overpromise.
+  function buildRelatedIncidents(relatedIncidents) {
+    var valid = (relatedIncidents || []).filter(function (r) {
+      return r && typeof r.jobId === 'string' && typeof r.title === 'string' && r.title.trim();
+    });
+    if (valid.length === 0) return null;
+
+    var section = document.createElement('div');
+    section.className = 'warroom-related';
+
+    var heading = document.createElement('p');
+    heading.className = 'warroom-related__heading';
+    heading.textContent = valid.length === 1 ? '1 similar incident' : valid.length + ' similar incidents';
+    section.appendChild(heading);
+
+    var chips = document.createElement('div');
+    chips.className = 'warroom-related__chips';
+    valid.forEach(function (item) {
+      var chip = document.createElement('span');
+      chip.className = 'warroom-related__chip';
+      chip.textContent = item.title.trim();
+      if (typeof item.completedAt === 'string' && item.completedAt) {
+        chip.title = 'Completed ' + item.completedAt;
+      }
+      chips.appendChild(chip);
+    });
+    section.appendChild(chips);
+
+    return section;
+  }
+
+  // ------------------------------------------------------------ meta line
+
+  function formatElapsed(startedAt, completedAt) {
+    var start = Date.parse(startedAt);
+    var end = Date.parse(completedAt);
+    if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) return null;
+    var totalSeconds = Math.round((end - start) / 1000);
+    if (totalSeconds < 60) return totalSeconds + 's';
+    var minutes = Math.floor(totalSeconds / 60);
+    var seconds = totalSeconds % 60;
+    return minutes + 'm ' + seconds + 's';
+  }
+
+  function formatCost(usd) {
+    if (typeof usd !== 'number' || !Number.isFinite(usd)) return null;
+    var fixed = usd < 0.01 ? usd.toFixed(4) : usd.toFixed(3);
+    fixed = fixed.replace(/0+$/, '').replace(/\.$/, '');
+    return '$' + (fixed === '' ? '0' : fixed);
+  }
+
+  // Low-emphasis trust signal (cost/depth/timing), never the loudest thing
+  // in the panel -- kept as its own caption-sized line rather than folded
+  // into the summary or the sources panel.
+  function buildMetaLine(job) {
+    var parts = [];
+
+    if (job.researchDepth === 'deep') parts.push('Deep investigation');
+    else if (job.researchDepth === 'shallow') parts.push('Shallow investigation');
+
+    var sourcedCount = job.result && Array.isArray(job.result.findings)
+      ? job.result.findings.filter(function (f) {
+          return f && typeof f.sourceUrl === 'string' && /^https?:\/\//i.test(f.sourceUrl);
+        }).length
+      : 0;
+    if (sourcedCount > 0) parts.push(sourcedCount + (sourcedCount === 1 ? ' source' : ' sources'));
+
+    var cost = formatCost(job.costEstimateUsd);
+    if (cost) parts.push(cost);
+
+    var elapsed = formatElapsed(job.startedAt, job.completedAt);
+    if (elapsed) parts.push('completed in ' + elapsed);
+
+    if (parts.length === 0) return null;
+
+    var p = document.createElement('p');
+    p.className = 'warroom-results__meta';
+    p.textContent = parts.join(' · ');
+    return p;
+  }
+
+  // ------------------------------------------------------------- assembly
+
   function buildResults(job) {
     var result = job.result;
     var wrap = document.createElement('div');
@@ -456,17 +742,39 @@
       if (f && typeof f.id === 'string') findingsById[f.id] = f;
     });
 
+    appendIfPresent(wrap, buildImpactBadge(result));
+
     var summary = document.createElement('p');
     summary.className = 'warroom-results__summary';
     summary.textContent = result.summary || '';
     wrap.appendChild(summary);
 
-    appendIfPresent(wrap, buildCategoryTable('Affected suppliers', result.affectedSuppliers, findingsById));
-    appendIfPresent(wrap, buildCategoryTable('Affected ports', result.affectedPorts, findingsById));
-    appendIfPresent(wrap, buildCategoryTable('Affected shipping lines', result.affectedShippingLines, findingsById));
-    appendIfPresent(wrap, buildCategoryTable('Affected manufacturers', result.affectedManufacturers, findingsById));
+    // Build (but don't yet append) each affected-category table so the
+    // strip's counts and click targets can reference the same nodes --
+    // buildCategoryTable()'s own "no claim without a source" filter is
+    // untouched, this only changes when the result is inserted/shown.
+    var categoryTables = IMPACT_STRIP_CATEGORIES.map(function (def) {
+      var items = result[def.field];
+      return {
+        tag: def.tag,
+        label: def.label,
+        count: filterSourced(items, findingsById).length,
+        node: buildCategoryTable(def.tableLabel, items, findingsById)
+      };
+    });
+
+    appendIfPresent(wrap, buildImpactStrip(categoryTables));
+    categoryTables.forEach(function (t) {
+      if (!t.node) return;
+      t.node.hidden = true;
+      wrap.appendChild(t.node);
+    });
+
     appendIfPresent(wrap, buildCategoryTable('Unaffected alternatives', result.unaffectedAlternatives, findingsById));
+    appendIfPresent(wrap, buildSourcesPanel(result.findings));
     appendIfPresent(wrap, buildActionsList(result.recommendedActions));
+    appendIfPresent(wrap, buildRelatedIncidents(job.relatedIncidents));
+    appendIfPresent(wrap, buildMetaLine(job));
 
     var disclaimer = document.createElement('p');
     disclaimer.className = 'warroom-results__disclaimer';

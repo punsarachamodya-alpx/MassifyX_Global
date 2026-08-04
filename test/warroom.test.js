@@ -63,8 +63,18 @@ function startFakeWarroom() {
             startedAt: '2026-08-01T00:00:00Z',
             completedAt: '2026-08-01T00:02:00Z',
             costEstimateUsd: 0.19,
+            // researchDepth and relatedIncidents are new top-level fields
+            // (sibling of `result`) added on the massifyx-warroom side --
+            // included here to prove the site's proxy forwards them
+            // verbatim without needing any server-side contract change.
+            researchDepth: 'deep',
+            relatedIncidents: [
+              { jobId: 'wrj_other1', title: 'Related incident one', completedAt: '2026-07-30T00:00:00Z', similarity: 0.82 }
+            ],
             result: {
               summary: 'One paragraph summary.',
+              impactLevel: 'moderate',
+              assessmentReason: 'One supplier confirmed affected; alternatives remain available.',
               affectedSuppliers: [{ name: 'Acme Freight', findingId: 'f_1', confidence: 'high' }],
               affectedPorts: [],
               affectedShippingLines: [],
@@ -215,6 +225,27 @@ test('GET /live/investigate/:jobId returns the completed result with citations i
   assert.equal(body.status, 'complete');
   assert.equal(body.result.affectedSuppliers[0].findingId, 'f_1');
   assert.equal(body.result.findings[0].sourceUrl, 'https://example.com/acme-freight-report');
+});
+
+// warroomClient.getInvestigation spreads the upstream JSON body verbatim
+// (`{ available: true, ...result.json }`), so newly-added top-level fields
+// (researchDepth, relatedIncidents) and result fields (impactLevel,
+// assessmentReason) need no server-side contract change to reach the
+// client -- this asserts that pass-through actually holds, not just that
+// it should in theory.
+test('GET /live/investigate/:jobId passes the new War Room fields through untouched', async () => {
+  const res = await fetch(`${base}/live/investigate/wrj_test123`, {
+    headers: { Cookie: unlockedCookie }
+  });
+  const body = await res.json();
+  assert.equal(body.researchDepth, 'deep');
+  assert.equal(body.relatedIncidents.length, 1);
+  assert.equal(body.relatedIncidents[0].title, 'Related incident one');
+  assert.equal(body.result.impactLevel, 'moderate');
+  assert.equal(
+    body.result.assessmentReason,
+    'One supplier confirmed affected; alternatives remain available.'
+  );
 });
 
 // ----------------------------------------------------------- request shape

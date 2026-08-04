@@ -2406,6 +2406,138 @@ button {
   color: rgba(255, 255, 255, 0.92);
 }
 
+/* -- impact badge: at-a-glance signal above the summary -------------------
+   Backgrounds are low-opacity tints of the map's own severity ramp (section
+   28) -- reusing the validated palette rather than inventing new hues, same
+   posture as the confidence pills below. "none" gets the identical treatment
+   as every other level (icon + colored surface + subtitle), not a bare
+   empty state -- a real no-impact result should read as confident, not
+   shallow. Icon foreground colors mirror .world-map__legend-swatch's own
+   contrast choices (white on green/lime/amber, navy on red). */
+.warroom-impact-badge {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 0 0 0.75rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 4px;
+}
+
+.warroom-impact-badge__icon {
+  flex: 0 0 auto;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.warroom-impact-badge__label {
+  display: block;
+  font-size: 0.85rem;
+  color: #fff;
+}
+
+.warroom-impact-badge__reason {
+  margin: 0.15rem 0 0;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.warroom-impact-badge--none {
+  background: rgba(34, 197, 94, 0.15);
+}
+
+.warroom-impact-badge--none .warroom-impact-badge__icon {
+  background: var(--severity-1);
+  color: #fff;
+}
+
+.warroom-impact-badge--low {
+  background: rgba(132, 204, 22, 0.15);
+}
+
+.warroom-impact-badge--low .warroom-impact-badge__icon {
+  background: var(--severity-2);
+  color: #fff;
+}
+
+.warroom-impact-badge--moderate {
+  background: rgba(251, 191, 36, 0.15);
+}
+
+.warroom-impact-badge--moderate .warroom-impact-badge__icon {
+  background: var(--severity-3);
+  color: #fff;
+}
+
+.warroom-impact-badge--severe {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.warroom-impact-badge--severe .warroom-impact-badge__icon {
+  background: var(--severity-5);
+  color: var(--navy);
+}
+
+/* -- at-a-glance impact strip: collapsed entry point into the category
+   tables below (section further down), instead of always showing every
+   table stacked open. */
+.warroom-impact-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 0.75rem;
+}
+
+.warroom-impact-strip__item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.warroom-impact-strip__item:hover,
+.warroom-impact-strip__item:focus-visible {
+  border-color: var(--cyan);
+  background: rgba(70, 211, 255, 0.1);
+  outline: none;
+}
+
+.warroom-impact-strip__item[aria-expanded='true'] {
+  border-color: var(--cyan);
+  background: rgba(70, 211, 255, 0.16);
+}
+
+.warroom-impact-strip__tag {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.warroom-impact-strip__count {
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.warroom-impact-strip__label {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
 .warroom-table {
   margin-bottom: 0.75rem;
 }
@@ -2518,6 +2650,66 @@ button {
   margin: 0.15rem 0 0;
   font-size: 0.76rem;
   color: rgba(255, 255, 255, 0.65);
+}
+
+/* -- sources panel: source-diversity signal computed client-side from
+   result.findings (sourceType breakdown) -- a first-class element, not a
+   citation link buried on each row. */
+.warroom-sources {
+  margin-bottom: 0.75rem;
+}
+
+.warroom-sources__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.warroom-sources__chip {
+  font-size: 0.72rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* -- related incidents: informational chips only, no click behavior --
+   there's no cross-event navigation mechanism in this popup system yet, and
+   building one is out of scope here (v1 is just the titles). */
+.warroom-related {
+  margin-bottom: 0.75rem;
+}
+
+.warroom-related__heading {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.warroom-related__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.warroom-related__chip {
+  font-size: 0.72rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* -- investigation metadata: a trust signal (cost/depth/elapsed time), kept
+   deliberately secondary -- caption-sized and muted, never competing with
+   the summary or the actions above it. */
+.warroom-results__meta {
+  margin: 0.5rem 0 0;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .warroom-results__disclaimer {
