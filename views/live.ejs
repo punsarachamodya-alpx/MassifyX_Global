@@ -92,35 +92,30 @@
             </p>
           <% } %>
         </div>
-        <div class="warroom-intro__preview" aria-hidden="true">
-          <p class="warroom-intro__preview-label">Example output (illustrative)</p>
-          <div class="warroom-impact-badge warroom-impact-badge--severe">
-            <span class="warroom-impact-badge__icon">!</span>
-            <div class="warroom-impact-badge__text">
-              <strong class="warroom-impact-badge__label">Severe impact</strong>
-              <p class="warroom-impact-badge__reason">A key regional port suspended operations, creating significant disruption risk for shipping routes through the area.</p>
+        <div class="warroom-intro__preview">
+          <p class="warroom-intro__preview-label">Real product screenshots</p>
+          <div class="warroom-slider">
+            <button type="button" class="warroom-slider__nav warroom-slider__nav--prev" aria-label="Previous screenshot">&#8249;</button>
+            <div class="warroom-slider__track" id="warroom-slider-track">
+              <figure class="warroom-slider__slide">
+                <img src="/img/warroom/warroom-map-overview.jpg" alt="The live global disruption map, showing real-time supply chain incidents plotted worldwide" loading="lazy">
+                <figcaption>Real-time disruptions plotted on the global map</figcaption>
+              </figure>
+              <figure class="warroom-slider__slide">
+                <img src="/img/warroom/warroom-search-sort.jpg" alt="The recent events feed, filtered by a search for &quot;flood&quot;, showing a real matching incident" loading="lazy">
+                <figcaption>Search and sort the live event feed</figcaption>
+              </figure>
+              <figure class="warroom-slider__slide">
+                <img src="/img/warroom/warroom-severe-impact.png" alt="A real War Room investigation result showing a severe impact verdict and a grounded assessment reason" loading="lazy">
+                <figcaption>A real AI-assessed impact verdict, not a guess</figcaption>
+              </figure>
+              <figure class="warroom-slider__slide">
+                <img src="/img/warroom/warroom-sources-panel.png" alt="A real War Room result showing affected ports, an 11-source breakdown, and a recommended action" loading="lazy">
+                <figcaption>Every claim cited — sources and recommended actions</figcaption>
+              </figure>
             </div>
+            <button type="button" class="warroom-slider__nav warroom-slider__nav--next" aria-label="Next screenshot">&#8250;</button>
           </div>
-          <div class="warroom-impact-strip">
-            <span class="warroom-impact-strip__item">
-              <span class="warroom-impact-strip__tag">PRT</span>
-              <span class="warroom-impact-strip__count">1</span>
-              <span class="warroom-impact-strip__label">Ports</span>
-            </span>
-            <span class="warroom-impact-strip__item">
-              <span class="warroom-impact-strip__tag">SHP</span>
-              <span class="warroom-impact-strip__count">2</span>
-              <span class="warroom-impact-strip__label">Shipping lines</span>
-            </span>
-          </div>
-          <div class="warroom-sources">
-            <h4 class="warroom-table__heading">11 sources</h4>
-            <div class="warroom-sources__chips">
-              <span class="warroom-sources__chip">6 government</span>
-              <span class="warroom-sources__chip">5 news</span>
-            </div>
-          </div>
-          <p class="warroom-results__meta">Deep investigation · 11 sources · completed in under a minute</p>
         </div>
       </div>
     </div>

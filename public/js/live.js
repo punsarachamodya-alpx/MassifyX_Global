@@ -518,4 +518,21 @@
   }
 
   setInterval(poll, POLL_INTERVAL_MS);
+
+  // ------------------------------------------------- War Room screenshot slider
+  // A bare CSS scroll-snap strip already works with zero JS (swipe/scroll/
+  // drag); these buttons are a progressive enhancement on top, not
+  // load-bearing for the carousel to function.
+  var sliderTrack = document.getElementById('warroom-slider-track');
+  if (sliderTrack) {
+    var prevBtn = document.querySelector('.warroom-slider__nav--prev');
+    var nextBtn = document.querySelector('.warroom-slider__nav--next');
+    var scrollByOneSlide = function (direction) {
+      var slide = sliderTrack.querySelector('.warroom-slider__slide');
+      var amount = slide ? slide.getBoundingClientRect().width + 14 : sliderTrack.clientWidth;
+      sliderTrack.scrollBy({ left: direction * amount, behavior: 'smooth' });
+    };
+    if (prevBtn) prevBtn.addEventListener('click', function () { scrollByOneSlide(-1); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { scrollByOneSlide(1); });
+  }
 })();

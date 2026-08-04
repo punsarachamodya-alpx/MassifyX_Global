@@ -2849,6 +2849,76 @@ button {
   color: rgba(255, 255, 255, 0.45);
 }
 
+/* Real product screenshots (not stock imagery -- see live.ejs's comment on
+   this block), scroll-snap carousel so it works with zero JS as a bare
+   swipeable/scrollable strip; the prev/next buttons (wired in live.js) are
+   a progressive enhancement on top, not load-bearing. Slides are plain
+   white cards floating on the dark preview surface -- most of these
+   screenshots have their own white chrome (browser/page background), so a
+   white card frame reads as intentional, not a mismatched background. */
+.warroom-slider {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.warroom-slider__track {
+  display: flex;
+  gap: 0.85rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  border-radius: 4px;
+}
+
+.warroom-slider__track::-webkit-scrollbar {
+  display: none;
+}
+
+.warroom-slider__slide {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  margin: 0;
+  background: #fff;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.warroom-slider__slide img {
+  display: block;
+  width: 100%;
+  height: 240px;
+  object-fit: contain;
+  background: #fff;
+}
+
+.warroom-slider__slide figcaption {
+  padding: 0.65rem 0.9rem;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  border-top: 1px solid var(--rule);
+}
+
+.warroom-slider__nav {
+  flex: 0 0 auto;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s var(--ease);
+}
+
+.warroom-slider__nav:hover,
+.warroom-slider__nav:focus-visible {
+  background: rgba(255, 255, 255, 0.18);
+  outline: none;
+}
+
 @media (max-width: 900px) {
   .warroom-intro {
     grid-template-columns: minmax(0, 1fr);
