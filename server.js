@@ -5,6 +5,7 @@ const path = require('path');
 const express = require('express');
 const helmet = require('helmet');
 const compression = require('compression');
+const rateLimit = require('express-rate-limit');
 const session = require('express-session');
 const expressLayouts = require('express-ejs-layouts');
 
@@ -28,6 +29,10 @@ const MIS_BASE_URL = process.env.MIS_BASE_URL || '';
 // or unreachable is not an error, the "Investigate" action just degrades to
 // an "unavailable" state. Its real address is never sent to the browser.
 const WARROOM_BASE_URL = process.env.WARROOM_BASE_URL || '';
+// Shared secret War Room now requires (X-API-Key) on both its endpoints.
+// Unset here just means every call degrades to "unavailable" exactly like
+// an unset WARROOM_BASE_URL already does — no separate failure mode to add.
+const WARROOM_API_KEY = process.env.WARROOM_API_KEY || '';
 
 // Correct secure-cookie and req.ip behaviour behind a reverse proxy.
 app.set('trust proxy', 1);
@@ -62,7 +67,13 @@ app.use(
             const url = store.getSection('contact').bookingEmbedUrl;
             if (!url) return "'none'";
             try {
-              return new URL(url).origin;
+              const parsed = new URL(url);
+              // URL() parses javascript:/data:/etc without throwing --
+              // .origin on those is the literal string "null", not the
+              // quoted CSP keyword 'none'/'null', so an unchecked parse
+              // here would hand a non-https value straight into the
+              // directive. Only a real https origin is ever allowed.
+              return parsed.protocol === 'https:' ? parsed.origin : "'none'";
             } catch {
               return "'none'";
             }
@@ -78,7 +89,26 @@ app.use(
   })
 );
 
+// Helmet no longer sets this by default; nothing on this site uses any of
+// these browser features, so deny them outright.
+app.use((req, res, next) => {
+  res.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), interest-cohort=()');
+  next();
+});
+
 app.use(compression());
+
+// Public, unauthenticated, cost/abuse-relevant endpoints -- the two admin/
+// warroom-unlock lockouts (lib/auth.js, lib/warroomAuth.js) already cover
+// their own login routes; these three have no such gating of their own.
+// standardHeaders/legacyHeaders match MIS's own rate limiter config
+// (lib/api/createApp.js) for consistency across the ecosystem.
+function makeRateLimiter(max, windowMs) {
+  return rateLimit({ windowMs, max, standardHeaders: true, legacyHeaders: false });
+}
+const contactLimiter = makeRateLimiter(10, 60_000); // form submissions are inherently low-frequency
+const liveDataLimiter = makeRateLimiter(60, 60_000); // polled periodically by the map UI
+const investigateLimiter = makeRateLimiter(10, 60_000); // each call can trigger real LLM/search spend downstream
 
 // ------------------------------------------------- canonical host redirect
 //
@@ -235,7 +265,7 @@ app.get('/live', async (req, res) => {
 
 // Same-origin proxy so the browser never learns MIS's real address — the
 // client-side map polls this instead of MIS directly.
-app.get('/live/data', async (req, res) => {
+app.get('/live/data', liveDataLimiter, async (req, res) => {
   const events = await misClient.getDisruptions(MIS_BASE_URL);
   const vessels = await misClient.getVessels(MIS_BASE_URL);
   res.set('Cache-Control', 'no-store');
@@ -271,8 +301,13 @@ app.post('/live/unlock', express.json({ limit: '1kb' }), (req, res) => {
   }
 
   warroomAuth.clearFailures(req.ip);
-  req.session.warroomUnlocked = true;
-  res.json({ ok: true });
+  // Regenerate on success to prevent session fixation, same as
+  // /admin/login (lib/auth.js's docstring on routes/admin.js's login route).
+  req.session.regenerate((err) => {
+    if (err) return res.status(500).json({ ok: false, error: 'Could not start a session. Try again.' });
+    req.session.warroomUnlocked = true;
+    res.json({ ok: true });
+  });
 });
 
 function requireWarroomUnlock(req, res, next) {
@@ -286,6 +321,7 @@ function requireWarroomUnlock(req, res, next) {
 // approved users (WARROOM_BUILD_PLAN.md §6/§10).
 app.post(
   '/live/investigate',
+  investigateLimiter,
   express.json({ limit: '10kb' }),
   requireWarroomUnlock,
   async (req, res) => {
@@ -295,7 +331,7 @@ app.post(
       return res.status(400).json({ available: false, error: 'Missing or invalid incident fields.' });
     }
 
-    const result = await warroomClient.createInvestigation(WARROOM_BASE_URL, payload);
+    const result = await warroomClient.createInvestigation(WARROOM_BASE_URL, payload, { apiKey: WARROOM_API_KEY });
     if (!result.available) return res.json({ available: false });
     if (result.rateLimited) return res.status(429).json({ available: true, rateLimited: true });
     if (result.invalid) {
@@ -315,7 +351,7 @@ app.get('/live/investigate/:jobId', requireWarroomUnlock, async (req, res) => {
   if (!warroomContract.isValidJobId(req.params.jobId)) {
     return res.status(400).json({ available: false, error: 'Invalid job id.' });
   }
-  const result = await warroomClient.getInvestigation(WARROOM_BASE_URL, req.params.jobId);
+  const result = await warroomClient.getInvestigation(WARROOM_BASE_URL, req.params.jobId, { apiKey: WARROOM_API_KEY });
   res.json(result);
 });
 
@@ -382,7 +418,7 @@ app.get('/contact', (req, res) => {
   renderContact(res, prefill ? { values: { message: prefill } } : {});
 });
 
-app.post('/contact', async (req, res) => {
+app.post('/contact', contactLimiter, async (req, res) => {
   const page = store.getSection('contact');
   const body = req.body || {};
 
@@ -422,9 +458,25 @@ app.post('/contact', async (req, res) => {
     });
   }
 
-  // Always logged as a fallback audit trail, whether or not email delivery
-  // succeeds — a submission should never vanish without a trace.
-  console.log('[contact] submission:', JSON.stringify(values));
+  // Fallback audit trail so a submission never vanishes without a trace if
+  // email delivery fails below — but this is a stdout/journald log line,
+  // not the system of record the published Privacy Policy's 24-month
+  // retention/deletion promise describes, and this app has no way to
+  // enforce log rotation on whatever host it runs on. Deliberately logs
+  // only what's needed to recover and reply to a lead (name, email,
+  // company, a truncated message preview) rather than every field
+  // verbatim and unbounded — the full message is still delivered intact
+  // to CONTACT_TO_EMAIL when SMTP is configured. Whoever operates this
+  // deployment is responsible for configuring the host's log retention to
+  // actually match the published policy; this narrows what a longer-than-
+  // intended retention would expose, it does not replace that configuration.
+  console.log('[contact] submission:', JSON.stringify({
+    name: values.name,
+    email: values.email,
+    company: values.company || null,
+    messagePreview: values.message ? values.message.slice(0, 140) : '',
+    submittedAt: new Date().toISOString()
+  }));
 
   if (mailer.isConfigured()) {
     try {
@@ -493,17 +545,34 @@ app.use((err, req, res, next) => {
 
 // ------------------------------------------------------------------- listen
 
+// A configured-but-weak shared secret is worse than an unconfigured one:
+// unconfigured fails closed (every login refused, by design — see
+// lib/auth.js/lib/warroomAuth.js), but a short secret is live and
+// brute-forceable, especially against a per-IP-only lockout that a
+// rotating-IP attacker can trivially reset (see lib/auth.js's
+// recordFailure/lockoutFor docstrings for the mitigating global lockout
+// added alongside this). Refusing to boot on a weak-but-set secret turns a
+// silent production footgun into an immediate, loud deploy failure.
+const MIN_ADMIN_PASSWORD_LENGTH = 12;
+const MIN_WARROOM_ACCESS_CODE_LENGTH = 8;
+
 if (require.main === module) {
   if (!process.env.ADMIN_PASSWORD) {
     console.warn('[boot] ADMIN_PASSWORD is not set — /admin logins will be refused.');
-  } else if (process.env.ADMIN_PASSWORD.length < 12) {
-    console.warn('[boot] ADMIN_PASSWORD is shorter than 12 characters.');
+  } else if (process.env.ADMIN_PASSWORD.length < MIN_ADMIN_PASSWORD_LENGTH) {
+    throw new Error(
+      `[boot] ADMIN_PASSWORD is shorter than ${MIN_ADMIN_PASSWORD_LENGTH} characters — refusing to start with a weak admin credential. Generate a longer one (see deploy/README.md).`
+    );
   }
   if (!process.env.SESSION_SECRET) {
     console.warn('[boot] SESSION_SECRET is not set — admin sessions reset on restart.');
   }
   if (!process.env.WARROOM_ACCESS_CODE) {
     console.warn('[boot] WARROOM_ACCESS_CODE is not set — /live/unlock will refuse every attempt.');
+  } else if (process.env.WARROOM_ACCESS_CODE.length < MIN_WARROOM_ACCESS_CODE_LENGTH) {
+    throw new Error(
+      `[boot] WARROOM_ACCESS_CODE is shorter than ${MIN_WARROOM_ACCESS_CODE_LENGTH} characters — refusing to start with a weak access code.`
+    );
   }
   app.listen(PORT, () => {
     console.log(`MassifyX Global listening on http://localhost:${PORT}`);

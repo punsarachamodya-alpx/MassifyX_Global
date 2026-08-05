@@ -11,6 +11,7 @@ const store = require('../lib/store');
 const schema = require('../lib/schema');
 const paths = require('../lib/paths');
 const mailer = require('../lib/mailer');
+const { sanitizeLinkHref, sanitizeAbsoluteUrl } = require('../lib/urlValidation');
 
 const router = express.Router();
 
@@ -92,7 +93,7 @@ router.post('/login', (req, res) => {
   });
 });
 
-router.post('/logout', (req, res) => {
+router.post('/logout', auth.verifyCsrf, (req, res) => {
   req.session.destroy(() => res.redirect('/admin/login'));
 });
 
@@ -202,6 +203,8 @@ function collect(fields, body, prefix, current) {
     const raw = typeof body[key] === 'string' ? body[key] : '';
     if (field.type === 'list') paths.setPath(out, field.path, paths.linesToArray(raw));
     else if (field.type === 'paras') paths.setPath(out, field.path, paths.textToParas(raw));
+    else if (field.type === 'url') paths.setPath(out, field.path, sanitizeLinkHref(raw));
+    else if (field.type === 'externalUrl') paths.setPath(out, field.path, sanitizeAbsoluteUrl(raw));
     else paths.setPath(out, field.path, raw);
   }
   return out;
@@ -265,15 +268,14 @@ router.get('/export', (req, res) => {
 
 // ------------------------------------------------------------------ upload
 
-// multer must run before the CSRF check: it's the only thing that parses a
-// multipart body, and the "_csrf" field lives inside that body. Checking CSRF
-// first (as a normal route-level middleware would) always sees an empty
-// req.body and rejects every upload.
+// CSRF is checked BEFORE multer touches the request (see auth.verifyCsrfPreBody's
+// docstring) — a forged cross-site request must be rejected before its file
+// ever lands on disk, not just before its response is returned.
 // The image-field file pickers (views/admin/_field.ejs) POST here via fetch and
 // expect JSON back; the standalone bulk-upload panel on the Site page is a plain
 // form post and expects the HTML result page. Both hit the same endpoint —
 // wantsJson decides which response a given request gets.
-router.post('/upload', (req, res, next) => {
+router.post('/upload', auth.verifyCsrfPreBody, (req, res, next) => {
   upload.array('images', 4)(req, res, (err) => {
     if (err) {
       const wantsJson = req.xhr || (req.get('Accept') || '').includes('application/json');
@@ -286,7 +288,7 @@ router.post('/upload', (req, res, next) => {
     }
     next();
   });
-}, auth.verifyCsrf, (req, res) => {
+}, (req, res) => {
   const files = (req.files || []).map((f) => `/img/uploads/${f.filename}`);
   const wantsJson = req.xhr || (req.get('Accept') || '').includes('application/json');
 

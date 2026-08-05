@@ -68,7 +68,6 @@
       var csrfField = wrap.closest('form').querySelector('input[name="_csrf"]');
       var data = new FormData();
       data.append('images', file);
-      if (csrfField) data.append('_csrf', csrfField.value);
 
       if (status) status.textContent = 'Uploading…';
       picker.disabled = true;
@@ -76,7 +75,10 @@
       fetch('/admin/upload', {
         method: 'POST',
         body: data,
-        headers: { Accept: 'application/json' },
+        headers: {
+          Accept: 'application/json',
+          'X-CSRF-Token': csrfField ? csrfField.value : ''
+        },
         credentials: 'same-origin'
       })
         .then(function (r) {

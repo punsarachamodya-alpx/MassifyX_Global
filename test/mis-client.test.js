@@ -43,16 +43,41 @@ test('getDisruptions returns null when the response has no events array', async 
   assert.equal(await misClient.getDisruptions('http://mis.local', { fetchImpl }), null);
 });
 
+function validEventOverrides(overrides) {
+  return {
+    id: 'a', severity: 3, category: 'weather', lat: 1.5, lon: 2.5,
+    ...overrides,
+  };
+}
+
 test('getDisruptions strips an unsafe sourceUrl scheme', async () => {
   const fetchImpl = async () => ({
     ok: true,
     json: async () => ({
-      events: [{ id: 'a', sourceUrl: 'javascript:alert(1)' }, { id: 'b', sourceUrl: 'https://example.com' }],
+      events: [
+        validEventOverrides({ id: 'a', sourceUrl: 'javascript:alert(1)' }),
+        validEventOverrides({ id: 'b', sourceUrl: 'https://example.com' }),
+      ],
     }),
   });
   const events = await misClient.getDisruptions('http://mis.local', { fetchImpl });
   assert.equal(events[0].sourceUrl, null);
   assert.equal(events[1].sourceUrl, 'https://example.com');
+});
+
+test('getDisruptions drops events that fail the disruption-event contract', async () => {
+  const fetchImpl = async () => ({
+    ok: true,
+    json: async () => ({
+      events: [
+        validEventOverrides({ id: 'valid' }),
+        { id: 'missing-fields' }, // no severity/category/lat/lon
+        validEventOverrides({ id: 'bad-severity', severity: 9 }),
+      ],
+    }),
+  });
+  const events = await misClient.getDisruptions('http://mis.local', { fetchImpl });
+  assert.deepEqual(events.map((e) => e.id), ['valid']);
 });
 
 test('getVessels returns an empty array when baseUrl is empty', async () => {
