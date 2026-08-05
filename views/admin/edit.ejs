@@ -34,8 +34,11 @@
   <div class="acard" style="margin-top:2.5rem;">
     <h2 class="ah2" style="margin-top:0;">Upload images</h2>
     <p class="amuted">JPG, PNG, or WebP. Up to 4 files, 4 MB each. You’ll get back a path to paste into any image field.</p>
-    <form method="post" action="/admin/upload" enctype="multipart/form-data">
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <!-- CSRF token is in the query string, not a body field: this is a real
+         page-navigation form (no way to set a custom header), and the check
+         must happen before multer parses the multipart body -- see
+         lib/auth.js's verifyCsrfPreBody. -->
+    <form method="post" action="/admin/upload?_csrf=<%= encodeURIComponent(csrfToken) %>" enctype="multipart/form-data">
       <input type="file" name="images" accept="image/jpeg,image/png,image/webp" multiple>
       <button type="submit" class="abtn abtn--quiet" style="margin-top:1rem;">Upload</button>
     </form>

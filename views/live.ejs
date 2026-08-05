@@ -1,0 +1,182 @@
+<link rel="stylesheet" href="/css/vendor/maplibre-gl.css">
+
+<section class="hero hero--inner">
+  <div class="shell">
+    <div class="hero__copy">
+      <span class="eyebrow">Live</span>
+      <h1 class="display-1">Global Disruption Monitor</h1>
+    </div>
+    <p class="lede">Real-time supply chain disruptions — port strikes, weather, geopolitical restrictions, and logistics failures — classified and scored as they're detected.</p>
+    <p class="crosslink"><a class="arrow-link" href="/insights/sweden-trade">Read the Sweden Trade Intelligence data story</a></p>
+  </div>
+</section>
+
+<% if (!misAvailable) { %>
+  <section class="section">
+    <div class="shell shell--narrow">
+      <div class="live-unavailable reveal">
+        <h2 class="display-2">Live monitor temporarily unavailable</h2>
+        <p class="lede">We can't reach the intelligence service right now. Please check back shortly — every other page on this site is unaffected.</p>
+      </div>
+    </div>
+  </section>
+<% } else { %>
+  <section class="section">
+    <div class="shell">
+      <%# MapLibre GL renders into this container -- see public/js/live.js.
+          Basemap is CARTO's free dark-matter vector style, fetched
+          client-side from *.basemaps.cartocdn.com (named CSP exception in
+          server.js). Shipping lanes are real, static maritime geography
+          (public/geo/shipping-lanes.geojson -- see public/geo/README.md for
+          source/license), not generated or illustrative. %>
+      <div id="live-globe" class="world-map reveal">
+        <div class="world-map__legend" aria-hidden="true">
+          <span class="world-map__legend-group">
+            <span class="world-map__legend-label">Severity</span>
+            <span class="world-map__legend-swatch world-map__legend-swatch--1">1</span>
+            <span class="world-map__legend-swatch world-map__legend-swatch--2">2</span>
+            <span class="world-map__legend-swatch world-map__legend-swatch--3">3</span>
+            <span class="world-map__legend-swatch world-map__legend-swatch--4">4</span>
+            <span class="world-map__legend-swatch world-map__legend-swatch--5">5</span>
+          </span>
+          <span class="world-map__legend-group">
+            <span class="world-map__legend-line"></span>
+            <span class="world-map__legend-label">Major shipping lanes</span>
+          </span>
+          <% if (vessels.length > 0) { %>
+            <span class="world-map__legend-group">
+              <span class="world-map__legend-vessel"></span>
+              <span class="world-map__legend-label">Live ships</span>
+            </span>
+          <% } %>
+        </div>
+        <p class="world-map__updated" data-role="last-updated" aria-live="polite"></p>
+      </div>
+      <p class="world-map__caption">
+        Shipping lanes are real maritime corridors (<a href="https://doi.org/10.5281/zenodo.6361763" target="_blank" rel="noopener noreferrer">Global Shipping Lanes dataset</a>, CC BY-SA 4.0), not live vessel tracking.
+        <% if (vessels.length > 0) { %>
+          Ship positions are live AIS data via aisstream.io.
+        <% } %>
+      </p>
+    </div>
+  </section>
+
+  <%# War Room feature explainer -- the "Investigate" action only lives
+      inside a clicked event's popup, so a visitor who never clicks a
+      marker has no way to discover it exists. This section makes the
+      capability visible regardless. The preview below reuses the exact
+      CSS classes public/js/live-warroom.js renders a real result with
+      (warroom-impact-badge, warroom-impact-strip, warroom-sources) with
+      static, clearly-labeled illustrative content -- not a screenshot, not
+      stock photography (this site's "No photography" honesty constraint
+      applies here too), just the product's own real UI with example data. %>
+  <section class="section section--warroom-intro">
+    <div class="shell">
+      <div class="warroom-intro">
+        <div class="warroom-intro__copy">
+          <span class="eyebrow">War Room</span>
+          <h2 class="display-2">Turn any disruption into an actionable briefing</h2>
+          <p class="lede">Click any marker on the map above, then choose <strong>Investigate</strong>. An AI agent researches that specific incident across news, government, port authority, and social sources, and returns a structured, cited briefing — who's affected, who isn't, and what to do next.</p>
+          <ul class="warroom-intro__features">
+            <li><strong>Multi-source research</strong> — news, government, port authority, and social sources, searched live for the one incident you clicked.</li>
+            <li><strong>Every claim cited</strong> — affected and unaffected entries link back to a real source; nothing is asserted without one.</li>
+            <li><strong>Affected vs. unaffected breakdown</strong> — suppliers, ports, shipping lines, and manufacturers, so you see the full picture, not just the bad news.</li>
+            <li><strong>Recommended next actions</strong> — concrete, urgency-ranked steps grounded in what the research actually found.</li>
+          </ul>
+          <% if (!warroomUnlocked) { %>
+            <p class="warroom-intro__cta">
+              <a class="btn btn--primary btn--sm" href="/contact?topic=warroom" target="_blank" rel="noopener noreferrer">Request access</a>
+              <% if (warroomBookingEmbedUrl) { %>
+                <a class="btn btn--ghost btn--sm" href="<%= warroomBookingEmbedUrl %>" target="_blank" rel="noopener noreferrer">Schedule a demo</a>
+              <% } %>
+            </p>
+          <% } %>
+        </div>
+        <div class="warroom-intro__preview">
+          <p class="warroom-intro__preview-label">Real product screenshots</p>
+          <div class="warroom-slider">
+            <button type="button" class="warroom-slider__nav warroom-slider__nav--prev" aria-label="Previous screenshot">&#8249;</button>
+            <div class="warroom-slider__track" id="warroom-slider-track">
+              <figure class="warroom-slider__slide">
+                <img src="/img/warroom/warroom-map-overview.jpg" alt="The live global disruption map, showing real-time supply chain incidents plotted worldwide" loading="lazy">
+                <figcaption>Real-time disruptions plotted on the global map</figcaption>
+              </figure>
+              <figure class="warroom-slider__slide">
+                <img src="/img/warroom/warroom-search-sort.jpg" alt="The recent events feed, filtered by a search for &quot;flood&quot;, showing a real matching incident" loading="lazy">
+                <figcaption>Search and sort the live event feed</figcaption>
+              </figure>
+              <figure class="warroom-slider__slide">
+                <img src="/img/warroom/warroom-severe-impact.jpg" alt="A real War Room investigation result showing a severe impact verdict and a grounded assessment reason" loading="lazy">
+                <figcaption>A real AI-assessed impact verdict, not a guess</figcaption>
+              </figure>
+              <figure class="warroom-slider__slide">
+                <img src="/img/warroom/warroom-sources-panel.jpg" alt="A real War Room result showing an 11-source breakdown and a recommended action with rationale" loading="lazy">
+                <figcaption>Every claim cited — sources and recommended actions</figcaption>
+              </figure>
+            </div>
+            <button type="button" class="warroom-slider__nav warroom-slider__nav--next" aria-label="Next screenshot">&#8250;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%# Recent events feed -- a separate section, after the War Room
+      explainer above (not nested inside the map section), so a long list
+      of events never buries the explainer beneath it. live.js's
+      renderFeed() rebuilds .live-feed__list client-side on every poll and
+      applies the search/sort controls below; this server-rendered markup
+      is just the first-paint state (identical shape, so there's no
+      flash-of-different-content on load). %>
+  <section class="section">
+    <div class="shell">
+      <div class="live-feed">
+        <div class="live-feed__header">
+          <h2 class="display-2">Recent events</h2>
+          <div class="live-feed__controls">
+            <label class="visually-hidden" for="live-feed-search">Search recent events</label>
+            <input type="search" id="live-feed-search" class="live-feed__search" placeholder="Search by location, category, or summary…" autocomplete="off">
+            <label class="visually-hidden" for="live-feed-sort">Sort recent events</label>
+            <select id="live-feed-sort" class="live-feed__sort">
+              <option value="newest">Newest first</option>
+              <option value="severity-desc">Severity: high to low</option>
+              <option value="severity-asc">Severity: low to high</option>
+            </select>
+          </div>
+        </div>
+        <p class="live-feed__count" data-role="feed-count" aria-live="polite"></p>
+        <ul class="live-feed__list">
+          <% events.forEach(function (e) { %>
+            <li class="live-feed__item" data-event-id="<%= e.id %>" tabindex="0" role="button" aria-label="Show this disruption on the map">
+              <span class="live-feed__severity live-feed__severity--<%= e.severity %>"><%= e.severity %></span>
+              <span class="live-feed__category"><%= e.category %></span>
+              <span class="live-feed__location"><%= e.location %></span>
+              <p class="live-feed__summary"><%= e.summary %></p>
+              <% if (e.sourceUrl) { %>
+                <a class="live-feed__source" href="<%= e.sourceUrl %>" target="_blank" rel="noopener noreferrer">Source</a>
+              <% } %>
+            </li>
+          <% }); %>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <%# Server-rendered snapshot for first paint; live.js polls /live/data (a
+      same-origin proxy — MIS's real address is never sent to the browser)
+      for updates. < escaping prevents a summary/title containing
+      "</script>" from breaking out of this JSON island. %>
+  <script type="application/json" id="live-initial-data"><%- JSON.stringify(events).replace(/</g, '\\u003c') %></script>
+  <script type="application/json" id="live-initial-vessels"><%- JSON.stringify(vessels).replace(/</g, '\\u003c') %></script>
+  <%# War Room gating state for the "Investigate" popup action
+      (public/js/live-warroom.js) — session-scoped, never a real service
+      address. See docs/internal/WARROOM_BUILD_PLAN.md §10. %>
+  <script type="application/json" id="live-warroom-state"><%- JSON.stringify({
+    unlocked: Boolean(warroomUnlocked),
+    requestAccessHref: '/contact?topic=warroom',
+    bookingEmbedUrl: warroomBookingEmbedUrl || ''
+  }).replace(/</g, '\\u003c') %></script>
+  <script src="/js/vendor/maplibre-gl-csp.js" defer></script>
+  <script src="/js/live-warroom.js" defer></script>
+  <script src="/js/live.js" defer></script>
+<% } %>

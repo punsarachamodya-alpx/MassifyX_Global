@@ -230,6 +230,12 @@ button {
   color: var(--ink-muted);
 }
 
+/* Small follow-up link under a hero lede -- used to cross-link the two
+   "Intelligence" pages (/live and /insights/sweden-trade) to each other. */
+.crosslink {
+  margin-top: 1.4rem;
+}
+
 /* ---------------------------------------------------------- 5. Structure */
 
 /* Full-bleed: no max-width cap, so content spans the actual viewport rather than
@@ -488,6 +494,13 @@ button {
   background: var(--cobalt);
   border-color: var(--cobalt);
   color: #fff;
+}
+
+/* Compact variant for tight spaces (the War Room popup panel, section 29) --
+   same modifier pattern as --primary/--ghost/--onNavy above. */
+.btn--sm {
+  padding: 0.5rem 0.9rem;
+  font-size: 0.78rem;
 }
 
 /* The chevron text-link that carries most navigation weight in this register */
@@ -1891,5 +1904,1024 @@ button {
 
   body {
     color: #000;
+  }
+}
+
+/* ------------------------------------------------------- 28. Live monitor */
+
+/* Severity behaves like a threat/status level (project44-style ops
+   dashboard reference), not a generic magnitude -- a status-style
+   green -> amber -> red ramp, distinct from the blue sequential ramp used
+   for other magnitude data elsewhere on the site. Never the only channel:
+   every marker also carries a numeric label and a text tooltip. */
+:root {
+  --severity-1: #22c55e;
+  --severity-2: #84cc16;
+  --severity-3: #fbbf24;
+  --severity-4: #f97316;
+  --severity-5: #ef4444;
+}
+
+.live-unavailable {
+  background: var(--ground-alt);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: clamp(2rem, 5vw, 3.5rem);
+  text-align: center;
+}
+
+.world-map {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 960 / 480;
+  min-height: 320px;
+  /* A section of the page, not the whole screen -- aspect-ratio alone
+     would make this taller than the viewport on wide desktop windows. */
+  max-height: 60vh;
+  border-radius: 6px;
+  /* CARTO's dark-matter basemap paints its own background layer once
+     loaded; this is only the fallback color shown for the instant before
+     the style/tiles finish their first fetch. */
+  background: #0e0e0e;
+  /* Not overflow:hidden: the War Room investigate section (section 29) can
+     make .world-map__popup taller than the map box itself, especially near
+     the bottom edge -- clipping it there would silently hide the results
+     panel. The canvas gets its own border-radius immediately below so the
+     map still reads as rounded; only children that intentionally extend
+     past the box (popups) are now allowed to. */
+  overflow: visible;
+  margin-bottom: 1rem;
+}
+
+.world-map .maplibregl-map {
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-body);
+}
+
+/* MapLibre adds its own "maplibregl-map" class to this same element at
+   init and maplibre-gl.css sets `.maplibregl-map { overflow: hidden }` --
+   same specificity as .world-map's own rule above, loaded after it in the
+   document, so it would otherwise win and re-clip popups. Two classes on
+   one selector beats one class regardless of source order. */
+.world-map.maplibregl-map {
+  overflow: visible;
+}
+
+.world-map .maplibregl-canvas {
+  border-radius: 6px;
+}
+
+/* Top-left (not bottom-left): MapLibre's own AttributionControl now lives
+   at bottom-left, required for the CARTO basemap. */
+.world-map__updated {
+  position: absolute;
+  left: 0.75rem;
+  top: 0.75rem;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  z-index: 1;
+}
+
+/* Distinct shape (arrow) and hue (cyan) from the disruption markers
+   (colored circles) -- two different entities never share one visual
+   channel. MapLibre's own Marker.setRotation() rotates the whole marker
+   wrapper (map-aligned), so no manual heading CSS var is needed here. */
+.world-map__vessel {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.world-map__vessel::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  background: var(--cyan);
+  clip-path: polygon(50% 0%, 100% 100%, 50% 78%, 0% 100%);
+  filter: drop-shadow(0 0 3px var(--cyan));
+}
+
+.world-map__vessel:hover::before,
+.world-map__vessel:focus-visible::before {
+  filter: drop-shadow(0 0 5px #fff);
+}
+
+.world-map__legend-vessel {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 9px solid var(--cyan);
+}
+
+.world-map__tooltip {
+  position: absolute;
+  translate: -50% calc(-100% - 10px);
+  max-width: 260px;
+  background: #fff;
+  color: var(--ink);
+  border-radius: 3px;
+  padding: 0.75rem 0.9rem;
+  box-shadow: 0 16px 32px -16px rgba(6, 15, 38, 0.5);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.world-map__tooltip-severity {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.world-map__tooltip-meta {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+  margin-top: 0.15rem;
+}
+
+.world-map__tooltip-summary {
+  margin: 0.4rem 0 0;
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+}
+
+/* Click popup for the native MapLibre circle event layer (events-dots).
+   maplibre-gl.css supplies the tip/close-button/positioning mechanics for
+   .maplibregl-popup; this just re-skins the content box to match the
+   site's dark surfaces instead of MapLibre's white default. */
+.world-map__popup .maplibregl-popup-content {
+  background: var(--navy-deep, #0a1628);
+  color: #fff;
+  border-radius: 4px;
+  padding: 0.75rem 0.9rem;
+  box-shadow: 0 16px 32px -16px rgba(6, 15, 38, 0.6);
+}
+
+.world-map__popup .maplibregl-popup-tip {
+  border-top-color: var(--navy-deep, #0a1628);
+  border-bottom-color: var(--navy-deep, #0a1628);
+}
+
+.world-map__popup .maplibregl-popup-close-button {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.world-map__popup-severity {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.world-map__popup-meta {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.55);
+  margin-top: 0.15rem;
+}
+
+.world-map__popup-summary {
+  margin: 0.4rem 0 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.world-map__popup-source {
+  display: inline-block;
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--cyan);
+}
+
+.world-map__legend {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  background: rgba(6, 15, 38, 0.6);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 0.4rem 0.7rem;
+}
+
+.world-map__legend-group {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.world-map__legend-label {
+  color: #fff;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-right: 0.15rem;
+}
+
+.world-map__legend-swatch {
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-family: var(--font-mono);
+}
+
+.world-map__legend-swatch--1 { background: var(--severity-1); color: #fff; }
+.world-map__legend-swatch--2 { background: var(--severity-2); color: #fff; }
+.world-map__legend-swatch--3 { background: var(--severity-3); color: #fff; }
+.world-map__legend-swatch--4 { background: var(--severity-4); color: var(--navy); }
+.world-map__legend-swatch--5 { background: var(--severity-5); color: var(--navy); }
+
+.world-map__legend-line {
+  width: 1.1rem;
+  height: 0;
+  border-top: 1px solid #5b7699;
+}
+
+.world-map__caption {
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+  margin: 0 0 clamp(2rem, 4vw, 3rem);
+}
+
+.live-feed__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.live-feed__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.live-feed__search,
+.live-feed__sort {
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--rule-strong);
+  border-radius: 2px;
+  padding: 0.55rem 0.8rem;
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+
+.live-feed__search {
+  min-width: 15rem;
+}
+
+.live-feed__search:focus,
+.live-feed__sort:focus {
+  outline: none;
+  border-color: var(--cobalt);
+  box-shadow: 0 0 0 3px rgba(46, 123, 255, 0.16);
+}
+
+.live-feed__count {
+  margin: 0.9rem 0 0;
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+}
+
+/* Capped height + internal scroll: with a live feed that can carry
+   hundreds of events, an uncapped list would push everything below it
+   (the War Room explainer moved above this section specifically to avoid
+   that, but the feed itself still needs its own bound) an unbounded
+   distance down the page. */
+.live-feed__list {
+  list-style: none;
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+  max-height: 640px;
+  overflow-y: auto;
+  padding-right: 0.4rem;
+}
+
+/* role="button"/tabindex on the <li> itself (see live.ejs / live.js
+   renderFeed): clicking or Enter/Space-ing an item flies the map to it and
+   opens its popup, so this needs visible interactive affordance. */
+.live-feed__item {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: baseline;
+  gap: 0.5rem 0.75rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease);
+}
+
+.live-feed__item:hover,
+.live-feed__item:focus-visible {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 1px var(--cyan);
+  outline: none;
+}
+
+.live-feed__severity {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 0.85rem;
+}
+
+.live-feed__severity--1 { background: var(--severity-1); }
+.live-feed__severity--2 { background: var(--severity-2); }
+.live-feed__severity--3 { background: var(--severity-3); }
+.live-feed__severity--4 { background: var(--severity-4); color: var(--navy); }
+.live-feed__severity--5 { background: var(--severity-5); color: var(--navy); }
+
+.live-feed__category {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+}
+
+.live-feed__location {
+  font-weight: 600;
+  grid-column: 3;
+}
+
+.live-feed__summary {
+  grid-column: 1 / -1;
+  color: var(--ink-muted);
+  margin: 0;
+}
+
+.live-feed__source {
+  grid-column: 1 / -1;
+  justify-self: start;
+  font-size: 0.85rem;
+}
+
+/* ---------------------------------------------------------- 29. War room */
+
+/* "Investigate" section appended to the disruption popup
+   (public/js/live-warroom.js). It lives inside the same dark
+   .world-map__popup surface as the rest of the popup (section 28 above),
+   so it inherits that dark-on-navy treatment rather than introducing a
+   second visual language inside one popup. Gating states (locked teaser,
+   unlock form, progress, results) are separate blocks below in that order.
+   See docs/internal/WARROOM_BUILD_PLAN.md §10 for the access model. */
+
+.warroom-panel {
+  margin-top: 0.65rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* -- locked teaser + request-access/demo CTAs -------------------------- */
+
+.warroom-teaser__title {
+  display: block;
+  font-size: 0.85rem;
+  color: #fff;
+}
+
+.warroom-teaser__body {
+  margin: 0.35rem 0 0.7rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.warroom-teaser__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* -- "already have a code?" inline unlock form --------------------------- */
+
+.warroom-unlock {
+  margin-top: 0.6rem;
+}
+
+.warroom-unlock__toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 0.76rem;
+  color: var(--cyan);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.warroom-unlock-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+/* The class rule above sets display:flex at the same specificity as the
+   browser's default `[hidden] { display: none }` -- without this, setting
+   the `hidden` attribute in live-warroom.js would stop actually hiding
+   the form once this stylesheet loads. */
+.warroom-unlock-form[hidden] {
+  display: none;
+}
+
+.warroom-unlock-form__input {
+  flex: 1 1 120px;
+  min-width: 0;
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.warroom-unlock-form__input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.warroom-unlock-form__input:focus {
+  outline: none;
+  border-color: var(--cyan);
+}
+
+.warroom-unlock-form__error {
+  flex-basis: 100%;
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  color: #ff9d9d;
+}
+
+/* -- unlocked idle / in-flight states ------------------------------------ */
+
+.warroom-investigate-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.warroom-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+}
+
+.warroom-spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: var(--cyan);
+  border-radius: 50%;
+  animation: warroom-spin 0.8s linear infinite;
+}
+
+@keyframes warroom-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.warroom-progress__text {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #fff;
+}
+
+.warroom-progress__note {
+  margin: 0;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* -- unavailable / rate-limited / failed messages ------------------------ */
+
+.warroom-message p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.warroom-message--error p {
+  color: #ff9d9d;
+}
+
+/* -- completed results panel: summary, tables, actions, citations ------- */
+
+.warroom-results {
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 0.3rem;
+}
+
+.warroom-results__capped {
+  margin: 0 0 0.5rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 2px;
+  background: rgba(251, 191, 36, 0.15);
+  color: #fde68a;
+  font-size: 0.75rem;
+}
+
+.warroom-results__summary {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* -- impact badge: at-a-glance signal above the summary -------------------
+   Backgrounds are low-opacity tints of the map's own severity ramp (section
+   28) -- reusing the validated palette rather than inventing new hues, same
+   posture as the confidence pills below. "none" gets the identical treatment
+   as every other level (icon + colored surface + subtitle), not a bare
+   empty state -- a real no-impact result should read as confident, not
+   shallow. Icon foreground colors mirror .world-map__legend-swatch's own
+   contrast choices (white on green/lime/amber, navy on red). */
+.warroom-impact-badge {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 0 0 0.75rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 4px;
+}
+
+.warroom-impact-badge__icon {
+  flex: 0 0 auto;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.warroom-impact-badge__label {
+  display: block;
+  font-size: 0.85rem;
+  color: #fff;
+}
+
+.warroom-impact-badge__reason {
+  margin: 0.15rem 0 0;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.warroom-impact-badge--none {
+  background: rgba(34, 197, 94, 0.15);
+}
+
+.warroom-impact-badge--none .warroom-impact-badge__icon {
+  background: var(--severity-1);
+  color: #fff;
+}
+
+.warroom-impact-badge--low {
+  background: rgba(132, 204, 22, 0.15);
+}
+
+.warroom-impact-badge--low .warroom-impact-badge__icon {
+  background: var(--severity-2);
+  color: #fff;
+}
+
+.warroom-impact-badge--moderate {
+  background: rgba(251, 191, 36, 0.15);
+}
+
+.warroom-impact-badge--moderate .warroom-impact-badge__icon {
+  background: var(--severity-3);
+  color: #fff;
+}
+
+.warroom-impact-badge--severe {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.warroom-impact-badge--severe .warroom-impact-badge__icon {
+  background: var(--severity-5);
+  color: var(--navy);
+}
+
+/* -- at-a-glance impact strip: collapsed entry point into the category
+   tables below (section further down), instead of always showing every
+   table stacked open. */
+.warroom-impact-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 0.75rem;
+}
+
+.warroom-impact-strip__item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.warroom-impact-strip__item:hover,
+.warroom-impact-strip__item:focus-visible {
+  border-color: var(--cyan);
+  background: rgba(70, 211, 255, 0.1);
+  outline: none;
+}
+
+.warroom-impact-strip__item[aria-expanded='true'] {
+  border-color: var(--cyan);
+  background: rgba(70, 211, 255, 0.16);
+}
+
+.warroom-impact-strip__tag {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.warroom-impact-strip__count {
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.warroom-impact-strip__label {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.warroom-table {
+  margin-bottom: 0.75rem;
+}
+
+.warroom-table__heading {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.warroom-table__list,
+.warroom-actions__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.warroom-table__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+}
+
+.warroom-table__name {
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Reuses the severity ramp's semantics (green/amber/muted), not its
+   literal role -- confidence isn't severity, but "good/caution/unclear"
+   maps cleanly onto the same three-step ramp already established. */
+.warroom-table__confidence {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.05rem 0.4rem;
+  border-radius: 8px;
+  border: 1px solid currentColor;
+}
+
+.warroom-table__confidence--high {
+  color: var(--severity-1);
+}
+
+.warroom-table__confidence--medium {
+  color: var(--severity-3);
+}
+
+.warroom-table__confidence--low {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* Every table row carries its own citation link -- never a claim with no
+   visible source (WARROOM_API_CONTRACT.md hard rule). */
+.warroom-table__source {
+  flex-basis: 100%;
+  font-size: 0.75rem;
+  color: var(--cyan);
+}
+
+.warroom-actions__item {
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.warroom-actions__item:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.warroom-actions__urgency {
+  display: inline-block;
+  margin-bottom: 0.2rem;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.05rem 0.4rem;
+  border-radius: 8px;
+}
+
+.warroom-actions__urgency--high {
+  background: var(--severity-5);
+  color: #fff;
+}
+
+.warroom-actions__urgency--medium {
+  background: var(--severity-3);
+  color: var(--navy);
+}
+
+.warroom-actions__urgency--low {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.warroom-actions__action {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #fff;
+}
+
+.warroom-actions__rationale {
+  margin: 0.15rem 0 0;
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* -- sources panel: source-diversity signal computed client-side from
+   result.findings (sourceType breakdown) -- a first-class element, not a
+   citation link buried on each row. */
+.warroom-sources {
+  margin-bottom: 0.75rem;
+}
+
+.warroom-sources__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.warroom-sources__chip {
+  font-size: 0.72rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* -- related incidents: informational chips only, no click behavior --
+   there's no cross-event navigation mechanism in this popup system yet, and
+   building one is out of scope here (v1 is just the titles). */
+.warroom-related {
+  margin-bottom: 0.75rem;
+}
+
+.warroom-related__heading {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.warroom-related__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.warroom-related__chip {
+  font-size: 0.72rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* -- investigation metadata: a trust signal (cost/depth/elapsed time), kept
+   deliberately secondary -- caption-sized and muted, never competing with
+   the summary or the actions above it. */
+.warroom-results__meta {
+  margin: 0.5rem 0 0;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.warroom-results__disclaimer {
+  margin: 0.75rem 0 0;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 0.7rem;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ------------------------------------------------ 30. War room explainer */
+
+/* The "Investigate" action only lives inside a clicked event's popup
+   (section 29) -- a visitor who never clicks a marker has no way to know
+   it exists. This section makes the capability visible on the page itself,
+   in the site's normal light editorial register. The preview card on the
+   right is deliberately a dark surface (same --navy-deep as the real
+   popup, section 28) so the real .warroom-impact-badge/-strip/-sources
+   classes nested inside it render pixel-identical to production instead of
+   needing a screenshot or any stock imagery (this site's "No photography"
+   constraint applies here too) -- it's the product's own real UI with
+   static, clearly-labeled illustrative content. */
+.section--warroom-intro {
+  border-top: 1px solid var(--rule);
+}
+
+.warroom-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: start;
+}
+
+.warroom-intro__features {
+  list-style: none;
+  margin: 1.6rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.warroom-intro__features li {
+  padding-left: 1.4rem;
+  position: relative;
+  color: var(--ink-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.warroom-intro__features li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cobalt);
+}
+
+.warroom-intro__features strong {
+  color: var(--ink);
+}
+
+.warroom-intro__cta {
+  margin-top: 1.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.warroom-intro__preview {
+  background: var(--navy-deep, #0a1628);
+  border-radius: 4px;
+  padding: 1.1rem 1.2rem 1.3rem;
+  box-shadow: 0 16px 32px -16px rgba(6, 15, 38, 0.6);
+}
+
+.warroom-intro__preview-label {
+  margin: 0 0 0.85rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* Real product screenshots (not stock imagery -- see live.ejs's comment on
+   this block), scroll-snap carousel so it works with zero JS as a bare
+   swipeable/scrollable strip; the prev/next buttons (wired in live.js) are
+   a progressive enhancement on top, not load-bearing. Slides are plain
+   white cards floating on the dark preview surface -- most of these
+   screenshots have their own white chrome (browser/page background), so a
+   white card frame reads as intentional, not a mismatched background. */
+.warroom-slider {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.warroom-slider__track {
+  display: flex;
+  gap: 0.85rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  border-radius: 4px;
+}
+
+.warroom-slider__track::-webkit-scrollbar {
+  display: none;
+}
+
+.warroom-slider__slide {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  margin: 0;
+  background: #fff;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.warroom-slider__slide img {
+  display: block;
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  object-position: top center;
+  background: #fff;
+}
+
+.warroom-slider__slide figcaption {
+  padding: 0.65rem 0.9rem;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  border-top: 1px solid var(--rule);
+}
+
+.warroom-slider__nav {
+  flex: 0 0 auto;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s var(--ease);
+}
+
+.warroom-slider__nav:hover,
+.warroom-slider__nav:focus-visible {
+  background: rgba(255, 255, 255, 0.18);
+  outline: none;
+}
+
+@media (max-width: 900px) {
+  .warroom-intro {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

@@ -27,15 +27,23 @@ node -e "console.log('ADMIN_PASSWORD=' + require('crypto').randomBytes(12).toStr
 node -e "console.log('SESSION_SECRET=' + require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-`.env` should end up looking like this:
+`.env` should end up looking like this (values below are illustrative
+placeholders only — always use freshly generated output from the commands
+above, never copy these literal strings):
 
 ```
 PORT=3000
-ADMIN_PASSWORD=sxfHeFOop4TICZj8
-SESSION_SECRET=77c20c93cf88952af85e9770ddc6526cf28887724a0e99d6717e6516457eb568
+ADMIN_PASSWORD=<your own generated value — 16+ random chars>
+SESSION_SECRET=<your own generated value — 64 hex chars>
 NODE_ENV=production
 BASE_URL=https://www.massifyx.com
+MIS_BASE_URL=https://your-mis-deployment.example.com
 ```
+
+`MIS_BASE_URL` is optional and only affects `/live` (the disruption-monitor
+map) — leave it unset and `/live` still returns 200 with a "temporarily
+unavailable" panel instead of live data. `/insights/sweden-trade` needs no
+env var; it renders from a file already committed to the repo.
 
 Then start it:
 
@@ -123,7 +131,10 @@ NODE_ENV=production
 BASE_URL=https://www.massifyx.com
 ADMIN_PASSWORD=your-generated-password
 SESSION_SECRET=your-generated-secret
+MIS_BASE_URL=https://your-mis-deployment.example.com
 ```
+
+`MIS_BASE_URL` is optional — see the note in part 1 above.
 
 **Start it as a service** so it survives crashes and reboots:
 

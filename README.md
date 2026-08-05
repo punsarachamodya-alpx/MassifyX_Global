@@ -5,6 +5,17 @@ engagement point in Sweden paired with senior-led delivery from Sri Lanka.
 
 Plain Node.js. No build step, no bundler, no CSS framework. Edit a file, restart, done.
 
+![Homepage](public/img/readme/homepage.jpg)
+
+**Intelligence pages** — `/live`'s global disruption map, feed search/sort, and the
+War Room AI-investigation feature (see "Intelligence" below), all real screenshots
+of the running site:
+
+| | |
+|---|---|
+| ![Live disruption map](public/img/warroom/warroom-map-overview.jpg) | ![Feed search and sort](public/img/warroom/warroom-search-sort.jpg) |
+| ![Real severity verdict](public/img/warroom/warroom-severe-impact.jpg) | ![Cited sources and actions](public/img/warroom/warroom-sources-panel.jpg) |
+
 ## Run it
 
 ```bash
@@ -32,17 +43,27 @@ the public site works, `/admin` stays locked). Production: `npm start`.
 | `SESSION_SECRET` | Recommended | Keeps admin sessions alive across restarts |
 | `NODE_ENV=production` | Recommended | Secure cookies, static-asset caching |
 | `BASE_URL` | Recommended | Canonical URLs, Open Graph tags, sitemap |
+| `MIS_BASE_URL` | Optional | Address of the [MassifyX Intelligence Service](https://github.com/Viraj97-SL/massifyx-intelligence) — see below |
+| `WARROOM_BASE_URL` | Optional | Address of the War Room investigation service — see below |
+| `WARROOM_ACCESS_CODE` | Required to unlock War Room | Shared code that unlocks `/live`'s "Investigate" action for a session. Without it, every unlock attempt is refused by design |
+
+Unset or unreachable `MIS_BASE_URL` is not an error — `/live` degrades to a
+"temporarily unavailable" panel and still returns 200.
+`/insights/sweden-trade` needs no env var at all; it renders entirely from
+the committed `content/sweden-trade-data.json` (see **Intelligence** below).
 
 ## Layout
 
 ```
-server.js          Express app — routes, contact validation, sitemap/robots
-content/           Default copy as plain JS modules — the site's substance
-lib/               store (merge), schema (fields + write allow-list), auth, paths
-routes/admin.js    All /admin routes
-views/             EJS templates + partials
-public/            One CSS file, vanilla JS, self-hosted fonts, brand assets
-data/              git-ignored — admin overrides and backups
+server.js               Express app — routes, contact validation, sitemap/robots
+content/                Default copy as plain JS modules — the site's substance
+content/sweden-trade-data.json  Pre-baked Statistics Sweden dataset (see Intelligence below)
+lib/                    store (merge), schema (fields + write allow-list), auth, paths
+routes/admin.js         All /admin routes
+scripts/sweden-trade/   Offline job that produces content/sweden-trade-data.json
+views/                  EJS templates + partials
+public/                 CSS, vanilla JS, self-hosted fonts/libraries, brand assets
+data/                   git-ignored — admin overrides and backups
 ```
 
 Copy lives in `content/*.js`. `lib/store.js` merges JSON overrides written by the
@@ -58,6 +79,74 @@ Two ways:
    live immediately. Backups are taken before every save; "reset to original" is
    always available.
 2. **`content/*.js`** — edit the shipped defaults directly and restart.
+
+## Intelligence
+
+Two pages under the "Intelligence" nav item, both designed so a down or
+missing upstream never takes the marketing site with it:
+
+- **`/live` — Global Disruption Monitor.** Server-side proxies
+  [MassifyX Intelligence Service](https://github.com/Viraj97-SL/massifyx-intelligence)
+  (`MIS_BASE_URL`) for live supply-chain disruption events; the browser
+  never learns MIS's real address (`GET /live/data` is a same-origin
+  proxy). The map is MapLibre GL JS (self-hosted, CSP-safe build) on
+  CARTO's free dark-matter vector basemap — a named CSP exception for
+  `*.basemaps.cartocdn.com` (`server.js`), the only origin exception on
+  the whole site. Shipping lanes drawn on it are real, static maritime
+  geography (`public/geo/shipping-lanes.geojson`, sourced from the
+  [Global Shipping Lanes dataset](https://doi.org/10.5281/zenodo.6361763),
+  CC BY-SA 4.0 — see `public/geo/README.md`), not generated or
+  illustrative paths. If MIS is unset, down, or slow, `/live` still
+  returns 200 with a "temporarily unavailable" panel.
+- **War Room — gated incident investigation.** An "Investigate" action in
+  `/live`'s event popup that proxies to a third, separate microservice
+  (`WARROOM_BASE_URL`) which researches a single clicked disruption and
+  returns a structured affected/unaffected/recommended-actions briefing,
+  every claim cited to a real source. Gated, not public: anonymous visitors
+  see a locked teaser with a "Request access" link into `/contact`
+  (identifiable via `?topic=warroom`) and, if a booking URL is configured,
+  a "Schedule a demo" link. `WARROOM_ACCESS_CODE` (same shape as
+  `ADMIN_PASSWORD`) unlocks it for a browser session via `POST
+  /live/unlock`. Investigations run server-side only — the browser never
+  learns War Room's address, and an unset/unreachable/failed/capped job all
+  degrade to a clear "unavailable" state, never a broken page. See
+  `docs/internal/WARROOM_BUILD_PLAN.md` and `WARROOM_API_CONTRACT.md`.
+  - The result itself is a structured panel, not a flat paragraph: a
+    colored impact badge (`impactLevel` — none/low/moderate/severe, the
+    investigation's own verdict, distinct from the incident's input
+    severity), a collapsed-by-default at-a-glance count strip per affected
+    category, a sources panel (source-type breakdown, computed client-side
+    from the citations already in the response), an investigation
+    metadata line (cost/depth/elapsed time), and up to 3 related-incident
+    chips surfaced from the same semantic-similarity check the service
+    uses for its own cost-saving dedupe cache.
+  - Since the "Investigate" action only lives inside a clicked event's
+    popup, `/live` also has a standalone explainer section below the map
+    (visible to every visitor, locked or unlocked) describing the
+    capability and previewing the real result-panel styling with static,
+    labeled-illustrative example content — not a screenshot or stock
+    photography, the product's own actual UI classes rendered with sample
+    data (see `views/live.ejs`'s War Room explainer section and
+    `public/css/styles.css` section 30).
+- **`/insights/sweden-trade` — Sweden Trade Intelligence.** A
+  scrollytelling data story analysing Sweden's trade (imports/exports by
+  goods category, partner country, concentration risk, balance, YoY
+  trend), sourced from Statistics Sweden's key-free PxWebApi v2. Static
+  by design — SCB updates monthly, so the site has **zero runtime
+  dependency on SCB**. `scripts/sweden-trade/` is the offline job that
+  produces the committed `content/sweden-trade-data.json`:
+  ```bash
+  npm run data:sweden-trade        # re-run the pipeline, overwrite the dataset
+  npm run test:sweden-trade        # unit tests for the pipeline (separate from npm test)
+  ```
+  The job fails loudly (non-zero exit, dataset untouched) on any
+  data-integrity violation — see `scripts/sweden-trade/RUNBOOK.md`.
+  A GitHub Action (`.github/workflows/sweden-trade-refresh.yml`) reruns it
+  monthly and opens a PR with the diff rather than pushing to `main`.
+  Charts are self-hosted D3 v7 (`public/js/vendor/d3.v7.min.js`) with a
+  hand-rolled scroll-position stepper (`public/js/story-engine.js`) — no
+  CDN, no new CSP exceptions. The page is fully readable with JavaScript
+  disabled; JS only upgrades it to the sticky-scroll experience.
 
 ## Honesty constraints
 
@@ -114,10 +203,15 @@ unconditionally in case the IntersectionObserver misses an element.
 
 - Helmet CSP: `script-src 'self'`, no inline scripts anywhere. `frame-src` is
   evaluated per request against the live booking URL, so adding a Calendly link in the
-  admin panel widens the policy with no restart.
+  admin panel widens the policy with no restart. The one standing origin exception is
+  `connect-src`/`img-src` for `/live`'s CARTO basemap tiles (`*.basemaps.cartocdn.com`)
+  — named and minimal, not a blanket relaxation.
 - Admin: one shared password via `ADMIN_PASSWORD`, SHA-256 + `timingSafeEqual`
   comparison, session regeneration on login, per-session CSRF on every POST, and a
   15-minute lockout after 6 failed attempts from one IP.
+- War Room: one shared access code via `WARROOM_ACCESS_CODE`, same
+  SHA-256 + `timingSafeEqual` comparison and 15-minute/6-attempt lockout
+  discipline as admin, gating a session flag rather than a login (`lib/warroomAuth.js`).
 - The schema doubles as a write allow-list — a crafted POST can only reach declared paths.
 - Uploads: JPG/PNG/WebP only by MIME type, 4 MB cap, 4 per request, filenames always
   replaced with random hex.
@@ -131,7 +225,9 @@ live in `data/content.json` and uploads in `public/img/uploads/`. Hosts that giv
 deploy a fresh filesystem silently discard both on redeploy. Either attach a
 persistent disk, treat the admin panel as edit-locally-then-commit, or export a JSON
 copy before every redeploy. If the site is only ever edited via `content/*.js` in
-code, none of this applies.
+code, none of this applies. `content/sweden-trade-data.json` is unaffected either
+way — it's a committed file in git, refreshed by a scheduled job (see
+**Intelligence** above), not written at runtime.
 
 ## Outstanding founder TODOs
 
