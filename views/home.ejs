@@ -13,13 +13,11 @@
         <a class="btn btn--ghost" href="<%= page.hero.secondaryCta.href %>"><%= page.hero.secondaryCta.label %></a>
       </div>
     </div>
-    <div class="hero__figure">
-      <% if (page.hero.figureImage) { %>
+    <% if (page.hero.figureImage) { %>
+      <div class="hero__figure">
         <img src="<%= page.hero.figureImage %>" alt="" width="660" height="520">
-      <% } else { %>
-        <%- include('partials/hero-figure') %>
-      <% } %>
-    </div>
+      </div>
+    <% } %>
   </div>
 </section>
 

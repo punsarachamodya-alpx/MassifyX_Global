@@ -643,9 +643,8 @@ button {
   object-position: right center;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.85;
-  mask-image: linear-gradient(to right, transparent 0%, transparent 38%, rgba(0, 0, 0, 0.55) 62%, black 82%);
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 38%, rgba(0, 0, 0, 0.55) 62%, black 82%);
+  mask-image: linear-gradient(to right, transparent 0%, transparent 30%, black 65%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 30%, black 65%);
 }
 
 @media (max-width: 900px) {
