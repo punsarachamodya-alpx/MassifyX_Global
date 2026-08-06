@@ -1,0 +1,39 @@
+# systemd unit — keeps the site running and restarts it on crash or reboot.
+#
+#   sudo cp deploy/norvenzia.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now norvenzia
+#   sudo systemctl status norvenzia
+#
+# Adjust User, WorkingDirectory, and the ExecStart node path to match your server.
+
+[Unit]
+Description=Norvenzia website
+After=network.target
+
+[Service]
+Type=simple
+User=norvenzia
+WorkingDirectory=/var/www/norvenzia
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=5
+
+# Secrets are read from this file, not baked into the unit.
+# Create it with: sudo install -o norvenzia -g norvenzia -m 600 /dev/null /etc/norvenzia.env
+EnvironmentFile=/etc/norvenzia.env
+
+# Logs go to the journal: journalctl -u norvenzia -f
+StandardOutput=journal
+StandardError=journal
+
+# Basic hardening. data/ and public/img/uploads/ must stay writable, so the
+# whole filesystem is read-only except those paths.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/var/www/norvenzia/data /var/www/norvenzia/public/img/uploads
+
+[Install]
+WantedBy=multi-user.target

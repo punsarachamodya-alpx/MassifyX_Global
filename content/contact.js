@@ -1,13 +1,13 @@
 module.exports = {
   meta: {
-    title: 'Contact — MassifyX Global',
+    title: 'Contact — Norvenzia',
     description:
-      'Book a discovery call. Tell us what your procurement operation looks like today and we’ll come back with an honest read on whether we can help.'
+      'Book a call. Tell us what your procurement operation looks like today and we’ll come back with an honest read on whether we can help.'
   },
 
   hero: {
     eyebrow: 'Contact',
-    headline: 'Book a discovery call.',
+    headline: 'Book a call.',
     body:
       'Tell us what your procurement operation looks like today. We’ll come back with an honest read on whether we can help — and if we can’t, we’ll say so.'
   },

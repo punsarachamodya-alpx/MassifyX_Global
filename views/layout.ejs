@@ -18,12 +18,12 @@
   <meta name="twitter:description" content="<%= meta && meta.description ? meta.description : site.description %>">
   <meta name="twitter:image" content="<%= site.baseUrl %>/og-image.png">
 
-  <meta name="theme-color" content="#0a1b3c">
+  <meta name="theme-color" content="#002d5c">
   <meta name="google-site-verification" content="7gYId43Lho6wGtoeaNaLe2Dn677lgGabxZ31fi0BUEI" />
   <%# SVG favicon for browsers that support scalable tab icons; PNG fallbacks
       (regenerated from the same source SVG) for everyone else, and Apple touch
       icon specifically — Safari doesn't accept SVG there. %>
-  <link rel="icon" href="/brand/massifyx-x-mark.svg" type="image/svg+xml">
+  <link rel="icon" href="/brand/norvenzia-favicon.svg" type="image/svg+xml">
   <link rel="icon" href="/brand/favicon-32.png" sizes="32x32">
   <link rel="icon" href="/brand/favicon-256.png" sizes="256x256">
   <link rel="apple-touch-icon" href="/brand/apple-icon-180.png">
@@ -60,9 +60,17 @@
     const logoHMobile = Math.min(MOBILE_LOGO_CAP, logoH);
     const footerLogoHMobile = Math.min(MOBILE_LOGO_CAP, footerLogoH);
 
-    // The wordmark's own viewBox (public/brand/massifyx-lockup-light.svg) —
-    // its true aspect ratio, straight from the source vector.
-    const LOGO_ASPECT = 1233.1688 / 183.2357;
+    // The wordmark's own viewBox (public/brand/norvenzia-logo-light.svg) —
+    // its true aspect ratio, straight from the source vector, tightly cropped
+    // to the artwork (icon + wordmark) with no baked-in padding, so the logo
+    // sits flush left in its box instead of drifting right of other flush-left
+    // text like the footer tagline. Left/top/bottom are cropped precisely
+    // (icon geometry, font-independent); the right edge carries extra padding
+    // because <img src="*.svg"> renders in an isolated context that can't see
+    // this page's @font-face Montserrat, so the wordmark silently falls back
+    // to a system sans-serif that measures wider than Montserrat at the same
+    // size — the crop has to fit that wider fallback render, not the brand font.
+    const LOGO_ASPECT = 337 / 66;
     const desktopLogoWidth = logoH * LOGO_ASPECT;
 
     // How much room the 5 nav links + CTA button + gutters need beside the logo
@@ -173,14 +181,14 @@
       URLs come from site.baseUrl rather than being hardcoded, so these can never
       drift from the canonical and og:url tags above, which already use it. That
       makes BASE_URL the single switch for the site's hostname — it must be
-      https://www.massifyx.com in the server's env for these to emit www. %>
+      https://www.norvenzia.com in the server's env for these to emit www. %>
   <% if (currentPath === '/') { %>
     <script type="application/ld+json">
       <%- JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'WebSite',
         name: site.publicName,
-        alternateName: 'MassifyX',
+        alternateName: 'Norvenzia',
         url: site.baseUrl + '/'
       }) %>
     </script>
@@ -191,9 +199,9 @@
         '@type': 'Organization',
         name: site.publicName,
         legalName: site.legalEntity,
-        alternateName: ['MassifyX', 'MassifyX Global Pvt Ltd'],
+        alternateName: ['Norvenzia', 'Norvenzia Pvt Ltd'],
         url: site.baseUrl + '/',
-        logo: site.baseUrl + '/brand/massifyx-lockup-light.svg',
+        logo: site.baseUrl + '/brand/norvenzia-logo-light.svg',
         sameAs: [site.linkedinUrl].filter(Boolean)
       }) %>
     </script>

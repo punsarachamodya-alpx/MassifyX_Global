@@ -1,6 +1,6 @@
 module.exports = {
   meta: {
-    title: 'What We Do — MassifyX Global',
+    title: 'What We Do — Norvenzia',
     description:
       'Two divisions live today: Operations and Analytics. Digital, AI, and Advisory are roadmap divisions — we don’t sell them yet.'
   },
@@ -9,7 +9,7 @@ module.exports = {
     eyebrow: 'What we do',
     headline: 'Two divisions, live today.',
     body:
-      'MassifyX runs Operations and Analytics now. Digital, AI, and Advisory are roadmap divisions for when the company scales — we don’t sell them yet.'
+      'Norvenzia runs Operations and Analytics now. Digital, AI, and Advisory are roadmap divisions for when the company scales — we don’t sell them yet.'
   },
 
   divisions: [
@@ -121,7 +121,7 @@ module.exports = {
       {
         name: 'Command',
         summary:
-          'For teams that want MassifyX embedded across procurement and analytics end to end.',
+          'For teams that want Norvenzia embedded across procurement and analytics end to end.',
         includes: [
           'Full Operations + Analytics scope',
           'Embedded delivery team',
@@ -137,6 +137,6 @@ module.exports = {
     headline: 'Ready to scope your engagement?',
     body:
       'A discovery call is the fastest way to find out whether this model fits your operation.',
-    cta: { label: 'Book a Discovery Call', href: '/contact' }
+    cta: { label: 'Book a Call', href: '/contact' }
   }
 };

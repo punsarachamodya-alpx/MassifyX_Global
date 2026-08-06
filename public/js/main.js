@@ -1,4 +1,4 @@
-/* MassifyX Global — progressive enhancement only.
+/* Norvenzia — progressive enhancement only.
    Every page renders, every link works, and the contact form validates and submits
    server-side without any of this. This file adds the mobile menu, scroll reveals,
    and the cookie banner. Nothing here is load-bearing. */
@@ -58,6 +58,91 @@
     // Failsafe: reveal everything after 2s regardless of whether the observer
     // fired, so content can never end up permanently invisible.
     window.setTimeout(revealAll, 2000);
+  }
+
+  // ------------------------------------------------- hero cursor interaction
+  // Cursor-follow spotlight + depth parallax on the homepage hero. Fine
+  // pointers only (no jank chasing a finger on touch) and only when motion
+  // isn't reduced. Everything else about the hero — copy, CTAs, the figure
+  // itself — renders and works identically without this.
+  var hero = document.querySelector('.hero');
+  var finePointer = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+
+  if (hero && finePointer && !reduced) {
+    hero.classList.add('has-pointer');
+
+    var heroRaf = null;
+    var lastPointerEvent = null;
+
+    function applyHeroPointer(clientX, clientY) {
+      var rect = hero.getBoundingClientRect();
+      var mx = ((clientX - rect.left) / rect.width) * 100;
+      var my = ((clientY - rect.top) / rect.height) * 100;
+      var px = (clientX - rect.left) / rect.width - 0.5; // -0.5..0.5
+      var py = (clientY - rect.top) / rect.height - 0.5;
+
+      hero.style.setProperty('--hero-mx', mx + '%');
+      hero.style.setProperty('--hero-my', my + '%');
+      hero.style.setProperty('--hero-px', String(px * 2)); // -1..1
+      hero.style.setProperty('--hero-py', String(py * 2));
+    }
+
+    hero.addEventListener('pointermove', function (e) {
+      lastPointerEvent = e;
+      if (heroRaf) return;
+      heroRaf = window.requestAnimationFrame(function () {
+        if (lastPointerEvent) applyHeroPointer(lastPointerEvent.clientX, lastPointerEvent.clientY);
+        heroRaf = null;
+      });
+    });
+
+    hero.addEventListener('pointerleave', function () {
+      hero.style.setProperty('--hero-mx', '50%');
+      hero.style.setProperty('--hero-my', '38%');
+      hero.style.setProperty('--hero-px', '0');
+      hero.style.setProperty('--hero-py', '0');
+    });
+  }
+
+  // ------------------------------------------- data-tunnel band interaction
+  // Cursor glow + depth parallax over the full-bleed motion band. The
+  // travelling data-flow sheen is pure CSS and runs regardless; this only adds
+  // the pointer-driven layer, under the same fine-pointer / motion-allowed
+  // conditions as the hero.
+  var band = document.querySelector('.motion-band');
+
+  if (band && finePointer && !reduced) {
+    band.classList.add('has-pointer');
+
+    var bandRaf = null;
+    var lastBandEvent = null;
+
+    function applyBandPointer(clientX, clientY) {
+      var rect = band.getBoundingClientRect();
+      var px = (clientX - rect.left) / rect.width - 0.5; // -0.5..0.5
+      var py = (clientY - rect.top) / rect.height - 0.5;
+
+      band.style.setProperty('--band-mx', ((clientX - rect.left) / rect.width) * 100 + '%');
+      band.style.setProperty('--band-my', ((clientY - rect.top) / rect.height) * 100 + '%');
+      band.style.setProperty('--band-px', String(px * 2)); // -1..1
+      band.style.setProperty('--band-py', String(py * 2));
+    }
+
+    band.addEventListener('pointermove', function (e) {
+      lastBandEvent = e;
+      if (bandRaf) return;
+      bandRaf = window.requestAnimationFrame(function () {
+        if (lastBandEvent) applyBandPointer(lastBandEvent.clientX, lastBandEvent.clientY);
+        bandRaf = null;
+      });
+    });
+
+    band.addEventListener('pointerleave', function () {
+      band.style.setProperty('--band-mx', '50%');
+      band.style.setProperty('--band-my', '50%');
+      band.style.setProperty('--band-px', '0');
+      band.style.setProperty('--band-py', '0');
+    });
   }
 
   // --------------------------------------------------------- cookie banner

@@ -1,6 +1,6 @@
 module.exports = {
   meta: {
-    title: 'Who We Are — MassifyX Global',
+    title: 'Who We Are — Norvenzia',
     description:
       'A specialist procurement and supply chain operation, built deliberately small. Senior attention on your operation, not scale we don’t have yet.'
   },
@@ -9,14 +9,14 @@ module.exports = {
     eyebrow: 'Who we are',
     headline: 'A specialist operation, built deliberately small.',
     body:
-      'MassifyX Global is early. We’d rather tell you that plainly than dress it up — what we offer is senior attention on your procurement operation, not scale we don’t have yet.'
+      'Norvenzia is early. We’d rather tell you that plainly than dress it up — what we offer is senior attention on your procurement operation, not scale we don’t have yet.'
   },
 
   founder: {
     eyebrow: 'Founder',
     headline: 'Why this exists.',
     name: 'Punsara Wimalasena',
-    role: 'Founder, MassifyX Global',
+    role: 'Founder, Norvenzia',
     // TODO(founder): upload a headshot; initials render until then.
     photo: '',
     linkedin: 'https://www.linkedin.com/in/punsara-wimalasena',
@@ -25,7 +25,7 @@ module.exports = {
     // notice back (see views/who-we-are.ejs).
     draftNotice: '',
     story: [
-      'I started MassifyX because I’d spent years inside supply chain and procurement operations — across telecom, garments, seafood, and logistics — and kept running into the same gap. Mid-market companies need senior procurement talent, but can’t justify a full in-house team for it.',
+      'I started Norvenzia because I’d spent years inside supply chain and procurement operations — across telecom, garments, seafood, and logistics — and kept running into the same gap. Mid-market companies need senior procurement talent, but can’t justify a full in-house team for it.',
       'Sri Lanka gave me a way to close that gap without cutting the corner most outsourcing does. The analysts running your account aren’t junior; they have real supply chain backgrounds. And Sweden gives you a genuine point of contact, in your time zone, accountable for the work.',
       'That’s the arbitrage: not cheaper labour for its own sake, but senior-level delivery at a cost structure that makes sense for a 50–500 person company.'
     ]
@@ -37,7 +37,7 @@ module.exports = {
     members: [
       {
         name: 'Viraj Bulugahapitiya',
-        role: 'AI Engineer and Data Scientist, At MassifyX Global',
+        role: 'AI Engineer and Data Scientist, At Norvenzia',
         // TODO(founder): upload a headshot; initials render until then.
         photo: '',
         quote: '',
@@ -90,6 +90,6 @@ module.exports = {
     headline: 'Let’s talk about your operation.',
     body:
       'A discovery call costs you half an hour and tells us both whether there’s a fit.',
-    cta: { label: 'Book a Discovery Call', href: '/contact' }
+    cta: { label: 'Book a Call', href: '/contact' }
   }
 };

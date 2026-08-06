@@ -161,8 +161,8 @@
     // separate, optional script. If it failed to load for any reason the
     // popup above still works exactly as before; this is additive, never
     // load-bearing for the base map/feed.
-    if (window.MassifyXWarroom) {
-      wrap.appendChild(window.MassifyXWarroom.buildSection(props));
+    if (window.NorvenziaWarroom) {
+      wrap.appendChild(window.NorvenziaWarroom.buildSection(props));
     }
 
     return wrap;

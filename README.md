@@ -43,7 +43,7 @@ the public site works, `/admin` stays locked). Production: `npm start`.
 | `SESSION_SECRET` | Recommended | Keeps admin sessions alive across restarts |
 | `NODE_ENV=production` | Recommended | Secure cookies, static-asset caching |
 | `BASE_URL` | Recommended | Canonical URLs, Open Graph tags, sitemap |
-| `MIS_BASE_URL` | Optional | Address of the [MassifyX Intelligence Service](https://github.com/Viraj97-SL/massifyx-intelligence) — see below |
+| `MIS_BASE_URL` | Optional | Address of the [Norvenzia Intelligence Service](https://github.com/Viraj97-SL/massifyx-intelligence) — see below |
 | `WARROOM_BASE_URL` | Optional | Address of the War Room investigation service — see below |
 | `WARROOM_ACCESS_CODE` | Required to unlock War Room | Shared code that unlocks `/live`'s "Investigate" action for a session. Without it, every unlock attempt is refused by design |
 
@@ -86,7 +86,7 @@ Two pages under the "Intelligence" nav item, both designed so a down or
 missing upstream never takes the marketing site with it:
 
 - **`/live` — Global Disruption Monitor.** Server-side proxies
-  [MassifyX Intelligence Service](https://github.com/Viraj97-SL/massifyx-intelligence)
+  [Norvenzia Intelligence Service](https://github.com/Viraj97-SL/massifyx-intelligence)
   (`MIS_BASE_URL`) for live supply-chain disruption events; the browser
   never learns MIS's real address (`GET /live/data` is a same-origin
   proxy). The map is MapLibre GL JS (self-hosted, CSP-safe build) on

@@ -1,8 +1,8 @@
 {
-  "name": "massifyx-global",
+  "name": "norvenzia",
   "version": "1.0.0",
   "private": true,
-  "description": "MassifyX Global — procurement & supply chain operations",
+  "description": "Norvenzia — procurement & supply chain operations",
   "main": "server.js",
   "scripts": {
     "start": "node --env-file-if-exists=.env server.js",

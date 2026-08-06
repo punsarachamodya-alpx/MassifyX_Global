@@ -262,7 +262,7 @@ router.post('/backups/restore', auth.verifyCsrf, (req, res) => {
 });
 
 router.get('/export', (req, res) => {
-  res.set('Content-Disposition', 'attachment; filename="massifyx-content.json"');
+  res.set('Content-Disposition', 'attachment; filename="norvenzia-content.json"');
   res.type('application/json').send(JSON.stringify(store.readOverrides(), null, 2));
 });
 

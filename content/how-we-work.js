@@ -1,6 +1,6 @@
 module.exports = {
   meta: {
-    title: 'How We Work — MassifyX Global',
+    title: 'How We Work — Norvenzia',
     description:
       'An EU engagement point in Sweden paired with a senior-led delivery hub in Sri Lanka. Documented process, and a straight account of our security posture today.'
   },
@@ -24,13 +24,13 @@ module.exports = {
       {
         label: 'EU engagement point',
         place: 'Sweden',
-        image: '/img/regions/sweden.svg',
+        image: '/img/regions/se-06.png',
         body: 'Contracting, communication, and accountability inside the EU.'
       },
       {
         label: 'Delivery hub',
         place: 'Sri Lanka',
-        image: '/img/regions/sri-lanka.svg',
+        image: '/img/regions/lk-06.png',
         body: 'Senior analysts running your day-to-day procurement operations.'
       }
     ]
@@ -103,7 +103,7 @@ module.exports = {
     headline: 'Frequently asked questions.',
     items: [
       {
-        question: 'Why is MassifyX so new — should that concern me?',
+        question: 'Why is Norvenzia so new — should that concern me?',
         answer:
           'It’s a fair question, so here’s a straight answer: we’re early, and we’ve said so throughout this site rather than dressing it up. What you get today is senior attention on your operation, run by someone with hands-on supply chain and procurement experience across telecom, garments, seafood, and logistics — not scale we haven’t earned yet. A discovery call costs you thirty minutes and tells you directly whether that trade-off works for your operation.'
       },
@@ -129,6 +129,6 @@ module.exports = {
     headline: 'Want to see how this maps to your operation?',
     body:
       'We’ll walk through your current process and show you exactly where the model would slot in.',
-    cta: { label: 'Book a Discovery Call', href: '/contact' }
+    cta: { label: 'Book a Call', href: '/contact' }
   }
 };

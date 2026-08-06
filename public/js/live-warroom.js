@@ -1,7 +1,7 @@
 /* War Room "Investigate" action for /live's event popup
    (docs/internal/WARROOM_BUILD_PLAN.md, WARROOM_API_CONTRACT.md).
 
-   Self-contained: exposes window.MassifyXWarroom.buildSection(props), which
+   Self-contained: exposes window.NorvenziaWarroom.buildSection(props), which
    public/js/live.js calls to append a section to the popup it already
    builds -- this file never touches the map itself. Every request goes to
    the site's own same-origin proxy routes (/live/unlock, /live/investigate,
@@ -830,5 +830,5 @@
     return container;
   }
 
-  window.MassifyXWarroom = { buildSection: buildSection };
+  window.NorvenziaWarroom = { buildSection: buildSection };
 })();
