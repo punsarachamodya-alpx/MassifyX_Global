@@ -1,4 +1,4 @@
-# Norvenzia — Website
+# NORVENZIA — Website
 
 Procurement and supply chain operations for mid-market companies: an EU-based
 engagement point in Sweden paired with senior-led delivery from Sri Lanka.
