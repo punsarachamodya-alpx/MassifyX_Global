@@ -1951,13 +1951,6 @@ button {
   object-position: center;
 }
 
-/* Taller variant for a page-level placement (How We Work) where the image is
-   the point, not a thin decorative strip. */
-.motion-band--tall img {
-  height: clamp(280px, 38vw, 460px);
-  object-position: center;
-}
-
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
