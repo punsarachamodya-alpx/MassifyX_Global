@@ -3,6 +3,7 @@ node_modules/
 # Admin overrides and backups live on the server's disk, not in the repo.
 # See §17: hosts with an ephemeral filesystem discard these on redeploy.
 data/
+!.claude/skills/**/data/
 
 # Admin-uploaded images
 public/img/uploads/*
