@@ -1200,18 +1200,20 @@ button {
   aspect-ratio: 16 / 9;
   overflow: hidden;
   background: var(--ice);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* object-fit: cover keeps the same crop window as before (which is what
-   keeps the vemaps.com watermark, sitting just outside that window, out of
-   frame) — object-fit: contain would reveal it. transform: scale shrinks
-   the already-cropped image by 0.7x afterwards, purely visually, without
-   changing what part of the source image was selected. */
+/* Source files are pre-cropped to their content bounding box (the vemaps.com
+   watermark was physically cropped out), so object-fit: contain shows the
+   whole flag-map with no cropping of the country outline. transform: scale
+   shrinks the visual size further inside the box. */
 .panel__media img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transform: scale(0.7);
+  object-fit: contain;
+  transform: scale(0.55);
 }
 
 .panel__inner {
