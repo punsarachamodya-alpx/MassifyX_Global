@@ -647,8 +647,25 @@ button {
   -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 30%, black 65%);
 }
 
+/* On mobile the grid stacks to a single column and the home hero has no
+   figure to reveal the image behind (figureImage is unset in content/
+   home.js — the desktop view shows the artwork in the empty right-hand
+   grid column, not behind a graphic), so there's no room in the text flow
+   to fade it in without sitting under a paragraph. Instead: reserve a
+   dedicated strip below the CTA buttons (:has keeps this scoped to the
+   home hero only — inner-page heroes have no .hero__bg) and reveal the
+   image only there, faded top-to-bottom, so it still reads as the same
+   photographic backdrop as desktop instead of disappearing on mobile. */
 @media (max-width: 900px) {
-  .hero__bg { display: none; }
+  .hero:has(.hero__bg) {
+    padding-bottom: clamp(9rem, 32vw, 11.5rem);
+  }
+
+  .hero__bg {
+    object-position: center;
+    mask-image: linear-gradient(to bottom, transparent 0%, transparent 74%, black 92%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 74%, black 92%);
+  }
 }
 
 /* Cursor-reactive glow. A radial-gradient layer positioned by --hero-mx/--hero-my
