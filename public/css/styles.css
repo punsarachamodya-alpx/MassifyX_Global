@@ -1196,8 +1196,11 @@ button {
   flex-direction: column;
 }
 
+/* aspect-ratio height is 0.7x the previous 16/9 box (9 * 0.7 = 6.3), so the
+   box itself is shorter while staying full width — the --ice ground still
+   fills the panel edge-to-edge with no white margins. */
 .panel__media {
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 16 / 6.3;
   overflow: hidden;
   background: var(--ice);
   display: flex;
