@@ -1,4 +1,4 @@
-# Deploying MassifyX Global
+# Deploying Norvenzia
 
 Two parts: running it locally to check things, and putting it on a server.
 
@@ -9,8 +9,8 @@ Two parts: running it locally to check things, and putting it on a server.
 You need [Node.js 20 or newer](https://nodejs.org). Check with `node --version`.
 
 ```bash
-git clone https://github.com/punsarachamodya-alpx/MassifyX_Global.git
-cd MassifyX_Global
+git clone https://github.com/punsarachamodya-alpx/Norvenzia_Global.git
+cd Norvenzia_Global
 npm install
 ```
 
@@ -36,7 +36,7 @@ PORT=3000
 ADMIN_PASSWORD=<your own generated value — 16+ random chars>
 SESSION_SECRET=<your own generated value — 64 hex chars>
 NODE_ENV=production
-BASE_URL=https://www.massifyx.com
+BASE_URL=https://www.norvenzia.com
 MIS_BASE_URL=https://your-mis-deployment.example.com
 ```
 
@@ -104,23 +104,23 @@ node --version
 **Create a non-root user to run the app:**
 
 ```bash
-adduser --system --group --home /var/www/massifyx massifyx
+adduser --system --group --home /var/www/norvenzia norvenzia
 ```
 
 **Get the code:**
 
 ```bash
-git clone https://github.com/punsarachamodya-alpx/MassifyX_Global.git /var/www/massifyx
-cd /var/www/massifyx
+git clone https://github.com/punsarachamodya-alpx/Norvenzia_Global.git /var/www/norvenzia
+cd /var/www/norvenzia
 npm ci --omit=dev
-chown -R massifyx:massifyx /var/www/massifyx
+chown -R norvenzia:norvenzia /var/www/norvenzia
 ```
 
 **Write the secrets file** (root-only, never in git):
 
 ```bash
-install -m 600 /dev/null /etc/massifyx.env
-nano /etc/massifyx.env
+install -m 600 /dev/null /etc/norvenzia.env
+nano /etc/norvenzia.env
 ```
 
 Put this in it, with your own generated values:
@@ -128,7 +128,7 @@ Put this in it, with your own generated values:
 ```
 PORT=3000
 NODE_ENV=production
-BASE_URL=https://www.massifyx.com
+BASE_URL=https://www.norvenzia.com
 ADMIN_PASSWORD=your-generated-password
 SESSION_SECRET=your-generated-secret
 MIS_BASE_URL=https://your-mis-deployment.example.com
@@ -139,27 +139,27 @@ MIS_BASE_URL=https://your-mis-deployment.example.com
 **Start it as a service** so it survives crashes and reboots:
 
 ```bash
-cp /var/www/massifyx/deploy/massifyx.service /etc/systemd/system/
+cp /var/www/norvenzia/deploy/norvenzia.service /etc/systemd/system/
 systemctl daemon-reload
-systemctl enable --now massifyx
-systemctl status massifyx
+systemctl enable --now norvenzia
+systemctl status norvenzia
 ```
 
 **Put nginx in front** and point your domain at it:
 
 ```bash
-cp /var/www/massifyx/deploy/nginx.conf /etc/nginx/sites-available/massifyx
-ln -s /etc/nginx/sites-available/massifyx /etc/nginx/sites-enabled/
+cp /var/www/norvenzia/deploy/nginx.conf /etc/nginx/sites-available/norvenzia
+ln -s /etc/nginx/sites-available/norvenzia /etc/nginx/sites-enabled/
 rm -f /etc/nginx/sites-enabled/default
 nginx -t && systemctl reload nginx
 ```
 
-In hPanel, point the `massifyx.com` A record at your VPS IP. Once DNS has propagated,
+In hPanel, point the `norvenzia.com` A record at your VPS IP. Once DNS has propagated,
 add HTTPS:
 
 ```bash
 apt-get install -y certbot python3-certbot-nginx
-certbot --nginx -d massifyx.com -d www.massifyx.com
+certbot --nginx -d norvenzia.com -d www.norvenzia.com
 ```
 
 The nginx config forwards `X-Forwarded-For` and `X-Forwarded-Proto`. Those are not
@@ -169,10 +169,10 @@ secure cookies. Without them, one failed login would lock out every visitor at o
 ### Deploying an update
 
 ```bash
-cd /var/www/massifyx
+cd /var/www/norvenzia
 git pull
 npm ci --omit=dev
-systemctl restart massifyx
+systemctl restart norvenzia
 ```
 
 `data/` is gitignored, so your admin edits survive `git pull` untouched.
@@ -192,7 +192,7 @@ crontab -e
 ```
 
 ```
-0 3 * * * cp /var/www/massifyx/data/content.json /root/massifyx-backup-$(date +\%F).json
+0 3 * * * cp /var/www/norvenzia/data/content.json /root/norvenzia-backup-$(date +\%F).json
 ```
 
 Hostinger VPS plans also include weekly snapshots — worth switching on in hPanel.
@@ -203,11 +203,11 @@ Hostinger VPS plans also include weekly snapshots — worth switching on in hPan
 
 | Symptom | Cause |
 | --- | --- |
-| `/admin` login always fails | `ADMIN_PASSWORD` not set. Check `systemctl status massifyx` for the boot warning. |
+| `/admin` login always fails | `ADMIN_PASSWORD` not set. Check `systemctl status norvenzia` for the boot warning. |
 | Logged out after every restart | `SESSION_SECRET` not set, so a new one is generated each boot. |
 | "Too many attempts" for everyone | nginx is not forwarding `X-Forwarded-For`, so every visitor shares one IP. |
 | Admin edits vanish after deploy | Ephemeral filesystem — you need a VPS or a persistent volume. |
-| 502 Bad Gateway | The Node service is not running: `systemctl status massifyx`, `journalctl -u massifyx -n 50`. |
+| 502 Bad Gateway | The Node service is not running: `systemctl status norvenzia`, `journalctl -u norvenzia -n 50`. |
 | Booking iframe blank | The CSP only allows the origin saved in the admin panel. Re-save the booking URL. |
 
-Live logs: `journalctl -u massifyx -f`
+Live logs: `journalctl -u norvenzia -f`

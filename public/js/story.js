@@ -358,7 +358,7 @@
       } else {
         scenes.hook();
       }
-      setAnnotation('This is the exact class of analysis MassifyX runs continuously for one company’s supplier base.');
+      setAnnotation('This is the exact class of analysis Norvenzia runs continuously for one company’s supplier base.');
     }
   };
 

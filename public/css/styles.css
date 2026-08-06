@@ -1,7 +1,9 @@
 /* ==========================================================================
-   MassifyX Global — public design system
+   Norvenzia — public design system
    One file, custom properties, no framework.
-   Light-only, editorial register. Cobalt and cyan are signal, never ground.
+   Light-only, editorial register. Monochrome navy — navy is the entire
+   accent system; in-body links are underlined since colour alone can't
+   distinguish them (WCAG 1.4.1).
    ========================================================================== */
 
 /* -------------------------------------------------------------- 1. Fonts */
@@ -42,27 +44,43 @@
 /* ------------------------------------------------------------- 2. Tokens */
 
 :root {
-  /* Brand palette */
-  --navy: #0a1b3c;
-  --navy-deep: #060f26;
-  --navy-soft: #16305c;
+  /* Brand palette v2 — navy is the entire accent system. Cobalt and cyan are
+     retired; the site is monochrome navy in the register of Linear or Stripe.
+     The old accent token NAMES are kept as navy-family aliases so the ~1,700
+     lines below resolve unchanged — only their values moved to navy. */
+  --navy: #002d5c;
+  --navy-deep: #001d3c;
+  --navy-soft: #0a3a6b;      /* mid-navy, for gradient depth only */
   --white: #ffffff;
-  --ice: #f1f6ff;
-  --ice-warm: #f7f9fc;
-  --cobalt: #2e7bff;
-  --cobalt-dark: #1c5fd6;
-  --cyan: #46d3ff;
+  --ground-alt: #f4f7fa;     /* alternate section background (replaces old ice) */
+  --ice: #f4f7fa;            /* retired alias → ground-alt */
+  --ice-warm: #eef2f7;       /* retired alias */
   --slate: #5e729a;
-  --slate-light: #8fb4ea;
+  --mist: #a7c0ce;
+  --slate-light: #a7c0ce;    /* retired alias → mist */
+  --grey: #bcbdc3;
+
+  /* Accents folded into navy */
+  --cobalt: #002d5c;         /* retired alias → navy */
+  --cobalt-dark: #001d3c;    /* retired alias → navy-deep */
+  --cyan: #5e729a;           /* retired alias → slate (keeps gradients monochrome) */
+
+  /* Functional colours */
+  --error: #98342e;
+  --warn: #8a5a1f;
+  --ok: #2e6a4f;
 
   /* Applied roles */
-  --ink: var(--navy);
+  --ink: #002d5c;            /* text is navy throughout — a deliberate monochrome */
   --ink-muted: #4a5c7e;
   --ink-faint: var(--slate);
+  --display: var(--navy);
+  --body: var(--ink);
+  --muted: var(--slate);
   --ground: var(--white);
-  --ground-alt: var(--ice);
-  --rule: rgba(10, 27, 60, 0.12);
-  --rule-strong: rgba(10, 27, 60, 0.22);
+  --rule: var(--grey);
+  --rule-soft: rgba(0, 45, 92, 0.12);
+  --rule-strong: rgba(0, 45, 92, 0.22);
 
   /* Type */
   --font-display: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -144,6 +162,20 @@ ol {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* WCAG 1.4.1 — with navy the only accent, an in-body link can't be signalled
+   by colour alone, so running-prose links carry an underline. Structural
+   links (nav, buttons, cards, arrow-links) are distinguished by shape and
+   position and set their own affordances, so they're excluded here. */
+main p a,
+main li a:not(.btn):not(.card):not(.card--link),
+.lede a,
+.legal-body a,
+.faq__answer a {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  text-decoration-thickness: 1px;
 }
 
 button {
@@ -597,11 +629,37 @@ button {
   overflow: hidden;
 }
 
+/* Cursor-reactive glow. A radial-gradient layer positioned by --hero-mx/--hero-my
+   (set in main.js from pointermove), under the copy and figure. Off by default —
+   .has-pointer only lands on fine-pointer devices with motion allowed (see
+   main.js and the reduced-motion guard at the bottom of this file), so touch,
+   keyboard and reduced-motion visitors never see it move. Monochrome navy. */
+.hero__spotlight {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s var(--ease);
+  background: radial-gradient(
+    560px circle at var(--hero-mx, 50%) var(--hero-my, 38%),
+    rgba(0, 45, 92, 0.10),
+    rgba(94, 114, 154, 0.06) 42%,
+    transparent 72%
+  );
+}
+
+.hero.has-pointer .hero__spotlight {
+  opacity: 1;
+}
+
 .hero__grid {
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
   gap: clamp(2rem, 5vw, 4.5rem);
   align-items: center;
+  position: relative;
+  z-index: 1;
 }
 
 .hero__body {
@@ -1802,6 +1860,20 @@ button {
   transform: none;
 }
 
+/* Cursor parallax: each .pz group carries its own --depth (0 = fixed,
+   1 = furthest travel), set inline per-group in hero-figure.ejs. --hero-px/
+   --hero-py (-1..1, set in main.js) inherit down from .hero, so one
+   pointermove listener drives every layer at a different rate — the control
+   point (deepest) leads, the background grid barely moves. */
+.hero-figure .pz {
+  transition: transform 0.5s var(--ease);
+  transform: translate3d(
+    calc(var(--hero-px, 0) * var(--depth, 0) * 22px),
+    calc(var(--hero-py, 0) * var(--depth, 0) * 22px),
+    0
+  );
+}
+
 /* The hero figure's own animation, paused when motion is reduced */
 .hero-figure__pulse {
   animation: mx-pulse 4.5s ease-in-out infinite;
@@ -1871,6 +1943,15 @@ button {
   .hero-figure__pulse,
   .hero-figure__dash {
     animation: none;
+  }
+
+  .hero__spotlight {
+    display: none;
+  }
+
+  .hero-figure .pz {
+    transition: none;
+    transform: none;
   }
 
   .btn:hover,

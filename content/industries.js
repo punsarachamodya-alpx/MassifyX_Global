@@ -3,7 +3,7 @@
 
 module.exports = {
   meta: {
-    title: 'Industries We Serve — MassifyX Global',
+    title: 'Industries We Serve — Norvenzia',
     description:
       'Eight verticals, one operating model. The procurement and supply chain patterns we are built to take on.'
   },
@@ -108,7 +108,7 @@ module.exports = {
 
   fit: {
     eyebrow: 'Is this a fit?',
-    headline: 'Where MassifyX works best.',
+    headline: 'Where Norvenzia works best.',
     criteria: [
       'You run 50–500 employees and procurement has outgrown the person who set it up.',
       'You’re based in Scandinavia, the EU, the UK, Switzerland, or Australia.',
@@ -121,6 +121,6 @@ module.exports = {
     headline: 'Don’t see your industry?',
     body:
       'If your operation runs on procurement and supply chain, we’d still like to hear from you.',
-    cta: { label: 'Book a Discovery Call', href: '/contact' }
+    cta: { label: 'Book a Call', href: '/contact' }
   }
 };

@@ -1,4 +1,4 @@
-/* MassifyX Global — progressive enhancement only.
+/* Norvenzia — progressive enhancement only.
    Every page renders, every link works, and the contact form validates and submits
    server-side without any of this. This file adds the mobile menu, scroll reveals,
    and the cookie banner. Nothing here is load-bearing. */
@@ -58,6 +58,50 @@
     // Failsafe: reveal everything after 2s regardless of whether the observer
     // fired, so content can never end up permanently invisible.
     window.setTimeout(revealAll, 2000);
+  }
+
+  // ------------------------------------------------- hero cursor interaction
+  // Cursor-follow spotlight + depth parallax on the homepage hero. Fine
+  // pointers only (no jank chasing a finger on touch) and only when motion
+  // isn't reduced. Everything else about the hero — copy, CTAs, the figure
+  // itself — renders and works identically without this.
+  var hero = document.querySelector('.hero');
+  var finePointer = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+
+  if (hero && finePointer && !reduced) {
+    hero.classList.add('has-pointer');
+
+    var heroRaf = null;
+    var lastPointerEvent = null;
+
+    function applyHeroPointer(clientX, clientY) {
+      var rect = hero.getBoundingClientRect();
+      var mx = ((clientX - rect.left) / rect.width) * 100;
+      var my = ((clientY - rect.top) / rect.height) * 100;
+      var px = (clientX - rect.left) / rect.width - 0.5; // -0.5..0.5
+      var py = (clientY - rect.top) / rect.height - 0.5;
+
+      hero.style.setProperty('--hero-mx', mx + '%');
+      hero.style.setProperty('--hero-my', my + '%');
+      hero.style.setProperty('--hero-px', String(px * 2)); // -1..1
+      hero.style.setProperty('--hero-py', String(py * 2));
+    }
+
+    hero.addEventListener('pointermove', function (e) {
+      lastPointerEvent = e;
+      if (heroRaf) return;
+      heroRaf = window.requestAnimationFrame(function () {
+        if (lastPointerEvent) applyHeroPointer(lastPointerEvent.clientX, lastPointerEvent.clientY);
+        heroRaf = null;
+      });
+    });
+
+    hero.addEventListener('pointerleave', function () {
+      hero.style.setProperty('--hero-mx', '50%');
+      hero.style.setProperty('--hero-my', '38%');
+      hero.style.setProperty('--hero-px', '0');
+      hero.style.setProperty('--hero-py', '0');
+    });
   }
 
   // --------------------------------------------------------- cookie banner

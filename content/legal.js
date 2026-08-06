@@ -6,15 +6,15 @@ const privacy = {
   slug: 'privacy',
   title: 'Privacy Policy',
   intro:
-    'This policy explains what personal data MassifyX Global handles when you use this website or contact us, why we handle it, and what rights you have over it.',
+    'This policy explains what personal data Norvenzia handles when you use this website or contact us, why we handle it, and what rights you have over it.',
   updated: 'July 2026',
   counselReviewed: false,
   sections: [
     {
       heading: 'Who we are',
       body: [
-        'MassifyX Global (Private) Limited is a knowledge process outsourcing partner providing procurement and supply chain operations. Our engagement point for European clients is based in Sweden; delivery is carried out from Sri Lanka.',
-        'For any question about this policy, or about data we hold, write to info@massifyx.com.'
+        'Norvenzia (Private) Limited runs procurement and supply chain operations for mid-market companies. Our engagement point for European clients is based in Sweden; delivery is carried out from Sri Lanka.',
+        'For any question about this policy, or about data we hold, write to info@norvenzia.com.'
       ]
     },
     {
@@ -57,13 +57,13 @@ const privacy = {
       heading: 'Your rights',
       body: [
         'Subject to applicable law, you may request access to the personal data we hold about you, ask us to correct or delete it, object to or restrict our processing, and request a portable copy.',
-        'To exercise any of these, email info@massifyx.com. If you are in the EU or EEA and believe we have handled your data improperly, you also have the right to lodge a complaint with your national supervisory authority.'
+        'To exercise any of these, email info@norvenzia.com. If you are in the EU or EEA and believe we have handled your data improperly, you also have the right to lodge a complaint with your national supervisory authority.'
       ]
     },
     {
       heading: 'Contact',
       body: [
-        'Questions about this policy, or about data we hold: info@massifyx.com.'
+        'Questions about this policy, or about data we hold: info@norvenzia.com.'
       ]
     }
   ]
@@ -112,7 +112,7 @@ const terms = {
   slug: 'terms',
   title: 'Terms of Use',
   intro:
-    'These terms govern your use of this website. They do not govern any engagement between MassifyX Global and a client — that is covered by a separate signed agreement.',
+    'These terms govern your use of this website. They do not govern any engagement between Norvenzia and a client — that is covered by a separate signed agreement.',
   updated: 'July 2026',
   counselReviewed: false,
   sections: [
@@ -138,7 +138,7 @@ const terms = {
     {
       heading: 'Intellectual property',
       body: [
-        'The MassifyX Global name, logo, site design, and written content are our property or used with permission, and may not be reproduced without written consent.'
+        'The Norvenzia name, logo, site design, and written content are our property or used with permission, and may not be reproduced without written consent.'
       ]
     },
     {
@@ -156,7 +156,7 @@ const terms = {
     },
     {
       heading: 'Contact',
-      body: ['Questions about these terms: info@massifyx.com.']
+      body: ['Questions about these terms: info@norvenzia.com.']
     }
   ]
 };

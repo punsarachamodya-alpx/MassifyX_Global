@@ -1,6 +1,8 @@
 <%# The abstract brand diagram: fragmented supplier inputs converging through a single
     control point, then leaving as ordered, connected lanes — literally
-    "One Chain. Total Control." Inline SVG, no external image, no photography. %>
+    "One chain, total control." Inline SVG, no external image, no photography.
+    Navy monochrome (palette v2). The .pz groups carry a --depth used by the
+    cursor parallax (see .hero-figure .pz in styles.css and main.js). %>
 <svg class="hero-figure" viewBox="0 0 660 520" role="img"
      aria-labelledby="heroFigTitle heroFigDesc" xmlns="http://www.w3.org/2000/svg">
   <title id="heroFigTitle">One chain, total control</title>
@@ -8,12 +10,12 @@
 
   <defs>
     <linearGradient id="mxLane" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#2e7bff"/>
-      <stop offset="100%" stop-color="#46d3ff"/>
+      <stop offset="0%" stop-color="#002d5c"/>
+      <stop offset="100%" stop-color="#5e729a"/>
     </linearGradient>
 
     <pattern id="mxGrid" width="34" height="34" patternUnits="userSpaceOnUse">
-      <path d="M34 0H0V34" fill="none" stroke="#0a1b3c" stroke-opacity="0.16" stroke-width="1"/>
+      <path d="M34 0H0V34" fill="none" stroke="#002d5c" stroke-opacity="0.14" stroke-width="1"/>
     </pattern>
 
     <%# Radial mask fades the grid toward the edges so the figure sits on the page
@@ -28,10 +30,14 @@
     </mask>
   </defs>
 
-  <rect width="660" height="520" fill="url(#mxGrid)" mask="url(#mxGridMask)"/>
+  <%# Cursor parallax: --depth scales how far each layer drifts toward the
+      pointer. Background barely moves; the control point leads. %>
+  <g class="pz" style="--depth:0.1">
+    <rect width="660" height="520" fill="url(#mxGrid)" mask="url(#mxGridMask)"/>
+  </g>
 
   <%# --- Fragmented inputs: irregular nodes, muted navy, converging left-to-centre --- %>
-  <g stroke="#0a1b3c" stroke-opacity="0.34" fill="none" stroke-width="1.4">
+  <g class="pz" style="--depth:0.26" stroke="#002d5c" stroke-opacity="0.34" fill="none" stroke-width="1.4">
     <path d="M52 74 C 150 96, 218 176, 292 244"/>
     <path d="M34 168 C 130 182, 210 208, 292 252"/>
     <path d="M62 262 C 140 262, 214 260, 290 260"/>
@@ -41,7 +47,7 @@
     <path d="M132 402 C 198 358, 246 310, 290 274"/>
   </g>
 
-  <g fill="#fff" stroke="#0a1b3c" stroke-opacity="0.42" stroke-width="1.4">
+  <g class="pz" style="--depth:0.3" fill="#fff" stroke="#002d5c" stroke-opacity="0.42" stroke-width="1.4">
     <rect x="42" y="64" width="20" height="20" rx="2"/>
     <rect x="24" y="158" width="20" height="20" rx="2"/>
     <rect x="52" y="252" width="20" height="20" rx="2"/>
@@ -51,19 +57,22 @@
     <circle cx="132" cy="402" r="7"/>
   </g>
 
-  <%# --- The control point: two rings, white fill, cobalt stroke --- %>
-  <g class="hero-figure__pulse">
-    <circle cx="326" cy="260" r="62" fill="none" stroke="#2e7bff" stroke-opacity="0.22" stroke-width="1.4"/>
+  <%# --- The control point: two rings, white fill, navy stroke. Deepest layer —
+      the one thing that should feel magnetically drawn to the cursor. --%>
+  <g class="pz" style="--depth:0.5">
+    <g class="hero-figure__pulse">
+      <circle cx="326" cy="260" r="62" fill="none" stroke="#002d5c" stroke-opacity="0.22" stroke-width="1.4"/>
+    </g>
+    <circle cx="326" cy="260" r="44" fill="#fff" stroke="#002d5c" stroke-width="2"/>
+    <%# The brand mark itself sits at the control point. This partial is inlined
+        into the page HTML, not loaded via <img>, so an external href renders fine
+        here (unlike the motion band, which needs a data URI). %>
+    <image href="/brand/norvenzia-mark.svg" x="298" y="232" width="56" height="56"
+           preserveAspectRatio="xMidYMid meet"/>
   </g>
-  <circle cx="326" cy="260" r="44" fill="#fff" stroke="#2e7bff" stroke-width="2"/>
-  <%# The brand X-mark itself sits at the control point. This partial is inlined
-      into the page HTML, not loaded via <img>, so an external href renders fine
-      here (unlike the motion band, which needs a data URI). %>
-  <image href="/brand/massifyx-x-mark-transparent.svg" x="294" y="229" width="64" height="62"
-         preserveAspectRatio="xMidYMid meet"/>
 
-  <%# --- Ordered outbound lanes, cobalt-to-cyan --- %>
-  <g stroke="url(#mxLane)" stroke-width="2.4" fill="none" stroke-linecap="round">
+  <%# --- Ordered outbound lanes, navy-to-slate --- %>
+  <g class="pz" style="--depth:0.38" stroke="url(#mxLane)" stroke-width="2.4" fill="none" stroke-linecap="round">
     <path d="M370 244 C 452 216, 520 152, 632 140"/>
     <path d="M372 254 C 460 246, 528 218, 634 210"/>
     <path d="M372 268 C 460 278, 528 304, 634 312"/>
@@ -71,14 +80,14 @@
   </g>
 
   <%# Thin dashed cross-lane links: one connected chain, not four parallel lines --%>
-  <g class="hero-figure__dash" stroke="#46d3ff" stroke-opacity="0.6" stroke-width="1.1" fill="none">
+  <g class="hero-figure__dash pz" style="--depth:0.42" stroke="#5e729a" stroke-opacity="0.6" stroke-width="1.1" fill="none">
     <path d="M486 176 L488 244"/>
     <path d="M486 292 L488 352"/>
     <path d="M568 156 L570 226"/>
     <path d="M568 320 L570 388"/>
   </g>
 
-  <g fill="#2e7bff">
+  <g class="pz" style="--depth:0.38" fill="#002d5c">
     <circle cx="632" cy="140" r="4.5"/>
     <circle cx="634" cy="210" r="4.5"/>
     <circle cx="634" cy="312" r="4.5"/>

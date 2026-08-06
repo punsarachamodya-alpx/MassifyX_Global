@@ -20,7 +20,7 @@ const adminRouter = require('./routes/admin');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const isProd = process.env.NODE_ENV === 'production';
-// The MassifyX Intelligence Service (MIS) — a separate, independently
+// The Norvenzia Intelligence Service (MIS) — a separate, independently
 // deployed microservice. Unset in dev by default: /live degrades cleanly
 // with no MIS_BASE_URL configured, same as it would if MIS were down.
 const MIS_BASE_URL = process.env.MIS_BASE_URL || '';
@@ -381,7 +381,7 @@ app.get('/insights/sweden-trade', (req, res) => {
     meta: {
       title: `Sweden Trade Intelligence — ${res.locals.site.publicName}`,
       description:
-        "A scroll-driven look at what Sweden imports, who from, and what that concentration means — the same analytical rigor MassifyX applies to a single company's supplier base."
+        "A scroll-driven look at what Sweden imports, who from, and what that concentration means — the same analytical rigor Norvenzia applies to a single company's supplier base."
     },
     data: tradeData
   });
@@ -532,14 +532,14 @@ app.get('/sitemap.xml', (req, res) => {
 
 app.use((req, res) => {
   res.status(404).render('404', {
-    meta: { title: 'Page not found — MassifyX Global', description: '' }
+    meta: { title: 'Page not found — Norvenzia', description: '' }
   });
 });
 
 app.use((err, req, res, next) => {
   console.error('[error]', err);
   res.status(500).render('500', {
-    meta: { title: 'Something went wrong — MassifyX Global', description: '' }
+    meta: { title: 'Something went wrong — Norvenzia', description: '' }
   });
 });
 
@@ -575,7 +575,7 @@ if (require.main === module) {
     );
   }
   app.listen(PORT, () => {
-    console.log(`MassifyX Global listening on http://localhost:${PORT}`);
+    console.log(`Norvenzia listening on http://localhost:${PORT}`);
   });
 }
 

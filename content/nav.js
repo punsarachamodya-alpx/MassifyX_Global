@@ -15,10 +15,9 @@ module.exports = {
     { label: 'Cookie Policy', href: '/cookies' },
     { label: 'Terms of Use', href: '/terms' }
   ],
-  // Deliberately not "Book a Call": the top-nav shortcut would promise instant
-  // scheduling that isn't wired up yet (contact.bookingEmbedUrl is still empty).
-  // Page CTAs keep "Book a Discovery Call" — those land on the form, which sets
-  // the right expectation. Switch this back once a real calendar link is live.
-  ctaLabel: 'Get in Touch',
+  // CTA label throughout the site (Brief §9). Lands on the contact form, which
+  // sets the right expectation until a real calendar link is wired up
+  // (contact.bookingEmbedUrl is still empty).
+  ctaLabel: 'Book a Call',
   ctaHref: '/contact'
 };

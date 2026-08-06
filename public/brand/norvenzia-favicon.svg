@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 63 63" width="63" height="63" role="img" aria-label="Norvenzia">
+  <rect width="63" height="63" rx="10" fill="#F4F7FA"/>
+  <rect x="7" y="7" width="49" height="49" fill="none" stroke="#002D5C" stroke-width="2"/>
+  <path d="M31.2 15.5 L46 27 L31.2 38.5" fill="none" stroke="#002D5C" stroke-width="3.6" stroke-linecap="square" stroke-linejoin="bevel"/>
+  <path d="M32.6 26 L17.8 37.5 L32.6 49" fill="none" stroke="#5E729A" stroke-width="3.6" stroke-linecap="square" stroke-linejoin="bevel"/>
+</svg>
