@@ -629,6 +629,26 @@ button {
   overflow: hidden;
 }
 
+/* Animated perspective-grid backdrop behind the home hero. Decorative, faint,
+   and masked to fade out over the copy column so navy text stays legible. The
+   SVG self-guards prefers-reduced-motion. Hidden on small screens where the
+   hero stacks and there's no room for it behind the copy. */
+.hero__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right center;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+@media (max-width: 900px) {
+  .hero__bg { display: none; }
+}
+
 /* Cursor-reactive glow. A radial-gradient layer positioned by --hero-mx/--hero-my
    (set in main.js from pointermove), under the copy and figure. Off by default —
    .has-pointer only lands on fine-pointer devices with motion allowed (see
