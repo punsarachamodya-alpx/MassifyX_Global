@@ -221,7 +221,7 @@ button {
 /* ------------------------------------------------------- 4. Type helpers */
 
 .display-1 {
-  font-size: clamp(2.6rem, 6.4vw, 5.1rem);
+  font-size: clamp(1.95rem, 4.8vw, 3.825rem);
   line-height: 0.98;
 }
 
