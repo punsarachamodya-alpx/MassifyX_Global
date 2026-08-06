@@ -61,8 +61,16 @@
     const footerLogoHMobile = Math.min(MOBILE_LOGO_CAP, footerLogoH);
 
     // The wordmark's own viewBox (public/brand/norvenzia-logo-light.svg) —
-    // its true aspect ratio, straight from the source vector.
-    const LOGO_ASPECT = 420 / 140;
+    // its true aspect ratio, straight from the source vector, tightly cropped
+    // to the artwork (icon + wordmark) with no baked-in padding, so the logo
+    // sits flush left in its box instead of drifting right of other flush-left
+    // text like the footer tagline. Left/top/bottom are cropped precisely
+    // (icon geometry, font-independent); the right edge carries extra padding
+    // because <img src="*.svg"> renders in an isolated context that can't see
+    // this page's @font-face Montserrat, so the wordmark silently falls back
+    // to a system sans-serif that measures wider than Montserrat at the same
+    // size — the crop has to fit that wider fallback render, not the brand font.
+    const LOGO_ASPECT = 337 / 66;
     const desktopLogoWidth = logoH * LOGO_ASPECT;
 
     // How much room the 5 nav links + CTA button + gutters need beside the logo
