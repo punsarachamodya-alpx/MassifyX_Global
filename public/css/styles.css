@@ -1198,8 +1198,6 @@ button {
 
 .panel__media {
   aspect-ratio: 16 / 9;
-  width: 50%;
-  margin: 0 auto;
   overflow: hidden;
   background: var(--ice);
   display: flex;
@@ -1207,14 +1205,16 @@ button {
   justify-content: center;
 }
 
-/* Source files are pre-cropped to their content bounding box (the vemaps.com
-   watermark was physically cropped out), so object-fit: contain shows the
-   whole flag-map with no cropping of the country outline, sized to fill
-   the (now halved) box tightly. */
+/* Box runs full width so the --ice ground fills the panel with no white
+   margins on the sides. Source files are pre-cropped to their content
+   bounding box (the vemaps.com watermark was physically cropped out), so
+   object-fit: contain shows the whole flag-map with no cropping of the
+   country outline, then scaled down by 0.7x within the ice box. */
 .panel__media img {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  transform: scale(0.7);
 }
 
 .panel__inner {
