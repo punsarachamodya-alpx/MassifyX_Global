@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 140" width="420" height="140" role="img" aria-label="Norvenzia">
   <rect x="41.5" y="41.5" width="57" height="57" fill="none" stroke="#002D5C" stroke-width="2"/>
   <path d="M69.23 50.75 L86.08 63.88 L69.23 77.00" fill="none" stroke="#002D5C" stroke-width="3.83" stroke-linecap="square" stroke-linejoin="bevel"/>
-  <path d="M70.77 63.00 L53.92 76.13 L70.77 89.25" fill="none" stroke="#5E729A" stroke-width="3.83" stroke-linecap="square" stroke-linejoin="bevel"/>
+  <path d="M70.77 63.00 L53.92 76.13 L70.77 89.25" fill="none" stroke="#1877F2" stroke-width="3.83" stroke-linecap="square" stroke-linejoin="bevel"/>
   <text x="118.5" y="72" font-family="Montserrat, system-ui, sans-serif" font-size="46" font-weight="600" letter-spacing="-1" fill="#002D5C" dominant-baseline="central">norvenzia</text>
 </svg>
