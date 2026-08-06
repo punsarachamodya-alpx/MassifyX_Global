@@ -1953,13 +1953,67 @@ button {
   background: var(--navy);
   overflow: hidden;
   line-height: 0;
+  position: relative;
 }
 
+/* Scaled slightly past the frame so the cursor parallax shift never exposes
+   an edge. The translate is driven by --band-px/--band-py, set in main.js
+   from pointermove; both default to 0, so with no pointer the image sits
+   exactly where it did before. */
 .motion-band img {
   width: 100%;
   height: clamp(200px, 26vw, 340px);
   object-fit: cover;
   object-position: center;
+  transform: scale(1.06)
+    translate3d(calc(var(--band-px, 0) * -14px), calc(var(--band-py, 0) * -10px), 0);
+  transition: transform 0.35s var(--ease);
+  will-change: transform;
+}
+
+.motion-band__flow,
+.motion-band__glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Live-data sheen: a narrow translucent-white band travelling left to right
+   on a loop, reading as throughput moving through the tunnel. Additive white
+   only — it lightens, never recolours, so the artwork's palette is intact. */
+.motion-band__flow {
+  background: linear-gradient(
+    100deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.05) 46%,
+    rgba(255, 255, 255, 0.11) 50%,
+    rgba(255, 255, 255, 0.05) 54%,
+    transparent 62%
+  );
+  background-size: 260% 100%;
+  animation: band-flow 9s linear infinite;
+}
+
+@keyframes band-flow {
+  from { background-position: 130% 0; }
+  to { background-position: -130% 0; }
+}
+
+/* Cursor-follow glow, same idea as the hero spotlight. Fades in only once
+   main.js confirms a fine pointer with motion allowed. */
+.motion-band__glow {
+  opacity: 0;
+  transition: opacity 0.5s var(--ease);
+  background: radial-gradient(
+    420px circle at var(--band-mx, 50%) var(--band-my, 50%),
+    rgba(255, 255, 255, 0.10),
+    rgba(255, 255, 255, 0.04) 45%,
+    transparent 72%
+  );
+}
+
+.motion-band.has-pointer .motion-band__glow {
+  opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1980,6 +2034,16 @@ button {
 
   .hero__spotlight {
     display: none;
+  }
+
+  .motion-band__flow,
+  .motion-band__glow {
+    display: none;
+  }
+
+  .motion-band img {
+    transform: scale(1.06);
+    transition: none;
   }
 
   .hero-figure .pz {

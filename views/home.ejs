@@ -37,6 +37,11 @@
 <%# Full-bleed motion band: the supply-chain thesis in one moving image. %>
 <section class="motion-band" aria-hidden="true">
   <img src="<%= page.motionBand.image %>" alt="" width="1600" height="420" loading="lazy">
+  <%# Decorative motion layers over the unmodified image: a continuously
+      travelling data-flow sheen and a cursor-follow glow. Both are additive
+      translucent white, so the artwork's own colours are unchanged. %>
+  <span class="motion-band__flow"></span>
+  <span class="motion-band__glow"></span>
 </section>
 
 <%# Problem — the situation a mid-market procurement lead recognises. %>

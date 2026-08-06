@@ -104,6 +104,47 @@
     });
   }
 
+  // ------------------------------------------- data-tunnel band interaction
+  // Cursor glow + depth parallax over the full-bleed motion band. The
+  // travelling data-flow sheen is pure CSS and runs regardless; this only adds
+  // the pointer-driven layer, under the same fine-pointer / motion-allowed
+  // conditions as the hero.
+  var band = document.querySelector('.motion-band');
+
+  if (band && finePointer && !reduced) {
+    band.classList.add('has-pointer');
+
+    var bandRaf = null;
+    var lastBandEvent = null;
+
+    function applyBandPointer(clientX, clientY) {
+      var rect = band.getBoundingClientRect();
+      var px = (clientX - rect.left) / rect.width - 0.5; // -0.5..0.5
+      var py = (clientY - rect.top) / rect.height - 0.5;
+
+      band.style.setProperty('--band-mx', ((clientX - rect.left) / rect.width) * 100 + '%');
+      band.style.setProperty('--band-my', ((clientY - rect.top) / rect.height) * 100 + '%');
+      band.style.setProperty('--band-px', String(px * 2)); // -1..1
+      band.style.setProperty('--band-py', String(py * 2));
+    }
+
+    band.addEventListener('pointermove', function (e) {
+      lastBandEvent = e;
+      if (bandRaf) return;
+      bandRaf = window.requestAnimationFrame(function () {
+        if (lastBandEvent) applyBandPointer(lastBandEvent.clientX, lastBandEvent.clientY);
+        bandRaf = null;
+      });
+    });
+
+    band.addEventListener('pointerleave', function () {
+      band.style.setProperty('--band-mx', '50%');
+      band.style.setProperty('--band-my', '50%');
+      band.style.setProperty('--band-px', '0');
+      band.style.setProperty('--band-py', '0');
+    });
+  }
+
   // --------------------------------------------------------- cookie banner
   var STORAGE_KEY = 'mxg.cookie-consent';
   var banner = document.getElementById('cookieBanner');
