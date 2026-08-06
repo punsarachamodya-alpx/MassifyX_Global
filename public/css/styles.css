@@ -629,10 +629,11 @@ button {
   overflow: hidden;
 }
 
-/* Animated perspective-grid backdrop behind the home hero. Decorative, faint,
-   and masked to fade out over the copy column so navy text stays legible. The
-   SVG self-guards prefers-reduced-motion. Hidden on small screens where the
-   hero stacks and there's no room for it behind the copy. */
+/* Photographic backdrop behind the home hero. Masked to fade out over the copy
+   column so navy text stays legible against the white section background, and
+   strongest behind the figure on the right. Hidden on small screens where the
+   hero stacks and there's no room for it behind the copy — and static, so
+   nothing here needs a prefers-reduced-motion guard. */
 .hero__bg {
   position: absolute;
   inset: 0;
@@ -642,7 +643,9 @@ button {
   object-position: right center;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.9;
+  opacity: 0.85;
+  mask-image: linear-gradient(to right, transparent 0%, transparent 38%, rgba(0, 0, 0, 0.55) 62%, black 82%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 38%, rgba(0, 0, 0, 0.55) 62%, black 82%);
 }
 
 @media (max-width: 900px) {
@@ -1934,8 +1937,7 @@ button {
   object-fit: cover;
 }
 
-/* Full-bleed moving band. Decorative: hidden from assistive tech, and the SVG
-   carries its own prefers-reduced-motion guard. */
+/* Full-bleed image band. Decorative: hidden from assistive tech. */
 .motion-band {
   background: var(--navy);
   overflow: hidden;
@@ -1946,6 +1948,13 @@ button {
   width: 100%;
   height: clamp(200px, 26vw, 340px);
   object-fit: cover;
+  object-position: center;
+}
+
+/* Taller variant for a page-level placement (How We Work) where the image is
+   the point, not a thin decorative strip. */
+.motion-band--tall img {
+  height: clamp(280px, 38vw, 460px);
   object-position: center;
 }
 

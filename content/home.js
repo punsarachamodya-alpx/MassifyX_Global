@@ -19,11 +19,11 @@ module.exports = {
     figureImage: ''
   },
 
-  // The full-bleed moving band beneath the value props: an animated global
-  // route map with the Sri Lanka control hub. Points at the shipped SVG by
-  // default; change the path to swap in different artwork.
+  // The full-bleed band beneath the value props: the Sri Lanka global
+  // network visual. Points at the shipped image by default; change the path
+  // to swap in different artwork.
   motionBand: {
-    image: '/img/motion/global-routes.svg'
+    image: '/img/generated-globe-hub.jpg'
   },
 
   problem: {
