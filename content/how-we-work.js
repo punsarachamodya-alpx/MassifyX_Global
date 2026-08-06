@@ -24,13 +24,13 @@ module.exports = {
       {
         label: 'EU engagement point',
         place: 'Sweden',
-        image: '/img/regions/sweden.svg',
+        image: '/img/regions/se-06.png',
         body: 'Contracting, communication, and accountability inside the EU.'
       },
       {
         label: 'Delivery hub',
         place: 'Sri Lanka',
-        image: '/img/regions/sri-lanka.svg',
+        image: '/img/regions/lk-06.png',
         body: 'Senior analysts running your day-to-day procurement operations.'
       }
     ]
