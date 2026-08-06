@@ -37,9 +37,13 @@
 <%# Full-bleed motion band: the supply-chain thesis in one moving image. %>
 <section class="motion-band" aria-hidden="true">
   <img src="<%= page.motionBand.image %>" alt="" width="1600" height="420" loading="lazy">
-  <%# Decorative motion layers over the unmodified image: a continuously
-      travelling data-flow sheen and a cursor-follow glow. Both are additive
-      translucent white, so the artwork's own colours are unchanged. %>
+  <%# Decorative motion layers over the unmodified image. The wave is a second
+      copy of the same image, masked to a narrow travelling window and pushed
+      slightly out of register, so the pixels themselves ripple left to right
+      in step with the sheen. Nothing recolours the artwork. %>
+  <span class="motion-band__wave">
+    <img src="<%= page.motionBand.image %>" alt="" width="1600" height="420" loading="lazy">
+  </span>
   <span class="motion-band__flow"></span>
   <span class="motion-band__glow"></span>
 </section>
