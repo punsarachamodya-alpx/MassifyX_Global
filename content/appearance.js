@@ -13,7 +13,7 @@ module.exports = {
   // responsive (section headings are a clamp() that grows with the viewport) and
   // a fixed px value would flatten that, and rem-based sizes respect a visitor's
   // browser font-size setting where px would override it. 100 = as designed.
-  eyebrowScale: '100',
+  eyebrowScale: '170',
   sectionHeadingScale: '100',
 
   // A maximum, not a fixed width: the portrait still shrinks with the viewport,
