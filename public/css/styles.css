@@ -1202,10 +1202,16 @@ button {
   background: var(--ice);
 }
 
+/* object-fit: cover keeps the same crop window as before (which is what
+   keeps the vemaps.com watermark, sitting just outside that window, out of
+   frame) — object-fit: contain would reveal it. transform: scale shrinks
+   the already-cropped image by 0.7x afterwards, purely visually, without
+   changing what part of the source image was selected. */
 .panel__media img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transform: scale(0.7);
 }
 
 .panel__inner {
