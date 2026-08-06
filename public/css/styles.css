@@ -1979,36 +1979,51 @@ button {
   pointer-events: none;
 }
 
+/* --band-t drives both the sheen and the wave from a single 0->1 sweep,
+   registered as an animatable number so calc() can place the gradients'
+   centre at an exact, continuous position — no background-size/tiling
+   arithmetic, so the sweep is visible for its entire on-screen travel
+   instead of fading in and out at unpredictable points. -20% to 120% means
+   the centre starts and ends fully off-canvas, so it enters and leaves
+   cleanly at the edges rather than popping in mid-band. */
+@property --band-t {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+
+@keyframes band-sweep {
+  from { --band-t: 0; }
+  to { --band-t: 1; }
+}
+
 /* Pixel-displacement wave. A duplicate of the band image, revealed only
-   through a narrow mask window that travels left to right on the same 9s
-   cycle as the sheen, and scaled a touch further than the base image so the
-   pixels inside that window sit out of register with the ones behind them —
-   the artwork appears to ripple as the light passes over it. Same image, so
-   no colour is introduced. */
+   through a narrow window that sweeps left to right in step with the sheen.
+   The duplicate uses the exact same scale as the base image (only main.js's
+   cursor offset plus one small constant shift), so the two stay a fixed
+   distance apart at every point in the frame — a uniform ripple, not a
+   mismatch that grows toward the edges. Same image, so no colour is
+   introduced. */
 .motion-band__wave {
   overflow: hidden;
   line-height: 0;
   mask-image: linear-gradient(
     100deg,
-    transparent 36%,
-    rgba(0, 0, 0, 0.55) 43%,
-    #000 50%,
-    rgba(0, 0, 0, 0.55) 57%,
-    transparent 64%
+    transparent calc(-20% + var(--band-t) * 140% - 16%),
+    rgba(0, 0, 0, 0.5) calc(-20% + var(--band-t) * 140% - 8%),
+    #000 calc(-20% + var(--band-t) * 140%),
+    rgba(0, 0, 0, 0.5) calc(-20% + var(--band-t) * 140% + 8%),
+    transparent calc(-20% + var(--band-t) * 140% + 16%)
   );
   -webkit-mask-image: linear-gradient(
     100deg,
-    transparent 36%,
-    rgba(0, 0, 0, 0.55) 43%,
-    #000 50%,
-    rgba(0, 0, 0, 0.55) 57%,
-    transparent 64%
+    transparent calc(-20% + var(--band-t) * 140% - 16%),
+    rgba(0, 0, 0, 0.5) calc(-20% + var(--band-t) * 140% - 8%),
+    #000 calc(-20% + var(--band-t) * 140%),
+    rgba(0, 0, 0, 0.5) calc(-20% + var(--band-t) * 140% + 8%),
+    transparent calc(-20% + var(--band-t) * 140% + 16%)
   );
-  mask-size: 260% 100%;
-  -webkit-mask-size: 260% 100%;
-  mask-repeat: no-repeat;
-  -webkit-mask-repeat: no-repeat;
-  animation: band-wave 9s linear infinite;
+  animation: band-sweep 9s linear infinite;
 }
 
 .motion-band__wave img {
@@ -2016,42 +2031,26 @@ button {
   height: 100%;
   object-fit: cover;
   object-position: center;
-  transform: scale(1.16)
-    translate3d(calc(var(--band-px, 0) * -14px + 18px), calc(var(--band-py, 0) * -10px - 5px), 0);
+  transform: scale(1.06)
+    translate3d(calc(var(--band-px, 0) * -14px + 9px), calc(var(--band-py, 0) * -10px + 4px), 0);
   transition: transform 0.35s var(--ease);
   will-change: transform;
 }
 
-@keyframes band-wave {
-  from {
-    mask-position: 130% 0;
-    -webkit-mask-position: 130% 0;
-  }
-  to {
-    mask-position: -130% 0;
-    -webkit-mask-position: -130% 0;
-  }
-}
-
-/* Live-data sheen: a narrow translucent-white band travelling left to right
-   on a loop, reading as throughput moving through the tunnel. Additive white
-   only — it lightens, never recolours, so the artwork's palette is intact. */
+/* Live-data sheen: a narrow translucent-white band sweeping left to right in
+   the same 9s loop as the wave, reading as throughput moving through the
+   tunnel. Additive white only — it lightens, never recolours, so the
+   artwork's palette is intact. */
 .motion-band__flow {
   background: linear-gradient(
     100deg,
-    transparent 38%,
-    rgba(255, 255, 255, 0.05) 46%,
-    rgba(255, 255, 255, 0.11) 50%,
-    rgba(255, 255, 255, 0.05) 54%,
-    transparent 62%
+    transparent calc(-20% + var(--band-t) * 140% - 11%),
+    rgba(255, 255, 255, 0.05) calc(-20% + var(--band-t) * 140% - 5%),
+    rgba(255, 255, 255, 0.13) calc(-20% + var(--band-t) * 140%),
+    rgba(255, 255, 255, 0.05) calc(-20% + var(--band-t) * 140% + 5%),
+    transparent calc(-20% + var(--band-t) * 140% + 11%)
   );
-  background-size: 260% 100%;
-  animation: band-flow 9s linear infinite;
-}
-
-@keyframes band-flow {
-  from { background-position: 130% 0; }
-  to { background-position: -130% 0; }
+  animation: band-sweep 9s linear infinite;
 }
 
 /* Cursor-follow glow, same idea as the hero spotlight. Fades in only once
